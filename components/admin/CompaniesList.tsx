@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { Building2, ShieldCheck, ShieldAlert, Trash2, Globe, MapPin, Loader2, Search } from "lucide-react";
 

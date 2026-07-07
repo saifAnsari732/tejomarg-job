@@ -98,7 +98,7 @@ export default function ResumeBuilderPage() {
       // Clean the cover letter style response into a summary
       let cleanedSummary = data.result
         .replace(/Dear Hiring Team,?/gi, "")
-        .replace(/Best regards,.*/gis, "")
+        .replace(/Best regards,[\s\S]*/gi, "")
         .replace(/I am writing to express.*/gi, "")
         .trim();
 
