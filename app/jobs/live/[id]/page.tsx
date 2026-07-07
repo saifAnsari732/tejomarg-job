@@ -148,7 +148,11 @@ export default function LiveJobDetailPage() {
                     <div className="flex items-center gap-1.5 mt-1">
                       <Building2 className="h-3.5 w-3.5 text-slate-400" />
                       <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{job.company}</span>
-                      {job.source !== "Mock Data" && <BadgeCheck className="h-3.5 w-3.5 text-blue-400" title="Verified" />}
+                      {job.source !== "Mock Data" && (
+                        <span title="Verified" className="flex items-center">
+                          <BadgeCheck className="h-3.5 w-3.5 text-blue-400" />
+                        </span>
+                      )}
                     </div>
                   </div>
                   {status === "mock" && (

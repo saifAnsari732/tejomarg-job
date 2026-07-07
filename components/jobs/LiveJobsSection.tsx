@@ -242,7 +242,9 @@ export default function LiveJobsSection({ initialQuery = "Developer", initialLoc
                         <Building2 className="h-3 w-3 text-slate-400 shrink-0" />
                         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{job.company}</span>
                         {job.source !== "Mock Data" && (
-                          <BadgeCheck className="h-3 w-3 text-blue-400" title="Verified" />
+                          <span title="Verified" className="flex items-center">
+                            <BadgeCheck className="h-3 w-3 text-blue-400" />
+                          </span>
                         )}
                       </div>
                     </Link>
