@@ -1,0 +1,912 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import { 
+  Upload, FileText, Plus, Trash2, Loader2, Save, MapPin, 
+  Building2, Briefcase, Mail, Phone, Calendar, User as UserIcon, 
+  Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare
+} from "lucide-react";
+
+interface ExperienceItem {
+  company: string;
+  role: string;
+  duration: string;
+  description: string;
+  skills: string; // comma separated for this UI
+  industry?: string;
+}
+
+interface EducationItem {
+  school: string;
+  degree: string;
+  year: string;
+}
+
+interface CertificationItem {
+  name: string;
+}
+
+export default function CandidateProfilePage() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // Profile data states
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [homeTown, setHomeTown] = useState("");
+  const [currentLocation, setCurrentLocation] = useState("");
+  const [totalExperience, setTotalExperience] = useState("");
+  const [expectedSalary, setExpectedSalary] = useState("0");
+  const [noticePeriod, setNoticePeriod] = useState("");
+  const [highestEducation, setHighestEducation] = useState("");
+  const [schoolMedium, setSchoolMedium] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [experience, setExperience] = useState<ExperienceItem[]>([]);
+  const [education, setEducation] = useState<EducationItem[]>([]);
+  const [certifications, setCertifications] = useState<CertificationItem[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [spokenEnglishLevel, setSpokenEnglishLevel] = useState("");
+  const [resumeUrl, setResumeUrl] = useState("");
+  const [preferredJobTitles, setPreferredJobTitles] = useState<string[]>([]);
+
+  // Section Editing toggles
+  const [editBasic, setEditBasic] = useState(false);
+  const [editWork, setEditWork] = useState(false);
+  const [editSingle, setEditSingle] = useState(false);
+  const [editEdu, setEditEdu] = useState(false);
+  const [editSkills, setEditSkills] = useState(false);
+  const [editCert, setEditCert] = useState(false);
+  const [editLang, setEditLang] = useState(false);
+  const [editOther, setEditOther] = useState(false);
+
+  // Temporary edit states
+  const [tempBasic, setTempBasic] = useState({ mobile: "", dob: "", gender: "", homeTown: "", currentLocation: "" });
+  const [tempSingle, setTempSingle] = useState({ totalExperience: "", expectedSalary: "0", noticePeriod: "" });
+  const [tempEdu, setTempEdu] = useState({ highestEducation: "", schoolMedium: "" });
+  const [tempSkillsText, setTempSkillsText] = useState("");
+  const [tempLanguagesText, setTempLanguagesText] = useState("");
+  const [tempPreferredRolesText, setTempPreferredRolesText] = useState("");
+
+  // Fetch initial profile
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/candidate/profile");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to load profile");
+        }
+
+        const u = data.user;
+        setName(u.name || "");
+        setEmail(u.email || "");
+        
+        const cp = u.candidateProfile || {};
+        setMobile(cp.mobile || "");
+        setDob(cp.dob || "");
+        setGender(cp.gender || "");
+        setHomeTown(cp.homeTown || "");
+        setCurrentLocation(cp.preferredLocation || "");
+        setTotalExperience(cp.totalExperience || "");
+        setExpectedSalary(cp.expectedSalary?.toString() || "0");
+        setNoticePeriod(cp.noticePeriod || "");
+        setHighestEducation(cp.highestEducation || "");
+        setSchoolMedium(cp.schoolMedium || "");
+        setSkills(cp.skills || []);
+        setExperience(cp.experience || []);
+        setEducation(cp.education || []);
+        setCertifications(cp.certifications || []);
+        setLanguages(cp.languages || []);
+        setSpokenEnglishLevel(cp.spokenEnglishLevel || "");
+        setResumeUrl(cp.resumeUrl || "");
+        setPreferredJobTitles(cp.preferredJobTitles || []);
+      } catch (err: any) {
+        toast.error(err.message || "Failed to retrieve profile data");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
+  // Save specific section
+  const handleSave = async (sectionPayload: any) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/candidate/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          expectedSalary,
+          preferredLocation: currentLocation,
+          skills,
+          experience,
+          education,
+          resumeUrl,
+          mobile,
+          dob,
+          gender,
+          homeTown,
+          totalExperience,
+          noticePeriod,
+          highestEducation,
+          schoolMedium,
+          certifications,
+          languages,
+          spokenEnglishLevel,
+          preferredJobTitles,
+          ...sectionPayload
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update profile");
+      }
+
+      // Update state locally
+      if (sectionPayload.name !== undefined) setName(sectionPayload.name);
+      if (sectionPayload.mobile !== undefined) setMobile(sectionPayload.mobile);
+      if (sectionPayload.dob !== undefined) setDob(sectionPayload.dob);
+      if (sectionPayload.gender !== undefined) setGender(sectionPayload.gender);
+      if (sectionPayload.homeTown !== undefined) setHomeTown(sectionPayload.homeTown);
+      if (sectionPayload.preferredLocation !== undefined) setCurrentLocation(sectionPayload.preferredLocation);
+      if (sectionPayload.totalExperience !== undefined) setTotalExperience(sectionPayload.totalExperience);
+      if (sectionPayload.expectedSalary !== undefined) setExpectedSalary(sectionPayload.expectedSalary);
+      if (sectionPayload.noticePeriod !== undefined) setNoticePeriod(sectionPayload.noticePeriod);
+      if (sectionPayload.highestEducation !== undefined) setHighestEducation(sectionPayload.highestEducation);
+      if (sectionPayload.schoolMedium !== undefined) setSchoolMedium(sectionPayload.schoolMedium);
+      if (sectionPayload.skills !== undefined) setSkills(sectionPayload.skills);
+      if (sectionPayload.experience !== undefined) setExperience(sectionPayload.experience);
+      if (sectionPayload.education !== undefined) setEducation(sectionPayload.education);
+      if (sectionPayload.certifications !== undefined) setCertifications(sectionPayload.certifications);
+      if (sectionPayload.languages !== undefined) setLanguages(sectionPayload.languages);
+      if (sectionPayload.spokenEnglishLevel !== undefined) setSpokenEnglishLevel(sectionPayload.spokenEnglishLevel);
+      if (sectionPayload.preferredJobTitles !== undefined) setPreferredJobTitles(sectionPayload.preferredJobTitles);
+
+      toast.success("Profile section updated successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Upload Resume
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Upload failed");
+        }
+
+        setResumeUrl(data.url);
+        await handleSave({ resumeUrl: data.url });
+        toast.success("Resume uploaded successfully!");
+      } catch (err: any) {
+        toast.error(err.message || "Upload failed");
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-slate-500 gap-2 bg-slate-50 min-h-screen">
+        <Loader2 className="animate-spin h-6 w-6 text-emerald-600" />
+        <span className="font-semibold">Loading profile information...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-50 min-h-screen -mt-6 pt-6 -mx-4 px-4 sm:-mx-8 sm:px-8 text-sm">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-12">
+        
+        {/* LEFT COLUMN: Sticky Info & Activities */}
+        <div className="lg:col-span-4 space-y-6">
+          
+          {/* Profile Card */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-5 relative">
+            <button 
+              onClick={() => {
+                if (editBasic) {
+                  handleSave({
+                    mobile: tempBasic.mobile,
+                    dob: tempBasic.dob,
+                    gender: tempBasic.gender,
+                    homeTown: tempBasic.homeTown,
+                    preferredLocation: tempBasic.currentLocation
+                  });
+                  setEditBasic(false);
+                } else {
+                  setTempBasic({ mobile, dob, gender, homeTown, currentLocation });
+                  setEditBasic(true);
+                }
+              }}
+              className="absolute top-4 right-4 text-emerald-600 hover:text-emerald-700 p-1 bg-emerald-50 rounded"
+            >
+              {editBasic ? <Check className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
+            </button>
+
+            {/* Initials & Top Bio */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-slate-700 text-white font-extrabold flex items-center justify-center text-lg shadow-inner">
+                {name.split(" ").map(n => n[0]).join("").toUpperCase() || "C"}
+              </div>
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-lg leading-tight">{name}</h2>
+                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                  <Briefcase className="h-3 w-3 shrink-0" />
+                  {experience[0]?.role ? `${experience[0].role} at ${experience[0].company}` : "Fresher"}
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  {currentLocation || "Location unspecified"}
+                </p>
+              </div>
+            </div>
+
+            <hr className="border-slate-100" />
+
+            {/* Details Grid */}
+            {editBasic ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Mobile</label>
+                  <input type="text" value={tempBasic.mobile} onChange={e => setTempBasic({...tempBasic, mobile: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Date of Birth</label>
+                  <input type="text" placeholder="DD/MM/YYYY" value={tempBasic.dob} onChange={e => setTempBasic({...tempBasic, dob: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Gender</label>
+                  <select value={tempBasic.gender} onChange={e => setTempBasic({...tempBasic, gender: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Current Location</label>
+                  <input type="text" value={tempBasic.currentLocation} onChange={e => setTempBasic({...tempBasic, currentLocation: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Home Town</label>
+                  <input type="text" value={tempBasic.homeTown} onChange={e => setTempBasic({...tempBasic, homeTown: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Email ID</span>
+                  <span className="text-slate-800 font-semibold break-all leading-tight flex items-center gap-1">
+                    <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {email}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Mobile Number</span>
+                  <span className="text-slate-800 font-semibold flex items-center gap-1">
+                    <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {mobile || "Not specified"}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Date of Birth</span>
+                  <span className="text-slate-800 font-semibold flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {dob || "Not specified"}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Gender</span>
+                  <span className="text-slate-800 font-semibold flex items-center gap-1">
+                    <UserIcon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {gender || "Not specified"}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Current Location</span>
+                  <span className="text-slate-800 font-semibold flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {currentLocation || "Not specified"}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-400 font-bold block">Home Town</span>
+                  <span className="text-slate-800 font-semibold flex items-center gap-1">
+                    <Home className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    {homeTown || "Not specified"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Activities Card */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+            <h3 className="font-extrabold text-slate-900 text-sm">My Activities</h3>
+            <Link 
+              href="/candidate" 
+              className="flex items-center justify-between border border-slate-200 hover:border-emerald-250 p-3.5 rounded-lg bg-slate-50 hover:bg-slate-100/50 transition-all text-left"
+            >
+              <div className="flex gap-3 items-start">
+                <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs">My Applications</h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">Check all your jobs applied and interview invites here</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
+            </Link>
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: Bio Sections Accordion */}
+        <div className="lg:col-span-8 space-y-6">
+
+          {/* Work Experience */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-50 pb-3">
+              <h3 className="font-extrabold text-slate-900 text-[15px]">Work Experience</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    const newExp = [...experience, { company: "", role: "", duration: "", description: "", skills: "" }];
+                    setExperience(newExp);
+                    setEditWork(true);
+                  }}
+                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add
+                </button>
+                <button 
+                  onClick={() => {
+                    if (editWork) {
+                      handleSave({ experience });
+                      setEditWork(false);
+                    } else {
+                      setEditWork(true);
+                    }
+                  }}
+                  className="text-emerald-605 text-xs font-bold p-1 bg-emerald-50 rounded"
+                >
+                  {editWork ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {experience.length > 0 ? (
+              <div className="space-y-6 relative pl-5 border-l border-slate-200">
+                {experience.map((exp, idx) => (
+                  <div key={idx} className="relative space-y-2">
+                    {/* Timeline dot */}
+                    <div className="absolute -left-[26px] top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-100 border-2 border-emerald-600 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-600"></div>
+                    </div>
+
+                    {editWork ? (
+                      <div className="space-y-3 bg-slate-50 p-4 rounded border border-slate-100">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Job Title / Role</label>
+                            <input type="text" value={exp.role} onChange={e => {
+                              const updated = [...experience];
+                              updated[idx].role = e.target.value;
+                              setExperience(updated);
+                            }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Company</label>
+                            <input type="text" value={exp.company} onChange={e => {
+                              const updated = [...experience];
+                              updated[idx].company = e.target.value;
+                              setExperience(updated);
+                            }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Duration</label>
+                            <input type="text" placeholder="e.g. Mar 2024 - Present" value={exp.duration} onChange={e => {
+                              const updated = [...experience];
+                              updated[idx].duration = e.target.value;
+                              setExperience(updated);
+                            }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Skills Used</label>
+                            <input type="text" placeholder="React, Node.js" value={exp.skills} onChange={e => {
+                              const updated = [...experience];
+                              updated[idx].skills = e.target.value;
+                              setExperience(updated);
+                            }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase">Description</label>
+                          <textarea value={exp.description} onChange={e => {
+                            const updated = [...experience];
+                            updated[idx].description = e.target.value;
+                            setExperience(updated);
+                          }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" rows={2} />
+                        </div>
+                        <button onClick={() => {
+                          setExperience(experience.filter((_, i) => i !== idx));
+                        }} className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+                          <Trash2 className="h-3.5 w-3.5" /> Delete Experience
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-extrabold text-slate-900 text-sm leading-snug">{exp.role}</h4>
+                            <p className="text-xs font-bold text-slate-500">{exp.company}</p>
+                          </div>
+                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{exp.duration}</span>
+                        </div>
+                        
+                        {exp.description && (
+                          <div className="bg-slate-50 border border-slate-100 p-2.5 rounded text-xs text-slate-600 leading-relaxed">
+                            {exp.description}
+                          </div>
+                        )}
+
+                        {exp.skills && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {exp.skills.split(",").map((s, i) => (
+                              <span key={i} className="text-[10px] bg-slate-100 font-semibold px-2 py-0.5 rounded text-slate-600">{s.trim()}</span>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-xs text-slate-400">
+                No work experience listed yet.
+              </div>
+            )}
+          </div>
+
+          {/* Experience, Salary, Notice Period Single Grid Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+            <button 
+              onClick={() => {
+                if (editSingle) {
+                  handleSave({
+                    totalExperience: tempSingle.totalExperience,
+                    expectedSalary: tempSingle.expectedSalary,
+                    noticePeriod: tempSingle.noticePeriod
+                  });
+                  setEditSingle(false);
+                } else {
+                  setTempSingle({ totalExperience, expectedSalary, noticePeriod });
+                  setEditSingle(true);
+                }
+              }}
+              className="absolute -top-3 right-0 text-emerald-650 p-1.5 bg-white border border-slate-200 rounded shadow-sm z-10"
+            >
+              {editSingle ? <Check className="h-4 w-4 text-emerald-600" /> : <Edit2 className="h-3.5 w-3.5" />}
+            </button>
+
+            {editSingle ? (
+              <div className="col-span-3 bg-white p-5 rounded-xl border border-slate-200 grid grid-cols-3 gap-4 shadow-sm">
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-400">Years of Experience</label>
+                  <input type="text" placeholder="e.g. 1 year" value={tempSingle.totalExperience} onChange={e => setTempSingle({...tempSingle, totalExperience: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-400">Monthly Salary (₹)</label>
+                  <input type="number" placeholder="20000" value={tempSingle.expectedSalary} onChange={e => setTempSingle({...tempSingle, expectedSalary: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-400">Notice Period</label>
+                  <input type="text" placeholder="e.g. 15 days" value={tempSingle.noticePeriod} onChange={e => setTempSingle({...tempSingle, noticePeriod: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Total Experience</span>
+                    <span className="text-slate-800 font-bold text-xs mt-1 block">{totalExperience || "Fresher"}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Monthly Salary</span>
+                    <span className="text-slate-800 font-bold text-xs mt-1 block">₹ {parseInt(expectedSalary).toLocaleString()}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Notice Period</span>
+                    <span className="text-slate-800 font-bold text-xs mt-1 block">{noticePeriod || "Immediate"}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Education */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-50 pb-3">
+              <h3 className="font-extrabold text-slate-900 text-[15px]">Education</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    const newEdu = [...education, { school: "", degree: "", year: "" }];
+                    setEducation(newEdu);
+                    setEditEdu(true);
+                  }}
+                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add
+                </button>
+                <button 
+                  onClick={() => {
+                    if (editEdu) {
+                      handleSave({ 
+                        highestEducation: tempEdu.highestEducation,
+                        schoolMedium: tempEdu.schoolMedium,
+                        education
+                      });
+                      setEditEdu(false);
+                    } else {
+                      setTempEdu({ highestEducation, schoolMedium });
+                      setEditEdu(true);
+                    }
+                  }}
+                  className="text-emerald-650 p-1 bg-emerald-50 rounded"
+                >
+                  {editEdu ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {editEdu ? (
+              <div className="space-y-4 mb-4 bg-slate-50 p-4 border rounded">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold uppercase text-slate-400">Highest Education</label>
+                    <input type="text" placeholder="e.g. Graduate" value={tempEdu.highestEducation} onChange={e => setTempEdu({...tempEdu, highestEducation: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase text-slate-400">School Medium</label>
+                    <input type="text" placeholder="e.g. English, Hindi" value={tempEdu.schoolMedium} onChange={e => setTempEdu({...tempEdu, schoolMedium: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 text-xs font-semibold mb-5 border-b border-slate-50 pb-4">
+                <div className="flex justify-between items-center bg-slate-50 border p-3 rounded-lg hover:border-slate-350 cursor-pointer">
+                  <div>
+                    <span className="text-slate-400 text-[10px] uppercase font-bold">Highest education</span>
+                    <p className="text-slate-800 font-bold mt-0.5">{highestEducation || "Graduate"}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </div>
+                <div className="flex justify-between items-center bg-slate-50 border p-3 rounded-lg hover:border-slate-350 cursor-pointer">
+                  <div>
+                    <span className="text-slate-400 text-[10px] uppercase font-bold">School medium</span>
+                    <p className="text-slate-800 font-bold mt-0.5">{schoolMedium || "English"}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                </div>
+              </div>
+            )}
+
+            {education.length > 0 ? (
+              <div className="space-y-4 pl-4 border-l-2 border-dashed border-slate-200">
+                {education.map((edu, idx) => (
+                  <div key={idx} className="relative space-y-1">
+                    <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+
+                    {editEdu ? (
+                      <div className="space-y-2 bg-white p-3 border rounded shadow-sm">
+                        <div className="grid grid-cols-3 gap-3">
+                          <input type="text" placeholder="Degree / Stream" value={edu.degree} onChange={e => {
+                            const updated = [...education];
+                            updated[idx].degree = e.target.value;
+                            setEducation(updated);
+                          }} className="border rounded p-1 text-xs" />
+                          <input type="text" placeholder="School / University" value={edu.school} onChange={e => {
+                            const updated = [...education];
+                            updated[idx].school = e.target.value;
+                            setEducation(updated);
+                          }} className="border rounded p-1 text-xs" />
+                          <input type="text" placeholder="Batch / Year" value={edu.year} onChange={e => {
+                            const updated = [...education];
+                            updated[idx].year = e.target.value;
+                            setEducation(updated);
+                          }} className="border rounded p-1 text-xs" />
+                        </div>
+                        <button onClick={() => {
+                          setEducation(education.filter((_, i) => i !== idx));
+                        }} className="text-red-600 hover:text-red-700 text-xs font-bold">Delete Record</button>
+                      </div>
+                    ) : (
+                      <>
+                        <h4 className="font-extrabold text-slate-900 text-xs">{edu.degree}</h4>
+                        <p className="text-[11px] font-bold text-slate-500">{edu.school}</p>
+                        <span className="text-[10px] text-slate-400 font-bold block">{edu.year}</span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-xs text-slate-400">No education qualifications specified.</div>
+            )}
+          </div>
+
+          {/* Skills */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+            <button 
+              onClick={() => {
+                if (editSkills) {
+                  const items = tempSkillsText.split(",").map(t => t.trim()).filter(t => t.length > 0);
+                  handleSave({ skills: items });
+                  setEditSkills(false);
+                } else {
+                  setTempSkillsText(skills.join(", "));
+                  setEditSkills(true);
+                }
+              }}
+              className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+            >
+              {editSkills ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+            </button>
+            
+            <h3 className="font-extrabold text-slate-900 text-[15px] mb-4">Skills</h3>
+            
+            {editSkills ? (
+              <div className="space-y-2">
+                <textarea 
+                  value={tempSkillsText} 
+                  onChange={e => setTempSkillsText(e.target.value)} 
+                  className="w-full border border-slate-200 rounded p-2 text-xs" 
+                  rows={3} 
+                  placeholder="React, Node.js, CSS, Excel"
+                />
+                <p className="text-[10px] text-slate-400">Comma-separated list of skills.</p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {skills.length > 0 ? (
+                  skills.map((s, idx) => (
+                    <span key={idx} className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-semibold">{s}</span>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400">No professional skills saved.</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Certifications */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-50 pb-3">
+              <h3 className="font-extrabold text-slate-900 text-[15px]">Certifications</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    const newCert = [...certifications, { name: "" }];
+                    setCertifications(newCert);
+                    setEditCert(true);
+                  }}
+                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add
+                </button>
+                <button 
+                  onClick={() => {
+                    if (editCert) {
+                      handleSave({ certifications });
+                      setEditCert(false);
+                    } else {
+                      setEditCert(true);
+                    }
+                  }}
+                  className="text-emerald-650 p-1 bg-emerald-50 rounded"
+                >
+                  {editCert ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {certifications.length > 0 ? (
+              <div className="space-y-3">
+                {certifications.map((cert, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-2.5 bg-slate-50 border rounded-lg">
+                    {editCert ? (
+                      <div className="flex-1 flex gap-2 items-center">
+                        <input type="text" value={cert.name} onChange={e => {
+                          const updated = [...certifications];
+                          updated[idx].name = e.target.value;
+                          setCertifications(updated);
+                        }} className="flex-1 border rounded p-1 text-xs bg-white" placeholder="Certification Name" />
+                        <button onClick={() => {
+                          setCertifications(certifications.filter((_, i) => i !== idx));
+                        }} className="text-red-500 hover:text-red-700">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="font-bold text-slate-800 text-xs">{cert.name}</span>
+                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-xs text-slate-400">No certifications uploaded.</div>
+            )}
+          </div>
+
+          {/* Languages Known & Spoken English */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Languages */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+              <button 
+                onClick={() => {
+                  if (editLang) {
+                    const items = tempLanguagesText.split(",").map(t => t.trim()).filter(t => t.length > 0);
+                    handleSave({ languages: items });
+                    setEditLang(false);
+                  } else {
+                    setTempLanguagesText(languages.join(", "));
+                    setEditLang(true);
+                  }
+                }}
+                className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+              >
+                {editLang ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+              </button>
+              
+              <h3 className="font-extrabold text-slate-900 text-sm mb-3">Languages known</h3>
+              {editLang ? (
+                <input type="text" value={tempLanguagesText} onChange={e => setTempLanguagesText(e.target.value)} className="w-full border rounded p-1 text-xs" placeholder="English, Hindi" />
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {languages.length > 0 ? (
+                    languages.map((l, i) => (
+                      <span key={i} className="text-xs bg-slate-100 font-bold px-2 py-0.5 rounded text-slate-600">{l}</span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-slate-400">Not specified.</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Spoken English */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+              <h3 className="font-extrabold text-slate-900 text-sm">Spoken English</h3>
+              <p className="text-[10px] text-slate-500 leading-tight">Having the required level of English speaking proficiency will help you find jobs at top companies.</p>
+              
+              <div className="flex items-center justify-between border border-emerald-500 rounded p-2.5 bg-emerald-50 text-emerald-700 font-bold text-xs">
+                <span>Verification Pending</span>
+                <button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded px-3 py-1 transition-all">Verify now</button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Resume Upload Card */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-extrabold text-slate-900 text-[15px]">Resume</h3>
+              <input type="file" accept=".pdf" id="resume-file-input" onChange={handleResumeUpload} className="hidden" />
+              <label htmlFor="resume-file-input" className="text-emerald-650 cursor-pointer p-1 bg-emerald-50 rounded">
+                <Edit2 className="h-3.5 w-3.5" />
+              </label>
+            </div>
+
+            {resumeUrl ? (
+              <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex items-center justify-between">
+                <div className="flex items-center space-x-3 text-sm">
+                  <FileText className="h-8 w-8 text-emerald-650 shrink-0" />
+                  <div>
+                    <p className="font-bold text-slate-800 truncate">Uploaded Resume</p>
+                    <p className="text-[10px] text-slate-400">PDF document format</p>
+                  </div>
+                </div>
+                <a 
+                  href={resumeUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-1.5 rounded transition-all"
+                >
+                  View PDF
+                </a>
+              </div>
+            ) : (
+              <div className="text-center p-6 border-2 border-dashed border-slate-200 rounded-xl">
+                {uploading ? (
+                  <Loader2 className="animate-spin h-8 w-8 text-emerald-600 mx-auto" />
+                ) : (
+                  <FileText className="h-8 w-8 text-slate-350 mx-auto" />
+                )}
+                <p className="text-xs text-slate-500 mt-2">Attach your PDF format resume document here.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Preferred Roles & Other preferences */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+            <button 
+              onClick={() => {
+                if (editOther) {
+                  const items = tempPreferredRolesText.split(",").map(t => t.trim()).filter(t => t.length > 0);
+                  handleSave({ preferredJobTitles: items });
+                  setEditOther(false);
+                } else {
+                  setTempPreferredRolesText(preferredJobTitles.join(", "));
+                  setEditOther(true);
+                }
+              }}
+              className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+            >
+              {editOther ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
+            </button>
+            
+            <h3 className="font-extrabold text-slate-900 text-[15px] mb-4">Preferred Job Titles / Roles</h3>
+            {editOther ? (
+              <input type="text" value={tempPreferredRolesText} onChange={e => setTempPreferredRolesText(e.target.value)} className="w-full border rounded p-1.5 text-xs bg-white" placeholder="Full-stack Developer, Software Engineer" />
+            ) : (
+              <div className="space-y-2">
+                {preferredJobTitles.length > 0 ? (
+                  preferredJobTitles.map((role, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3 border rounded-lg bg-slate-50 hover:bg-slate-100/30 cursor-pointer">
+                      <span className="font-semibold text-slate-700 text-xs">{role}</span>
+                      <ChevronRight className="h-4 w-4 text-slate-450" />
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400">No job titles selected.</span>
+                )}
+              </div>
+            )}
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
