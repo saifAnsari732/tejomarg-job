@@ -103,7 +103,7 @@ export default function EmployerLoginPage() {
       }
 
       toast.success("Employer Login Successful!");
-      if (callbackUrl) {
+      if (callbackUrl && !callbackUrl.includes("/login")) {
         router.push(callbackUrl);
       } else {
         router.push("/employer/post-job");

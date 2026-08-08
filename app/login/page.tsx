@@ -103,7 +103,7 @@ export default function CandidateLoginPage() {
       }
 
       toast.success("Login Successful!");
-      if (callbackUrl) {
+      if (callbackUrl && !callbackUrl.includes("/login")) {
         router.push(callbackUrl);
       } else {
         router.push("/");
