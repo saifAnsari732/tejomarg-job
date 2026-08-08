@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
-import Application from "@/models/Application";
+import { db } from "@/lib/firebaseAdmin";
+import Razorpay from "razorpay";
 
 export async function GET() {
   try {
@@ -19,18 +17,36 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden. Recruiter access only." }, { status: 403 });
     }
 
-    await dbConnect();
-    
     // Find all jobs posted by this employer
-    const jobs = await Job.find({ employerId: user.id }).sort({ createdAt: -1 }).lean();
+    const jobsSnapshot = await db.collection("jobs")
+      .where("employerId", "==", user.id)
+      .get();
+      
+    const jobs = jobsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        _id: doc.id, 
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date(data.createdAt || Date.now()).toISOString()
+      };
+    });
+
+    // Sort in memory to avoid Firestore composite index requirement
+    jobs.sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     // Map through jobs to attach application counts
     const jobsWithCounts = await Promise.all(
       jobs.map(async (job: any) => {
-        const applicantCount = await Application.countDocuments({ jobId: job._id });
+        const appsSnapshot = await db.collection("applications")
+          .where("jobId", "==", job._id)
+          .get();
         return {
           ...job,
-          applicantCount,
+          applicantCount: appsSnapshot.size,
         };
       })
     );
@@ -55,16 +71,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Forbidden. Recruiter access only." }, { status: 403 });
     }
 
-    await dbConnect();
-
     // Check if company exists
-    const company = await Company.findOne({ employerId: user.id });
-    if (!company) {
+    const companySnapshot = await db.collection("companies")
+      .where("employerId", "==", user.id)
+      .limit(1)
+      .get();
+
+    if (companySnapshot.empty) {
       return NextResponse.json(
         { error: "Please complete your company profile before posting a job." },
         { status: 400 }
       );
     }
+    const company = { _id: companySnapshot.docs[0].id, ...companySnapshot.docs[0].data() } as any;
 
     const body = await req.json();
     const {
@@ -96,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     // Create Job (starts as pending and must be approved by admin)
-    const newJob = await Job.create({
+    const newJobData = {
       employerId: user.id,
       companyId: company._id,
       title,
@@ -112,12 +131,65 @@ export async function POST(req: Request) {
       openings: openings ? parseInt(openings) : 1,
       deadline: new Date(deadline),
       category,
-      status: "pending", // Moderate
+      isNightShift: body.isNightShift || false,
+      workLocationType: body.workLocationType || "Work From Office",
+      payType: body.payType || "Fixed Only",
+      perks: Array.isArray(body.perks) ? body.perks : [],
+      joiningFeeRequired: body.joiningFeeRequired || false,
+      minEducation: body.minEducation || "Graduate",
+      ageMin: body.ageMin ? parseInt(body.ageMin) : undefined,
+      ageMax: body.ageMax ? parseInt(body.ageMax) : undefined,
+      isWalkInInterview: body.isWalkInInterview || false,
+      communicationPreference: body.communicationPreference || "Myself",
+      pricingPlan: body.pricingPlan || "Classic",
+      englishLevel: body.englishLevel || "Basic English",
+      genderPreference: body.gender || "Both genders allowed",
+      status: body.isDraft ? "draft" : "pending_payment", // Handle draft status
+      createdAt: new Date(),
+    };
+    
+    // Remove undefined values
+    Object.keys(newJobData).forEach(key => (newJobData as any)[key] === undefined && delete (newJobData as any)[key]);
+
+    const newJobRef = await db.collection("jobs").add(newJobData);
+    const newJob = { _id: newJobRef.id, ...newJobData };
+
+    // If it's just a draft, skip payment generation
+    if (body.isDraft) {
+      return NextResponse.json({
+        message: "Draft saved successfully",
+        jobId: newJobRef.id,
+      });
+    }
+
+    // Calculate Price Based on Plan
+    let amountInRupees = 1; // Default
+    if (body.pricingPlan === "Classic") amountInRupees = 1;
+    if (body.pricingPlan === "Premium") amountInRupees = 2;
+    if (body.pricingPlan === "Premium AI") amountInRupees = 3;
+    if (body.pricingPlan === "Super Premium") amountInRupees = 4;
+
+    const amountInPaise = amountInRupees * 100;
+
+    // Initialize Razorpay
+    const instance = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+      key_secret: process.env.RAZORPAY_KEY_SECRET as string,
     });
 
+    const options = {
+      amount: amountInPaise,
+      currency: "INR",
+      receipt: "receipt_order_" + newJobRef.id,
+    };
+
+    const order = await instance.orders.create(options);
+
     return NextResponse.json({
-      message: "Job posting submitted. It is pending admin approval.",
-      job: newJob,
+      message: "Order created successfully",
+      jobId: newJobRef.id,
+      orderId: order.id,
+      amount: order.amount,
     });
   } catch (error: any) {
     console.error("Employer jobs POST error:", error);

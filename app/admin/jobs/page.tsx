@@ -1,22 +1,42 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 import PendingJobsList from "@/components/admin/PendingJobsList";
 
 async function getPendingJobs() {
   try {
-    await dbConnect();
+    const snapshot = await db.collection("jobs").where("status", "==", "pending").get();
     
-    // Register Company schema for populating
-    const _dummyCompany = Company.schema;
+    let jobs = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        let companyData = null;
+        if (data.companyId) {
+          const compSnap = await db.collection("companies").doc(data.companyId).get();
+          if (compSnap.exists) {
+            const cData = compSnap.data() as any;
+            companyData = {
+              _id: compSnap.id,
+              name: cData.name,
+              logo: cData.logo,
+              industry: cData.industry
+            };
+          }
+        }
+        return {
+          _id: doc.id,
+          ...data,
+          companyId: companyData || data.companyId
+        };
+      })
+    );
 
-    const jobs = await Job.find({ status: "pending" })
-      .populate("companyId", "name logo industry")
-      .sort({ createdAt: -1 })
-      .lean();
+    jobs.sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     return JSON.parse(JSON.stringify(jobs));
   } catch (error) {

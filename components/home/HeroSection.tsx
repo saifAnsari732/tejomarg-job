@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import { Search, MapPin, ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, MapPin, ChevronDown, Sparkles, Briefcase, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function HeroSection() {
   const router = useRouter();
@@ -16,7 +15,6 @@ export default function HeroSection() {
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
-  // Debouncing Search Input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchVal(searchVal);
@@ -24,7 +22,6 @@ export default function HeroSection() {
     return () => clearTimeout(timer);
   }, [searchVal]);
 
-  // Debouncing Location Input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedLocationVal(locationVal);
@@ -33,313 +30,223 @@ export default function HeroSection() {
   }, [locationVal]);
 
   const jobSuggestions = [
-    // Tech & Design
-    "Full-stack Developer",
-    "Frontend Developer",
-    "Backend Developer",
-    "Software Engineer",
-    "Mobile App Developer",
-    "Android Developer",
-    "iOS Developer",
-    "UI/UX Designer",
-    "Graphic Designer",
-    "Web Developer",
-    "Python Developer",
-    "Java Developer",
-    // Office, Admin & Data
-    "Office Assistant",
-    "Receptionist",
-    "Data Entry Operator",
-    "Admin Executive",
-    "Executive Assistant",
-    // Sales, Marketing & Customer Support
-    "Telecaller",
-    "Customer Support Executive",
-    "BPO Executive",
-    "Sales Executive",
-    "Business Development Associate",
-    "Marketing Executive",
-    "Digital Marketing Specialist",
-    "Social Media Manager",
-    "SEO Executive",
-    // Field & Logistics
-    "Delivery Boy",
-    "Delivery Partner",
-    "Driver",
-    "Field Sales Executive",
-    "Logistics Executive",
-    // Creative
-    "Content Writer",
-    "Video Editor",
-    "Photographer",
-    // HR & Management
-    "HR Executive",
-    "Recruiter",
-    "Operations Manager",
-    // Finance & Accounts
-    "Accountant",
-    "Finance Executive",
-    "Accounts Manager",
-    // Education & Others
-    "Teacher",
-    "Tutor",
-    "Cook",
-    "Chef",
-    "Waiter",
-    "Housekeeping Staff",
-    "Security Guard",
-    "Beautician"
+    "Software Engineer", "Frontend Developer", "UI/UX Designer", "Product Manager",
+    "Data Scientist", "Marketing Executive", "Sales Manager", "HR Executive"
   ];
 
   const locationSuggestions = [
-    // Uttar Pradesh
-    "Lucknow",
-    "Noida",
-    "Greater Noida",
-    "Ghaziabad",
-    "Kanpur",
-    "Varanasi",
-    "Agra",
-    "Meerut",
-    "Allahabad (Prayagraj)",
-    "Bareilly",
-    "Gorakhpur",
-    "Aligarh",
-    "Jhansi",
-    "Moradabad",
-    // Delhi NCR & Haryana
-    "Delhi NCR",
-    "Gurgaon (Gurugram)",
-    "Faridabad",
-    "Panipat",
-    "Ambala",
-    // Maharashtra
-    "Mumbai",
-    "Pune",
-    "Thane",
-    "Navi Mumbai",
-    "Nagpur",
-    "Nashik",
-    "Aurangabad",
-    // Karnataka
-    "Bengaluru (Bangalore)",
-    "Mysore",
-    "Mangalore",
-    "Hubli",
-    // Telangana & Andhra Pradesh
-    "Hyderabad",
-    "Visakhapatnam",
-    "Vijayawada",
-    // Tamil Nadu
-    "Chennai",
-    "Coimbatore",
-    "Madurai",
-    // Kerala
-    "Kochi",
-    "Trivandrum",
-    // West Bengal & East India
-    "Kolkata",
-    "Bhubaneswar",
-    "Guwahati",
-    "Patna",
-    "Ranchi",
-    "Muzaffarpur",
-    // Rajasthan
-    "Jaipur",
-    "Udaipur",
-    "Jodhpur",
-    "Kota",
-    // Gujarat
-    "Ahmedabad",
-    "Surat",
-    "Vadodara",
-    "Rajkot",
-    // Madhya Pradesh & Chhattisgarh
-    "Indore",
-    "Bhopal",
-    "Gwalior",
-    "Raipur",
-    "Bilaspur",
-    // Punjab & Chandigarh
-    "Chandigarh",
-    "Ludhiana",
-    "Amritsar",
-    "Jalandhar",
-    // Uttarakhand
-    "Dehradun",
-    "Haridwar"
+    "Bengaluru", "Mumbai", "Delhi NCR", "Pune", "Hyderabad", "Chennai", "Remote"
   ];
 
   const filteredJobSuggestions = jobSuggestions.filter((item) =>
     item.toLowerCase().includes(debouncedSearchVal.toLowerCase())
   );
-
   const filteredLocationSuggestions = locationSuggestions.filter((item) =>
     item.toLowerCase().includes(debouncedLocationVal.toLowerCase())
   );
 
-  // Show dropdown only if user has typed something and matching suggestions exist
   const showSearch = showSearchSuggestions && searchVal.trim() !== "" && filteredJobSuggestions.length > 0;
   const showLocation = showLocationSuggestions && locationVal.trim() !== "" && filteredLocationSuggestions.length > 0;
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    
     if (searchVal) params.set("search", searchVal);
     if (locationVal) params.set("location", locationVal);
-    
     router.push(`/jobs?${params.toString()}`);
   };
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <section className="bg-slate-50 relative pt-12 pb-20 overflow-hidden">
-      {/* Background Gradient matching the screenshot's faint pink/purple aura on left */}
-      <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+    <section className="relative w-full pt-12 md:pt-24 pb-20 md:pb-32 overflow-hidden bg-gradient-to-b from-blue-50 via-white to-slate-50 min-h-[90vh] flex flex-col justify-center">
+      {/* Background Animated Orbs */}
+      <motion.div 
+        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-300/30 rounded-full blur-[120px] mix-blend-multiply pointer-events-none"
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-sky-300/30 rounded-full blur-[100px] mix-blend-multiply pointer-events-none"
+      />
+      
+      {/* Floating Badges (Desktop Only) */}
+      <motion.div 
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0, y: [0, -15, 0] }}
+        transition={{ opacity: { duration: 0.8 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
+        className="hidden lg:flex absolute left-[5%] top-[25%] bg-white/90 backdrop-blur-xl px-5 py-4 rounded-2xl items-center gap-4 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] z-20"
+      >
+        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+          <Sparkles className="w-6 h-6 text-emerald-600" />
+        </div>
+        <div>
+          <p className="text-slate-900 text-sm font-bold">Match Found</p>
+          <p className="text-slate-500 text-xs font-medium mt-0.5">Senior UI Designer</p>
+        </div>
+      </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row items-center justify-between">
+      <motion.div 
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0, y: [0, -20, 0] }}
+        transition={{ opacity: { duration: 0.8, delay: 0.3 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
+        className="hidden lg:flex absolute right-[5%] top-[40%] bg-white/90 backdrop-blur-xl px-5 py-4 rounded-2xl items-center gap-4 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] z-20"
+      >
+        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+          <Zap className="w-6 h-6 text-blue-600" />
+        </div>
+        <div>
+          <p className="text-slate-900 text-sm font-bold">Fast Response</p>
+          <p className="text-slate-500 text-xs font-medium mt-0.5">Usually replies in 2h</p>
+        </div>
+      </motion.div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-30 flex flex-col items-center text-center w-full">
         
-        {/* Left Content */}
-        <div className="lg:w-[60%] pt-10">
-          <h3 className="text-emerald-600 font-bold tracking-widest text-sm uppercase mb-4">
-            INDIA'S #1 JOB PLATFORM
-          </h3>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">
-            Your job search ends here
-          </h1>
-          <p className="text-slate-600 text-lg sm:text-xl mb-10">
-            Discover 50 lakh+ career opportunities
-          </p>
+        {/* Top Label */}
+        <motion.div 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-blue-50/80 backdrop-blur-md border border-blue-100 mb-8 shadow-sm max-w-full overflow-hidden"
+        >
+          <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span className="text-blue-700 text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase truncate">Over 50 Lakh+ Opportunities Live</span>
+        </motion.div>
 
-          {/* Search Bar */}
-          <div className="bg-white p-2 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] mb-12 max-w-4xl border border-slate-100 relative z-30">
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
-              
-              <div className="flex items-center flex-1 px-4 py-3 w-full relative">
-                <Search className="h-5 w-5 text-slate-400 shrink-0" />
-                <input 
-                  type="text" 
-                  name="search"
-                  value={searchVal}
-                  onChange={(e) => {
-                    setSearchVal(e.target.value);
-                    setShowSearchSuggestions(true);
-                  }}
-                  onFocus={() => setShowSearchSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
-                  placeholder="Search jobs by 'title'" 
-                  className="w-full pl-3 pr-2 py-1 bg-transparent border-none focus:ring-0 text-slate-800 placeholder-slate-400 text-sm md:text-base outline-none"
-                />
-                
-                {showSearch && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
-                    {filteredJobSuggestions.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => {
-                          setSearchVal(item);
-                          setShowSearchSuggestions(false);
-                        }}
-                        className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold border-b border-slate-100 last:border-none transition-colors"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+        {/* Main Heading */}
+        <motion.h1 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight w-full break-words"
+        >
+          Find Your Dream Job <br className="hidden md:block"/>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x" style={{ backgroundSize: '200% 200%' }}>With Tejomarg JOB</span>
+        </motion.h1>
+        
+        <motion.p 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-slate-600 text-sm sm:text-lg max-w-2xl mb-8 leading-relaxed font-medium px-2 w-full"
+        >
+        </motion.p>
 
-              <div className="flex items-center flex-1 px-4 py-3 w-full cursor-pointer group relative">
-                <BriefcaseIcon className="h-5 w-5 text-slate-400 shrink-0" />
-                <select className="w-full pl-3 pr-8 py-1 bg-transparent border-none focus:ring-0 text-slate-800 text-sm md:text-base outline-none appearance-none cursor-pointer">
-                  <option value="">Your Experience</option>
-                  <option value="Entry-level">0-2 Years</option>
-                  <option value="Mid-level">2-5 Years</option>
-                  <option value="Senior">5+ Years</option>
-                </select>
-                <ChevronDown className="h-4 w-4 text-slate-400 absolute right-4 group-hover:text-slate-600 transition-colors pointer-events-none" />
-              </div>
-
-              <div className="flex items-center flex-1 px-4 py-3 w-full relative">
-                <MapPin className="h-5 w-5 text-slate-400 shrink-0" />
-                <input 
-                  type="text" 
-                  name="location"
-                  value={locationVal}
-                  onChange={(e) => {
-                    setLocationVal(e.target.value);
-                    setShowLocationSuggestions(true);
-                  }}
-                  onFocus={() => setShowLocationSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
-                  placeholder="Search for an area or city" 
-                  className="w-full pl-3 pr-2 py-1 bg-transparent border-none focus:ring-0 text-slate-800 placeholder-slate-400 text-sm md:text-base outline-none"
-                />
-                
-                {showLocation && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
-                    {filteredLocationSuggestions.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => {
-                          setLocationVal(item);
-                          setShowLocationSuggestions(false);
-                        }}
-                        className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold border-b border-slate-100 last:border-none transition-colors"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="px-2 py-2 w-full md:w-auto">
-                <button type="submit" className="w-full bg-[#208f60] hover:bg-[#1a7650] text-white font-bold py-3 px-8 rounded-lg transition-colors whitespace-nowrap">
-                  Search jobs
-                </button>
-              </div>
-
-            </form>
+        {/* Feature Highlights */}
+        <motion.div 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mb-12 text-sm sm:text-base text-slate-600 font-semibold"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            100% Free for Candidates
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-sky-500"></div>
+            Direct HR Contact
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+            Verified Companies
+          </div>
+        </motion.div>
 
-          {/* Trusted By & Proud To Support */}
-          <div className="space-y-8">
-            <div>
-              <p className="text-slate-800 font-bold text-sm mb-4">Proud to Support</p>
-              <div className="flex items-center gap-6">
-                <div className="text-slate-500 text-xs font-bold flex items-center border border-slate-200 px-3 py-1.5 bg-white rounded shadow-sm">
-                  <span className="w-4 h-4 bg-orange-500 rounded-full inline-block mr-2"></span> Ministry of Labour
+        {/* Search Bar - Glassmorphism */}
+        <motion.div 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.4 }}
+          className="w-full max-w-4xl relative z-40"
+        >
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 p-2 md:p-3 space-y-3 md:space-y-0 rounded-2xl transition-all duration-300 hover:shadow-[0_8px_40px_rgb(79,70,229,0.12)] hover:border-blue-200">
+            
+            {/* Search Job */}
+            <div className="flex items-center flex-1 px-4 py-3 w-full relative group">
+              <Search className="h-6 w-6 text-blue-400 group-focus-within:text-blue-600 transition-colors" />
+              <input 
+                type="text" 
+                value={searchVal}
+                onChange={(e) => { setSearchVal(e.target.value); setShowSearchSuggestions(true); }}
+                onFocus={() => setShowSearchSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
+                placeholder="Job title, skills, or company" 
+                className="w-full pl-3 pr-2 py-1 bg-transparent border-none text-slate-900 placeholder-slate-400 text-[16px] outline-none focus:ring-0 font-medium"
+              />
+              {showSearch && (
+                <div className="absolute left-0 right-0 top-full mt-4 bg-white border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden">
+                  {filteredJobSuggestions.map((item) => (
+                    <button
+                      key={item} type="button" onClick={() => { setSearchVal(item); setShowSearchSuggestions(false); }}
+                      className="w-full text-left px-5 py-3.5 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors border-b border-slate-100 last:border-none"
+                    >
+                      {item}
+                    </button>
+                  ))}
                 </div>
-                <div className="text-slate-500 text-xs font-bold flex items-center border border-slate-200 px-3 py-1.5 bg-white rounded shadow-sm">
-                  <span className="w-4 h-4 bg-emerald-500 rounded-full inline-block mr-2"></span> Startup India
-                </div>
-              </div>
+              )}
             </div>
 
-            <div>
-              <p className="text-slate-800 font-bold text-sm mb-4">Trusted by 1000+ enterprises and 7 lakh+ MSMEs for hiring</p>
-              <div className="flex flex-wrap items-center gap-6 opacity-70 grayscale">
-                <span className="text-xl font-black tracking-tighter">asket</span>
-                <span className="text-xl font-black text-blue-800">HDFC BANK</span>
-                <span className="text-xl font-black text-orange-600">SWIGGY</span>
-                <span className="text-xl font-black">Uber</span>
-                <span className="text-xl font-black">Urban Company</span>
-                <span className="text-xl font-black text-red-600">Z</span>
-              </div>
+            <div className="hidden md:block w-px h-10 bg-slate-200"></div>
+
+            {/* Location */}
+            <div className="flex items-center flex-1 px-4 py-3 w-full relative group">
+              <MapPin className="h-6 w-6 text-sky-400 group-focus-within:text-sky-600 transition-colors" />
+              <input 
+                type="text" 
+                value={locationVal}
+                onChange={(e) => { setLocationVal(e.target.value); setShowLocationSuggestions(true); }}
+                onFocus={() => setShowLocationSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
+                placeholder="City or 'Remote'" 
+                className="w-full pl-3 pr-2 py-1 bg-transparent border-none text-slate-900 placeholder-slate-400 text-[16px] outline-none focus:ring-0 font-medium"
+              />
+              {showLocation && (
+                <div className="absolute left-0 right-0 top-full mt-4 bg-white border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden">
+                  {filteredLocationSuggestions.map((item) => (
+                    <button
+                      key={item} type="button" onClick={() => { setLocationVal(item); setShowLocationSuggestions(false); }}
+                      className="w-full text-left px-5 py-3.5 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors border-b border-slate-100 last:border-none"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+
+            {/* Submit Button */}
+            <div className="w-full md:w-auto mt-2 md:mt-0">
+              <button type="submit" className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold py-4 md:py-3.5 px-10 rounded-xl md:rounded-full transition-all duration-300 shadow-[0_4px_14px_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:-translate-y-0.5 whitespace-nowrap text-[16px]">
+                Search Jobs
+              </button>
+            </div>
+          </form>
+        </motion.div>
+
+        {/* Popular Tags */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-sm animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <span className="text-slate-500 font-medium mr-1">Popular:</span>
+          {["Software Engineer", "Product Manager", "Data Scientist", "UI/UX Designer"].map((tag) => (
+            <button key={tag} onClick={() => { setSearchVal(tag); setShowSearchSuggestions(false); }} className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-colors shadow-sm font-medium text-[13px]">
+              {tag}
+            </button>
+          ))}
         </div>
 
-        {/* Right Content (Image) */}
-        <div className="hidden lg:block lg:w-[45%] relative">
-           <img 
-              src="/hero-man.jpg" 
-              alt="Professional job seeker" 
-              className="w-full max-w-[480px] mx-auto object-contain z-10 relative"
-           />
+        {/* Trusted By Marquee */}
+        <div className="w-full mt-28 pt-10 border-t border-slate-200 relative z-20">
+          <p className="text-slate-400 text-sm font-bold mb-8 uppercase tracking-widest">Trusted by industry leaders</p>
+          <div className="relative max-w-full overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none"></div>
+            
+            <div className="inline-flex animate-marquee whitespace-nowrap">
+              <div className="flex items-center gap-16 px-8">
+                <BrandLogos />
+              </div>
+              <div className="flex items-center gap-16 px-8">
+                <BrandLogos />
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -347,23 +254,30 @@ export default function HeroSection() {
   );
 }
 
-// Inline Briefcase icon since we didn't import it at the top
-function BriefcaseIcon(props: React.SVGProps<SVGSVGElement>) {
+function BrandLogos() {
+  const partners = [
+    "11.png",
+    "2 (1).png",
+    "3.png",
+    "4.png",
+    "5 (1).png",
+    "5.png",
+    "6.png",
+    "TM24 png.png",
+    "eco-kisan.webp"
+  ];
+
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
+    <>
+      {partners.map((img, idx) => (
+        <div key={idx} className="relative h-12 sm:h-16 w-32 sm:w-40 flex items-center justify-center">
+          <img 
+            src={`/partner-image/${img}`} 
+            alt={`Partner ${idx + 1}`} 
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      ))}
+    </>
   );
 }

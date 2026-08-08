@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import Category from "@/models/Category";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
-    await dbConnect();
-    const categories = await Category.find({}).sort({ name: 1 }).lean();
-    return NextResponse.json({ categories });
+    const snapshot = await db.collection("categories").get();
+    const categories = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+    return NextResponse.json(categories);
   } catch (error: any) {
-    console.error("Categories GET error:", error);
-    return NextResponse.json({ error: "Failed to retrieve categories" }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

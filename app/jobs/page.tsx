@@ -1,14 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
-import Category from "@/models/Category";
+import { db } from "@/lib/firebaseAdmin";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FilterSidebar from "@/components/jobs/FilterSidebar";
 import JobCard from "@/components/jobs/JobCard";
-import RightWidgets from "@/components/jobs/RightWidgets";
 import LiveJobsSection from "@/components/jobs/LiveJobsSection";
 import { ChevronLeft, ChevronRight, Inbox, Zap, Database } from "lucide-react";
 
@@ -33,54 +29,74 @@ interface SearchParams {
 
 async function getJobsData(filters: SearchParams) {
   try {
-    await dbConnect();
-    // Force-register Company schema so Job.populate("companyId") works
-    void Company;
-    const categories = await Category.find({}).lean();
-    const query: any = { status: "active" };
+    const catSnap = await db.collection("categories").get();
+    const categories = catSnap.docs.map(d => ({ _id: d.id, ...d.data() }));
+
+    const jobsSnap = await db.collection("jobs").where("status", "==", "active").get();
+    let jobs = jobsSnap.docs.map(doc => ({ _id: doc.id, ...doc.data() as any }));
 
     if (filters.search) {
-      query.$or = [
-        { title: { $regex: filters.search, $options: "i" } },
-        { description: { $regex: filters.search, $options: "i" } },
-        { skillsRequired: { $regex: filters.search, $options: "i" } },
-      ];
+      const q = filters.search.toLowerCase();
+      jobs = jobs.filter(j => 
+        (j.title || "").toLowerCase().includes(q) ||
+        (j.description || "").toLowerCase().includes(q) ||
+        ((j.skillsRequired || []).some((s: string) => s.toLowerCase().includes(q)))
+      );
     }
-    if (filters.location) query.location = { $regex: filters.location, $options: "i" };
+    
+    if (filters.location) {
+      const loc = filters.location.toLowerCase();
+      jobs = jobs.filter(j => (j.location || "").toLowerCase().includes(loc));
+    }
 
     const deptFilters: string[] = [];
-    if (filters.category)   deptFilters.push(...filters.category.split(","));
+    if (filters.category) deptFilters.push(...filters.category.split(","));
     if (filters.department) deptFilters.push(...filters.department.split(","));
-    if (deptFilters.length > 0) query.category = { $in: deptFilters };
+    if (deptFilters.length > 0) {
+      jobs = jobs.filter(j => deptFilters.includes(j.category));
+    }
 
     const typeFilters: string[] = [];
-    if (filters.jobType)  typeFilters.push(...filters.jobType.split(","));
+    if (filters.jobType) typeFilters.push(...filters.jobType.split(","));
     if (filters.workType) typeFilters.push(...filters.workType.split(","));
     const mappedTypes = typeFilters.map(t =>
       t === "Full time" ? "Full-time" : t === "Part time" ? "Part-time" : t
     );
-    if (mappedTypes.length > 0) query.jobType = { $in: mappedTypes };
-
+    let workModes: string[] = [];
     if (filters.workMode) {
-      const modes = filters.workMode.split(",");
-      if (modes.includes("Work from home")) {
-        if (!query.jobType) query.jobType = {};
-        query.jobType.$in = [...(query.jobType.$in || []), "Remote"];
+      workModes = filters.workMode.split(",");
+      if (workModes.includes("Work from home")) {
+        mappedTypes.push("Remote");
       }
+    }
+    if (mappedTypes.length > 0) {
+      jobs = jobs.filter(j => mappedTypes.includes(j.jobType));
     }
 
     if (filters.experience) {
       const exp = parseInt(filters.experience);
-      if (!isNaN(exp)) query.experienceYears = { $lte: exp };
+      if (!isNaN(exp)) jobs = jobs.filter(j => (j.experienceYears || 0) <= exp);
     }
     if (filters.minSalary) {
       const sal = parseInt(filters.minSalary);
-      if (!isNaN(sal) && sal > 0) query.salaryMax = { $gte: sal };
+      if (!isNaN(sal) && sal > 0) jobs = jobs.filter(j => (j.salaryMax || 0) >= sal);
     }
-    if (filters.education)    query.highestEducation = { $in: filters.education.split(",") };
-    if (filters.workShift)    query.workShift        = { $in: filters.workShift.split(",") };
-    if (filters.englishLevel) query.englishLevel     = { $in: filters.englishLevel.split(",") };
-    if (filters.gender)       query.genderPreference = { $in: filters.gender.split(",") };
+    if (filters.education) {
+      const edu = filters.education.split(",");
+      jobs = jobs.filter(j => edu.includes(j.highestEducation));
+    }
+    if (filters.workShift) {
+      const shift = filters.workShift.split(",");
+      jobs = jobs.filter(j => shift.includes(j.workShift));
+    }
+    if (filters.englishLevel) {
+      const eng = filters.englishLevel.split(",");
+      jobs = jobs.filter(j => eng.includes(j.englishLevel));
+    }
+    if (filters.gender) {
+      const gen = filters.gender.split(",");
+      jobs = jobs.filter(j => gen.includes(j.genderPreference));
+    }
 
     if (filters.datePosted && filters.datePosted !== "All") {
       const now = new Date();
@@ -88,24 +104,44 @@ async function getJobsData(filters: SearchParams) {
       if (filters.datePosted === "Last 24 hours") pastDate.setDate(now.getDate() - 1);
       else if (filters.datePosted === "Last 3 days") pastDate.setDate(now.getDate() - 3);
       else if (filters.datePosted === "Last 7 days") pastDate.setDate(now.getDate() - 7);
-      query.createdAt = { $gte: pastDate };
+      
+      jobs = jobs.filter(j => {
+        const d = j.createdAt?.toDate ? j.createdAt.toDate() : new Date(j.createdAt || 0);
+        return d >= pastDate;
+      });
     }
 
-    let sortOptions: any = { createdAt: -1 };
-    if (filters.sort === "Salary - High to low") sortOptions = { salaryMax: -1 };
+    // Sort
+    if (filters.sort === "Salary - High to low") {
+      jobs.sort((a, b) => (b.salaryMax || 0) - (a.salaryMax || 0));
+    } else {
+      jobs.sort((a, b) => {
+         const dA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+         const dB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+         return dB - dA;
+      });
+    }
 
+    const totalJobs = jobs.length;
     const page  = parseInt(filters.page || "1");
     const limit = 10;
     const skip  = (page - 1) * limit;
-
-    const totalJobs = await Job.countDocuments(query);
-    const rawJobs   = await Job.find(query).sort(sortOptions).skip(skip).limit(limit).populate("companyId").lean();
-    const jobs      = JSON.parse(JSON.stringify(rawJobs));
     const totalPages = Math.ceil(totalJobs / limit) || 1;
+
+    jobs = jobs.slice(skip, skip + limit);
+
+    // populate company
+    jobs = await Promise.all(jobs.map(async (j) => {
+       if (j.companyId) {
+          const compSnap = await db.collection("companies").doc(j.companyId).get();
+          if (compSnap.exists) j.companyId = { _id: compSnap.id, ...compSnap.data() };
+       }
+       return j;
+    }));
 
     return {
       categories: JSON.parse(JSON.stringify(categories)),
-      jobs,
+      jobs: JSON.parse(JSON.stringify(jobs)),
       pagination: { currentPage: page, totalPages, totalJobs },
     };
   } catch (error) {
@@ -157,152 +193,104 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
   return (
     <>
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 bg-slate-50/50">
+      
+      {/* Search Header Banner */}
+      <div className="bg-white border-b border-slate-200 py-8 mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Find your next dream job</h1>
+          <p className="text-slate-500">Explore thousands of job opportunities with all the information you need.</p>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          
           {/* ── Left: Filter Sidebar ─────────────────────────────── */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-1 lg:sticky lg:top-24">
             <FilterSidebar categories={categories} initialFilters={currentFilters} />
           </div>
 
-          {/* ── Center: Both sections stacked ───────────────────── */}
-          <div className="lg:col-span-6 space-y-8">
-
-            {/* ═══════════════════════════════════════════════════
-                SECTION 1 — PORTAL JOBS (MongoDB)
-            ═══════════════════════════════════════════════════ */}
-            <div className="space-y-4">
-              {/* Section Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-slate-900 dark:bg-slate-700">
-                    <Database className="h-3.5 w-3.5 text-white" />
-                  </div>
-                  <h2 className="font-extrabold text-slate-900 dark:text-white text-base">
-                    Portal Jobs
-                  </h2>
-                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full">
-                    {pagination.totalJobs} found
-                  </span>
-                </div>
-
-                {/* Sort controls */}
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase">Sort:</span>
-                  <div className="flex rounded-xl bg-white dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700 gap-0.5">
-                    <Link href={getSortLink("latest")}
-                      className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors ${
-                        currentFilters.sort === "latest"
-                          ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}>
-                      Latest
-                    </Link>
-                    <Link href={getSortLink("salary-desc")}
-                      className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors ${
-                        currentFilters.sort === "salary-desc"
-                          ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}>
-                      High Salary
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Portal Job Cards */}
-              {jobs.length > 0 ? (
-                <div className="space-y-4">
-                  {jobs.map((job: any) => <JobCard key={job._id} job={job} />)}
-
-                  {pagination.totalPages > 1 && (
-                    <div className="flex justify-between items-center bg-white dark:bg-slate-800 px-5 py-3.5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                      <span className="text-xs text-slate-500">
-                        Page <strong>{pagination.currentPage}</strong> of <strong>{pagination.totalPages}</strong>
-                      </span>
-                      <div className="flex gap-2">
-                        {pagination.currentPage > 1 ? (
-                          <Link href={getPageLink(pagination.currentPage - 1)}
-                            className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
-                            <ChevronLeft className="h-4 w-4 text-slate-500" />
-                          </Link>
-                        ) : (
-                          <button disabled className="p-2 border border-slate-100 dark:border-slate-800 rounded-xl opacity-40">
-                            <ChevronLeft className="h-4 w-4 text-slate-300" />
-                          </button>
-                        )}
-                        {pagination.currentPage < pagination.totalPages ? (
-                          <Link href={getPageLink(pagination.currentPage + 1)}
-                            className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors">
-                            <ChevronRight className="h-4 w-4 text-slate-500" />
-                          </Link>
-                        ) : (
-                          <button disabled className="p-2 border border-slate-100 dark:border-slate-800 rounded-xl opacity-40">
-                            <ChevronRight className="h-4 w-4 text-slate-300" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 py-10 px-6 text-center">
-                  <Inbox className="h-10 w-10 mx-auto text-slate-300 dark:text-slate-600" />
-                  <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mt-3">No portal jobs found</p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                    No employer has posted jobs matching these filters yet. Check live listings below.
-                  </p>
-                  <Link href="/jobs"
-                    className="inline-flex mt-4 px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-200 transition-colors">
-                    Clear Filters
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-700" />
-              </div>
-              <div className="relative flex justify-center">
-                <div className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-black px-4 py-1.5 rounded-full shadow-sm shadow-blue-500/20">
-                  <Zap className="h-3 w-3" />
-                  Live Jobs from Indeed · LinkedIn · Glassdoor
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                </div>
-              </div>
-            </div>
-
-            {/* ═══════════════════════════════════════════════════
-                SECTION 2 — LIVE JOBS (JSearch / Indeed)
-            ═══════════════════════════════════════════════════ */}
-            <div className="space-y-4">
-              {/* Section Header */}
+          {/* ── Right: Jobs List ──────────────────────────────────── */}
+          <div className="lg:col-span-3 space-y-6">
+            
+            {/* Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-blue-600">
-                  <Zap className="h-3.5 w-3.5 text-white" />
-                </div>
-                <h2 className="font-extrabold text-slate-900 dark:text-white text-base">
-                  Live Jobs
+                <h2 className="font-bold text-slate-900 text-lg">
+                  {jobs.length > 0 ? "Recommended Jobs" : "All Jobs"}
                 </h2>
-                <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800">
-                  Real-time · Indeed
+                <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                  Portal & Live
                 </span>
               </div>
 
+              {/* Sort controls */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 font-medium">Sort by:</span>
+                <div className="flex rounded-md bg-slate-100 p-1">
+                  <Link href={getSortLink("latest")}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${
+                      currentFilters.sort === "latest"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}>
+                    Latest
+                  </Link>
+                  <Link href={getSortLink("salary-desc")}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${
+                      currentFilters.sort === "salary-desc"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}>
+                    Salary
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Job Cards */}
+            <div className="space-y-4">
+              {/* 1. Portal Jobs (Native) */}
+              {jobs.map((job: any) => <JobCard key={job._id} job={job} />)}
+
+              {/* Pagination (for Portal Jobs) */}
+              {jobs.length > 0 && pagination.totalPages > 1 && (
+                <div className="flex justify-between items-center py-4">
+                  <span className="text-sm text-slate-500">
+                    Page <span className="font-medium text-slate-900">{pagination.currentPage}</span> of <span className="font-medium text-slate-900">{pagination.totalPages}</span>
+                  </span>
+                  <div className="flex gap-2">
+                    {pagination.currentPage > 1 ? (
+                      <Link href={getPageLink(pagination.currentPage - 1)}
+                        className="px-3 py-1.5 border border-slate-200 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                        Previous
+                      </Link>
+                    ) : (
+                      <button disabled className="px-3 py-1.5 border border-slate-100 rounded text-slate-300 text-sm font-medium">
+                        Previous
+                      </button>
+                    )}
+                    {pagination.currentPage < pagination.totalPages ? (
+                      <Link href={getPageLink(pagination.currentPage + 1)}
+                        className="px-3 py-1.5 border border-slate-200 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                        Next
+                      </Link>
+                    ) : (
+                      <button disabled className="px-3 py-1.5 border border-slate-100 rounded text-slate-300 text-sm font-medium">
+                        Next
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Live Jobs */}
               <LiveJobsSection
                 initialQuery={liveQuery}
                 initialLocation={liveLocation}
               />
             </div>
 
-          </div>
-
-          {/* ── Right: Widgets ───────────────────────────────────── */}
-          <div className="lg:col-span-3">
-            <RightWidgets />
           </div>
         </div>
       </main>

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,22 +24,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "Missing blocked state parameters" }, { status: 400 });
     }
 
-    await dbConnect();
-
     // Prevent blocking oneself
     if (id === user.id) {
       return NextResponse.json({ error: "Cannot suspend your own admin account." }, { status: 400 });
     }
 
-    const targetUser = await User.findByIdAndUpdate(
-      id,
-      { $set: { isBlocked } },
-      { new: true }
-    );
+    const docRef = db.collection("users").doc(id);
+    const docSnap = await docRef.get();
 
-    if (!targetUser) {
+    if (!docSnap.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    await docRef.update({ isBlocked });
+
+    const userData = docSnap.data() || {};
+    const targetUser = { _id: id, ...userData, isBlocked };
 
     return NextResponse.json({
       message: `User account has been ${isBlocked ? "suspended" : "restored"}.`,
@@ -66,17 +65,19 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: "Forbidden. Admin access only." }, { status: 403 });
     }
 
-    await dbConnect();
-
     // Prevent deleting oneself
     if (id === user.id) {
       return NextResponse.json({ error: "Cannot delete your own admin account." }, { status: 400 });
     }
 
-    const targetUser = await User.findByIdAndDelete(id);
-    if (!targetUser) {
+    const docRef = db.collection("users").doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    await docRef.delete();
 
     return NextResponse.json({ message: "User account deleted successfully." });
   } catch (error: any) {

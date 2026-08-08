@@ -2,26 +2,28 @@ import React from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
-import Job from "@/models/Job";
-import Application from "@/models/Application";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 import { Users, Briefcase, FileText, CheckCircle, AlertTriangle, ShieldCheck, Building2, ChevronRight } from "lucide-react";
 
 async function getAdminDashboardData() {
   try {
-    await dbConnect();
-
-    const seekersCount = await User.countDocuments({ role: "candidate" });
-    const employersCount = await User.countDocuments({ role: "employer" });
-    const totalJobs = await Job.countDocuments({});
-    const activeJobs = await Job.countDocuments({ status: "active" });
-    const pendingJobs = await Job.countDocuments({ status: "pending" });
-    const totalApplications = await Application.countDocuments({});
-    
-    // Fetch pending companies
-    const unverifiedCompaniesCount = await Company.countDocuments({ isVerified: false });
+    const [
+      seekersCount,
+      employersCount,
+      totalJobs,
+      activeJobs,
+      pendingJobs,
+      totalApplications,
+      unverifiedCompaniesCount
+    ] = await Promise.all([
+      db.collection("users").where("role", "==", "candidate").count().get().then(s => s.data().count),
+      db.collection("users").where("role", "==", "employer").count().get().then(s => s.data().count),
+      db.collection("jobs").count().get().then(s => s.data().count),
+      db.collection("jobs").where("status", "==", "active").count().get().then(s => s.data().count),
+      db.collection("jobs").where("status", "==", "pending").count().get().then(s => s.data().count),
+      db.collection("applications").count().get().then(s => s.data().count),
+      db.collection("companies").where("isVerified", "==", false).count().get().then(s => s.data().count),
+    ]);
 
     return {
       seekersCount,

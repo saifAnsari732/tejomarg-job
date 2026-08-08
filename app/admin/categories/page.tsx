@@ -1,14 +1,16 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Category from "@/models/Category";
+import { db } from "@/lib/firebaseAdmin";
 import CategoriesList from "@/components/admin/CategoriesList";
 
 async function getCategories() {
   try {
-    await dbConnect();
-    const categories = await Category.find({}).sort({ name: 1 }).lean();
+    const snapshot = await db.collection("categories").orderBy("name").get();
+    const categories = snapshot.docs.map(doc => ({
+      _id: doc.id,
+      ...doc.data()
+    }));
     return JSON.parse(JSON.stringify(categories));
   } catch (error) {
     console.error("Error loading categories list:", error);

@@ -1,51 +1,82 @@
+import { cookies } from "next/headers";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import bcrypt from "bcryptjs";
-import dbConnect from "./dbConnect";
-import User from "@/models/User";
+import { db } from "@/lib/firebaseAdmin";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "mock-google-client-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "mock-google-client-secret",
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     CredentialsProvider({
-      name: "Credentials",
+      id: "phone-otp",
+      name: "Phone OTP",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        idToken: { label: "ID Token", type: "text" },
+        intendedRole: { label: "Intended Role", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password are required");
+        if (!credentials?.idToken) {
+          throw new Error("ID Token is required");
         }
 
-        await dbConnect();
-        const user = await User.findOne({ email: credentials.email.toLowerCase() });
+        // Verify the Firebase ID token using Google Identity Toolkit REST API
+        const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken: credentials.idToken }),
+        });
 
-        if (!user) {
-          throw new Error("No account found with this email");
+        const data = await response.json();
+
+        if (data.error || !data.users || data.users.length === 0) {
+          throw new Error("Invalid or expired OTP session");
+        }
+
+        const phoneNumber = data.users[0].phoneNumber;
+        if (!phoneNumber) {
+          throw new Error("No phone number associated with this OTP");
+        }
+
+        const usersRef = db.collection("users");
+        const querySnapshot = await usersRef.where("phone", "==", phoneNumber).limit(1).get();
+        let user: any = null;
+        let userId = "";
+
+        if (querySnapshot.empty) {
+          const intendedRole = credentials.intendedRole || "candidate";
+          const newUser = {
+            name: "User " + phoneNumber.slice(-4), // Default name using last 4 digits
+            phone: phoneNumber,
+            role: intendedRole,
+            isBlocked: false,
+            createdAt: new Date().toISOString(),
+          };
+          const docRef = await usersRef.add(newUser);
+          user = newUser;
+          userId = docRef.id;
+        } else {
+          user = querySnapshot.docs[0].data();
+          userId = querySnapshot.docs[0].id;
         }
 
         if (user.isBlocked) {
-          throw new Error("Your account has been suspended. Please contact support.");
-        }
-
-        if (!user.password) {
-          throw new Error("This email is registered using Google Sign-In. Please log in using Google.");
-        }
-
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValid) {
-          throw new Error("Incorrect password");
+          throw new Error("Your account has been suspended.");
         }
 
         return {
-          id: user._id.toString(),
-          email: user.email,
+          id: userId,
+          phone: user.phone,
           name: user.name,
           role: user.role,
         };
@@ -56,26 +87,24 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          await dbConnect();
-          const existingUser = await User.findOne({ email: user.email?.toLowerCase() });
-          
-          if (!existingUser) {
-            // Register new OAuth user as a candidate by default
-            const newUser = await User.create({
-              name: user.name,
-              email: user.email?.toLowerCase(),
-              role: "candidate",
-              isBlocked: false,
-            });
-            user.id = newUser._id.toString();
-            (user as any).role = newUser.role;
-          } else {
-            user.id = existingUser._id.toString();
-            (user as any).role = existingUser.role;
+          const usersRef = db.collection("users");
+          const email = user.email?.toLowerCase();
+          if (email) {
+            const querySnapshot = await usersRef.where("email", "==", email).limit(1).get();
+            if (querySnapshot.empty) {
+              await usersRef.add({
+                name: user.name,
+                email: email,
+                role: "candidate",
+                isBlocked: false,
+                createdAt: new Date().toISOString(),
+              });
+            }
           }
         } catch (dbErr) {
           console.error("NextAuth Google signIn DB sync error:", dbErr);
-          return false;
+          // Let NextAuth proceed
+          return true;
         }
       }
       return true;
@@ -84,6 +113,29 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.phone = (user as any).phone;
+      }
+      
+      // Fetch DB role if not present
+      if (!token.role && (token.email || token.phone)) {
+        try {
+          const usersRef = db.collection("users");
+          let querySnapshot;
+          if (token.email) {
+            querySnapshot = await usersRef.where("email", "==", token.email.toLowerCase()).limit(1).get();
+          } else if (token.phone) {
+            querySnapshot = await usersRef.where("phone", "==", token.phone).limit(1).get();
+          }
+          
+          if (querySnapshot && !querySnapshot.empty) {
+            const dbUser = querySnapshot.docs[0].data();
+            token.id = querySnapshot.docs[0].id;
+            token.role = dbUser.role;
+            token.phone = dbUser.phone;
+          }
+        } catch (e) {
+          console.error("JWT DB fetch error:", e);
+        }
       }
       
       // Allow dynamic session updates
@@ -97,6 +149,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).phone = token.phone;
       }
       return session;
     },

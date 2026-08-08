@@ -3,11 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
-import User from "@/models/User";
-import Application from "@/models/Application";
+import { db } from "@/lib/firebaseAdmin";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import JobDetailActions from "@/components/jobs/JobDetailActions";
@@ -32,17 +28,23 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   try {
-    await dbConnect();
-    const job = await Job.findById(id).populate("companyId").lean();
-    if (!job) {
+    const jobSnap = await db.collection("jobs").doc(id).get();
+    if (!jobSnap.exists) {
       return {
         title: "Job Not Found | Tejomarg Job Portal",
       };
     }
-    const companyName = (job.companyId as any)?.name || "Verified Employer";
+    const job = jobSnap.data() as any;
+    let companyName = "Verified Employer";
+    if (job.companyId) {
+       const compSnap = await db.collection("companies").doc(job.companyId).get();
+       if (compSnap.exists) {
+          companyName = compSnap.data()?.name || companyName;
+       }
+    }
     return {
       title: `${job.title} at ${companyName} | Tejomarg Job`,
-      description: `Apply for the ${job.title} position at ${companyName}. Requirements: ${job.skillsRequired.join(", ")}. Find more careers on Tejomarg Job Portal.`,
+      description: `Apply for the ${job.title} position at ${companyName}. Requirements: ${(job.skillsRequired || []).join(", ")}. Find more careers on Tejomarg Job Portal.`,
     };
   } catch (error) {
     return { title: "Job Opportunity | Tejomarg Job Portal" };
@@ -51,26 +53,39 @@ export async function generateMetadata({ params }: PageProps) {
 
 async function getJobDetails(jobId: string) {
   try {
-    await dbConnect();
+    const jobSnap = await db.collection("jobs").doc(jobId).get();
+    if (!jobSnap.exists) return { job: null, similarJobs: [] };
+    const jobData = jobSnap.data() as any;
+    let companyData = null;
+    if (jobData.companyId) {
+       const compSnap = await db.collection("companies").doc(jobData.companyId).get();
+       if (compSnap.exists) companyData = { _id: compSnap.id, ...compSnap.data() };
+    }
+    const job = { _id: jobSnap.id, ...jobData, companyId: companyData || jobData.companyId };
+
+    const similarSnap = await db.collection("jobs").where("category", "==", jobData.category || "").where("status", "==", "active").get();
+    let similarRaw = similarSnap.docs
+      .filter(doc => doc.id !== jobId)
+      .map(doc => ({ _id: doc.id, ...doc.data() as any }));
+      
+    similarRaw.sort((a, b) => {
+       const dA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+       const dB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+       return dB - dA;
+    });
     
-    // Force company model registration
-    const _dummyCompany = Company.schema;
-
-    const jobRaw = await Job.findById(jobId).populate("companyId").lean();
-    if (!jobRaw) return { job: null, similarJobs: [] };
-
-    const job = JSON.parse(JSON.stringify(jobRaw));
-
-    // Fetch similar jobs (same category, different ID)
-    const similarRaw = await Job.find({ _id: { $ne: jobId }, category: job.category, status: "active" })
-      .sort({ createdAt: -1 })
-      .limit(3)
-      .populate("companyId")
-      .lean();
+    similarRaw = similarRaw.slice(0, 3);
     
-    const similarJobs = JSON.parse(JSON.stringify(similarRaw));
+    const similarJobs = await Promise.all(similarRaw.map(async (simJob) => {
+       let simComp = null;
+       if (simJob.companyId) {
+          const scSnap = await db.collection("companies").doc(simJob.companyId).get();
+          if (scSnap.exists) simComp = { _id: scSnap.id, ...scSnap.data() };
+       }
+       return { ...simJob, companyId: simComp || simJob.companyId };
+    }));
 
-    return { job, similarJobs };
+    return { job: JSON.parse(JSON.stringify(job)), similarJobs: JSON.parse(JSON.stringify(similarJobs)) };
   } catch (error) {
     console.error("Error fetching job details:", error);
     return { job: null, similarJobs: [] };
@@ -81,17 +96,11 @@ async function getCandidateStatus(jobId: string, userId?: string) {
   if (!userId) return { alreadyApplied: false, resumeUrl: "" };
 
   try {
-    await dbConnect();
-    
-    // Check if already applied
-    const app = await Application.findOne({ jobId, candidateId: userId }).lean();
-    
-    // Check profile resume
-    const user = await User.findById(userId).select("candidateProfile.resumeUrl").lean();
-
+    const appsSnap = await db.collection("applications").where("jobId", "==", jobId).where("candidateId", "==", userId).get();
+    const userSnap = await db.collection("users").doc(userId).get();
     return {
-      alreadyApplied: !!app,
-      resumeUrl: user?.candidateProfile?.resumeUrl || "",
+      alreadyApplied: !appsSnap.empty,
+      resumeUrl: userSnap.data()?.candidateProfile?.resumeUrl || "",
     };
   } catch (error) {
     console.error("Error getting candidate status:", error);

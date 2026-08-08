@@ -2,9 +2,28 @@ import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 import { LayoutDashboard, FilePlus2, Briefcase, Building2, ChevronRight } from "lucide-react";
 
-export default function EmployerLayout({ children }: { children: React.ReactNode }) {
+export default async function EmployerLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+  
+  // We can't access headers/pathname easily in layout, but we should not block the layout for auth pages if they exist here.
+  // Actually, the login/signup pages are inside `app/employer/login` which uses this layout.
+  // If we redirect them to login while they are on login, it causes a loop.
+  // We will let the individual pages handle auth if needed, or check a custom property.
+  // For now, if no session, just return children without the sidebar, because it's probably login/signup page.
+  if (!session) {
+    return <>{children}</>;
+  }
+
+  // If candidate tries to access employer area, redirect to home
+  if ((session.user as any)?.role === "candidate") {
+    redirect("/");
+  }
+
   return (
     <>
       <Navbar />

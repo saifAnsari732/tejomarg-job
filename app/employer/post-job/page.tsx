@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { PlusCircle, Loader2, Save, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, ArrowLeft, Check, CheckCircle2, Circle, Eye, Edit2 } from "lucide-react";
+import Script from "next/script";
 
 export default function PostJobPage() {
   const router = useRouter();
@@ -11,19 +12,35 @@ export default function PostJobPage() {
   const [loadingCats, setLoadingCats] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Form State
+  const [currentStep, setCurrentStep] = useState(0); // 0 is initial choice, 1-5 are wizard steps
+
+  // Form State matching all screenshot fields
   const [formData, setFormData] = useState({
     title: "",
     category: "",
-    jobType: "Full-time",
-    experienceLevel: "Entry-level",
+    jobType: "Full Time",
+    isNightShift: false,
+    workLocationType: "Work From Office",
     location: "",
+    payType: "Fixed Only",
     salaryMin: "",
     salaryMax: "",
+    perks: [] as string[],
+    joiningFeeRequired: false,
+    minEducation: "Graduate",
+    englishLevel: "Basic English",
+    experienceRequired: "Any",
+    experienceYears: "0",
+    gender: "Both genders allowed",
+    ageMin: "",
+    ageMax: "",
+    description: "",
+    isWalkInInterview: false,
+    communicationPreference: "Yes, to myself",
+    pricingPlan: "Classic Job",
     openings: "1",
     deadline: "",
-    skillsRequired: "",
-    description: "",
+    skillsRequired: "General",
   });
 
   // Load categories
@@ -33,9 +50,11 @@ export default function PostJobPage() {
         const res = await fetch("/api/categories");
         const data = await res.json();
         if (res.ok) {
-          setCategories(data.categories || []);
-          if (data.categories?.length > 0) {
-            setFormData((prev) => ({ ...prev, category: data.categories[0].slug }));
+          // The API returns an array directly, not an object with a categories property
+          const cats = Array.isArray(data) ? data : (data.categories || []);
+          setCategories(cats);
+          if (cats.length > 0) {
+            setFormData((prev) => ({ ...prev, category: cats[0].slug }));
           }
         }
       } catch (err) {
@@ -47,31 +66,93 @@ export default function PostJobPage() {
     loadCategories();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  const handlePillSelect = (name: string, value: any) => {
+    setFormData({ ...formData, [name]: value });
+  };
 
+  const togglePerk = (perk: string) => {
+    setFormData((prev) => {
+      if (prev.perks.includes(perk)) {
+        return { ...prev, perks: prev.perks.filter((p) => p !== perk) };
+      }
+      return { ...prev, perks: [...prev.perks, perk] };
+    });
+  };
+
+  const handleSubmit = async () => {
+    setSaving(true);
     try {
+      const payload = {
+        ...formData,
+        experienceLevel: formData.experienceRequired === "Fresher Only" ? "Entry-level" : "Mid-level",
+      };
+
       const res = await fetch("/api/employer/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to post job");
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to post job");
-      }
+      const { orderId, jobId, amount } = data;
 
-      toast.success("Job posted successfully! Pending admin approval.");
-      router.push("/employer/manage-jobs");
+      // Handle Razorpay Payment
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
+        amount: amount.toString(), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        currency: "INR",
+        name: "Tejomarg Job Portal",
+        description: `Payment for ${formData.pricingPlan} Job Post`,
+        image: "https://www.tejomarg.com/favicon.ico", // Or local logo path
+        order_id: orderId, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+        handler: async function (response: any) {
+          try {
+            // Verify payment on backend
+            const verifyRes = await fetch("/api/employer/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                jobId: jobId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            
+            if (verifyRes.ok) {
+              toast.success("Payment successful! Your job is now active.");
+              router.push("/employer/dashboard"); // Redirect to dashboard
+            } else {
+              throw new Error(verifyData.error || "Payment verification failed");
+            }
+          } catch (e: any) {
+            toast.error(e.message || "Something went wrong verifying the payment");
+          }
+        },
+        prefill: {
+          name: "Employer",
+          email: "employer@example.com",
+          contact: "9999999999",
+        },
+        theme: {
+          color: "#208f60", // Green matching the site
+        },
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on("payment.failed", function (response: any) {
+        toast.error("Payment Failed: " + response.error.description);
+      });
+      rzp1.open();
+      
     } catch (err: any) {
       toast.error(err.message || "Failed to submit job");
     } finally {
@@ -79,236 +160,501 @@ export default function PostJobPage() {
     }
   };
 
+  const handleSaveDraft = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        ...formData,
+        experienceLevel: formData.experienceRequired === "Fresher Only" ? "Entry-level" : "Mid-level",
+        isDraft: true,
+      };
+
+      const res = await fetch("/api/employer/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save draft");
+
+      toast.success("Job saved as draft successfully!");
+      router.push("/employer/manage-jobs");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save draft");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // UI Components
+  const Pill = ({ label, name, value, currentVal, onClick }: any) => (
+    <button
+      type="button"
+      onClick={() => onClick ? onClick() : handlePillSelect(name, value || label)}
+      className={`px-5 py-2 text-sm font-semibold rounded-full border transition-all ${
+        currentVal === (value || label)
+          ? "border-[#208f60] bg-emerald-50 text-[#208f60]"
+          : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const MultiPill = ({ label, selected, onClick }: any) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-4 py-2 text-sm font-medium rounded-full border flex items-center gap-1 transition-all ${
+        selected
+          ? "border-[#208f60] bg-emerald-50 text-[#208f60]"
+          : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
+      }`}
+    >
+      {label} {selected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3 text-slate-400" />}
+    </button>
+  );
+
+  const steps = [
+    "Job details",
+    "Candidate requirements",
+    "Interviewer information",
+    "Job preview",
+    "Publish job"
+  ];
+
+  const renderProgressBar = () => (
+    <div className="flex items-center justify-between w-full max-w-4xl mx-auto mb-8 relative">
+      <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-200 -z-10"></div>
+      {steps.map((step, idx) => {
+        const stepNum = idx + 1;
+        const isActive = currentStep === stepNum;
+        const isPast = currentStep > stepNum;
+        return (
+          <div key={idx} className="flex flex-col items-center gap-2 bg-slate-50 px-2 z-10">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
+                isActive
+                  ? "bg-[#208f60] text-white border-[#208f60]"
+                  : isPast
+                  ? "bg-emerald-100 text-[#208f60] border-emerald-100"
+                  : "bg-slate-200 text-slate-500 border-slate-200"
+              }`}
+            >
+              {isPast ? <Check className="w-4 h-4" /> : stepNum}
+            </div>
+            <span className={`text-xs font-semibold ${isActive || isPast ? "text-slate-800" : "text-slate-400"}`}>
+              {step}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Post a New Job</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Fill out the details below to publish a position. Note that jobs undergo admin moderation before going live.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 -m-6 lg:-m-8">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      {currentStep > 0 && renderProgressBar()}
 
-      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Title */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Job Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                required
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Senior Frontend Engineer"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200">
+        
+        {/* STEP 0: Initial Choice */}
+        {currentStep === 0 && (
+          <div className="p-12 text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-10">Post your first job</h2>
+            <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
+              <div className="w-full max-w-sm border border-slate-200 rounded-xl p-8 hover:shadow-lg transition-all">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-6">
+                  <Plus className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Start with blank form</h3>
+                <p className="text-sm text-slate-500 mb-8 h-10">Use our blank form to create your job and fill manually</p>
+                <button onClick={() => setCurrentStep(1)} className="w-full border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg hover:bg-slate-50">
+                  Start with blank form
+                </button>
+              </div>
+              <div className="text-slate-400 font-medium">OR</div>
+              <div className="w-full max-w-sm border border-slate-200 rounded-xl p-8 hover:shadow-lg transition-all">
+                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mx-auto mb-6">
+                  <Edit2 className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Use a template</h3>
+                <p className="text-sm text-slate-500 mb-8 h-10">Use templates made by experts to save time.</p>
+                <button onClick={() => setCurrentStep(1)} className="w-full bg-[#208f60] text-white font-bold py-2.5 rounded-lg hover:bg-[#1a7650]">
+                  Use a template
+                </button>
+              </div>
             </div>
+          </div>
+        )}
 
-            {/* Category */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Job Category
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                disabled={loadingCats}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              >
-                {loadingCats ? (
-                  <option>Loading categories...</option>
-                ) : (
-                  categories.map((cat) => (
-                    <option key={cat.slug} value={cat.slug}>
-                      {cat.name}
-                    </option>
-                  ))
+        {/* STEP 1: Job Details */}
+        {currentStep === 1 && (
+          <div>
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800">Job details</h2>
+              <p className="text-xs text-slate-500 mt-1">We use this information to find the best candidates for the job.</p>
+            </div>
+            
+            <div className="p-8 space-y-8">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Job title / Designation <span className="text-red-500">*</span></label>
+                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Eg. Accountant" className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Job Category <span className="text-red-500">*</span></label>
+                <select name="category" value={formData.category} onChange={handleChange} className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60] bg-white">
+                  {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Type of Job <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap">
+                  <Pill label="Full Time" name="jobType" currentVal={formData.jobType} />
+                  <Pill label="Part Time" name="jobType" currentVal={formData.jobType} />
+                  <Pill label="Both (Full-Time And Part-Time)" name="jobType" currentVal={formData.jobType} />
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <input type="checkbox" id="nightShift" name="isNightShift" checked={formData.isNightShift} onChange={handleChange} className="w-4 h-4 text-[#208f60]" />
+                  <label htmlFor="nightShift" className="text-sm text-slate-600 font-medium">This is a night shift job</label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Work location type <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap">
+                  <Pill label="Work From Office" name="workLocationType" currentVal={formData.workLocationType} />
+                  <Pill label="Work From Home" name="workLocationType" currentVal={formData.workLocationType} />
+                  <Pill label="Field Job" name="workLocationType" currentVal={formData.workLocationType} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Location <span className="text-red-500">*</span></label>
+                <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Eg. Delhi" className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+              </div>
+
+              <div className="pt-6 border-t border-slate-100">
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Compensation</h3>
+                <p className="text-xs text-slate-500 mb-6">Job postings with right salary & incentives will help you find the right candidates.</p>
+                
+                <label className="block text-sm font-semibold text-slate-700 mb-3">What is the pay type? <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap mb-6">
+                  <Pill label="Fixed Only" name="payType" currentVal={formData.payType} />
+                  <Pill label="Fixed + Incentive" name="payType" currentVal={formData.payType} />
+                  <Pill label="Incentive Only" name="payType" currentVal={formData.payType} />
+                </div>
+
+                <div className="flex gap-4 mb-6">
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Min Salary</label>
+                    <input type="number" name="salaryMin" value={formData.salaryMin} onChange={handleChange} placeholder="₹" className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Max Salary</label>
+                    <input type="number" name="salaryMax" value={formData.salaryMax} onChange={handleChange} placeholder="₹" className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+                  </div>
+                </div>
+
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Do you offer any additional perks ?</label>
+                <div className="flex gap-3 flex-wrap mb-6">
+                  {["Flexible Working Hours", "Weekly Payout", "Overtime Pay", "Joining Bonus", "Annual Bonus", "PF", "Health Insurance"].map(p => (
+                    <MultiPill key={p} label={p} selected={formData.perks.includes(p)} onClick={() => togglePerk(p)} />
+                  ))}
+                </div>
+                
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Is there any joining fee or deposit required from the candidate? <span className="text-red-500">*</span></label>
+                <div className="flex gap-3">
+                  <Pill label="Yes" name="joiningFeeRequired" value={true} currentVal={formData.joiningFeeRequired} onClick={() => handlePillSelect("joiningFeeRequired", true)} />
+                  <Pill label="No" name="joiningFeeRequired" value={false} currentVal={formData.joiningFeeRequired} onClick={() => handlePillSelect("joiningFeeRequired", false)} />
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-slate-100 flex justify-end">
+              <button onClick={() => setCurrentStep(2)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Candidate Requirements */}
+        {currentStep === 2 && (
+          <div>
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800">Candidate requirements</h2>
+              <p className="text-xs text-slate-500 mt-1">We'll use these requirement details to make your job visible to the right candidates.</p>
+            </div>
+            
+            <div className="p-8 space-y-8">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Minimum Education <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap">
+                  {["10th Or Below 10th", "12th Pass", "Diploma", "ITI", "Graduate", "Post Graduate"].map(ed => (
+                    <Pill key={ed} label={ed} name="minEducation" currentVal={formData.minEducation} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">English level required <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap">
+                  {["No English", "Basic English", "Good English"].map(lvl => (
+                    <Pill key={lvl} label={lvl} name="englishLevel" currentVal={formData.englishLevel} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Total experience required <span className="text-red-500">*</span></label>
+                <div className="flex gap-3 flex-wrap mb-4">
+                  {["Any", "Experienced Only", "Fresher Only"].map(exp => (
+                    <Pill key={exp} label={exp} name="experienceRequired" currentVal={formData.experienceRequired} />
+                  ))}
+                </div>
+                {formData.experienceRequired === "Experienced Only" && (
+                   <input type="number" name="experienceYears" value={formData.experienceYears} onChange={handleChange} placeholder="Minimum years" className="w-48 p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
                 )}
-              </select>
+              </div>
+              
+              <div className="pt-6 border-t border-slate-100">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Job Description <span className="text-red-500">*</span></label>
+                <textarea 
+                  name="description" 
+                  value={formData.description} 
+                  onChange={handleChange} 
+                  rows={5} 
+                  placeholder="Enter the job description, including the main responsibilities and tasks..."
+                  className="w-full p-4 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60] resize-none" 
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 flex justify-between">
+              <button onClick={() => setCurrentStep(1)} className="border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
+              <button onClick={() => setCurrentStep(3)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
             </div>
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Job Type */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Job Type
-              </label>
-              <select
-                name="jobType"
-                value={formData.jobType}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Remote">Remote</option>
-                <option value="Internship">Internship</option>
-              </select>
-            </div>
-
-            {/* Experience Level */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Experience Level
-              </label>
-              <select
-                name="experienceLevel"
-                value={formData.experienceLevel}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              >
-                <option value="Entry-level">Entry-level</option>
-                <option value="Mid-level">Mid-level</option>
-                <option value="Senior">Senior</option>
-              </select>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Location
-              </label>
-              <input
-                type="text"
-                name="location"
-                required
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="e.g. Austin, TX (Hybrid) or Remote"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Min Salary */}
-            <div className="md:col-span-1">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Min Salary ($/yr)
-              </label>
-              <input
-                type="number"
-                name="salaryMin"
-                value={formData.salaryMin}
-                onChange={handleChange}
-                placeholder="e.g. 50000"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
-            </div>
-
-            {/* Max Salary */}
-            <div className="md:col-span-1">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Max Salary ($/yr)
-              </label>
-              <input
-                type="number"
-                name="salaryMax"
-                value={formData.salaryMax}
-                onChange={handleChange}
-                placeholder="e.g. 80000"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
-            </div>
-
-            {/* Openings */}
-            <div className="md:col-span-1">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Number of Openings
-              </label>
-              <input
-                type="number"
-                name="openings"
-                required
-                value={formData.openings}
-                onChange={handleChange}
-                min="1"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
-            </div>
-
-            {/* Application Deadline */}
-            <div className="md:col-span-1">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                Application Deadline
-              </label>
-              <input
-                type="date"
-                name="deadline"
-                required
-                value={formData.deadline}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Skills Required */}
+        {/* STEP 3: Interviewer info */}
+        {currentStep === 3 && (
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-              Skills Required (comma separated)
-            </label>
-            <input
-              type="text"
-              name="skillsRequired"
-              required
-              value={formData.skillsRequired}
-              onChange={handleChange}
-              placeholder="e.g. React, Node.js, TypeScript, REST APIs"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-            />
-            <p className="text-[10px] text-slate-400 mt-1">
-              Separate distinct tags with commas. These are key targets for user profile matching index.
-            </p>
-          </div>
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800">Interviewer information</h2>
+            </div>
+            
+            <div className="p-8 space-y-8">
+              <div>
+                <h3 className="font-semibold text-slate-800 mb-1">Interview method and address</h3>
+                <p className="text-xs text-slate-500 mb-4">Let candidates know how interview will be conducted.</p>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Is this a walk-in interview? <span className="text-red-500">*</span></label>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="isWalkIn" checked={formData.isWalkInInterview === true} onChange={() => handlePillSelect("isWalkInInterview", true)} className="w-5 h-5 text-[#208f60]" />
+                    <span className="text-slate-700 font-medium">Yes</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="isWalkIn" checked={formData.isWalkInInterview === false} onChange={() => handlePillSelect("isWalkInInterview", false)} className="w-5 h-5 text-[#208f60]" />
+                    <span className="text-slate-700 font-medium">No</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="pt-6 border-t border-slate-100">
+                <h3 className="font-semibold text-slate-800 mb-4">Communication Preferences</h3>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Do you want candidates to contact you via Call / Whatsapp after they apply? <span className="text-red-500">*</span></label>
+                <div className="space-y-3">
+                  {["Yes, to myself", "Yes, to other recruiter", "No, I will contact candidates first"].map(pref => (
+                     <label key={pref} className="flex items-center gap-3 cursor-pointer">
+                       <input type="radio" checked={formData.communicationPreference === pref} onChange={() => handlePillSelect("communicationPreference", pref)} className="w-5 h-5 text-[#208f60]" />
+                       <span className="text-slate-700 font-medium">{pref}</span>
+                     </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="pt-6 border-t border-slate-100">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Application Deadline & Openings <span className="text-red-500">*</span></label>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <input type="date" name="deadline" value={formData.deadline} onChange={handleChange} className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+                  </div>
+                  <div className="flex-1">
+                    <input type="number" name="openings" value={formData.openings} onChange={handleChange} placeholder="Openings (eg. 5)" className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          {/* Description */}
+            <div className="p-6 border-t border-slate-100 flex justify-between">
+              <button onClick={() => setCurrentStep(2)} className="border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
+              <button onClick={() => setCurrentStep(4)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: Preview */}
+        {currentStep === 4 && (
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-              Full Job Description
-            </label>
-            <textarea
-              name="description"
-              required
-              rows={6}
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe the job duties, daily routines, team details, and employee benefits..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white resize-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
-            />
-          </div>
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800">Job preview</h2>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="border border-slate-200 rounded-xl p-6">
+                <h3 className="font-bold text-slate-800 mb-4 border-b pb-2 flex justify-between items-center">Job Details <Edit2 className="w-4 h-4 text-blue-500 cursor-pointer" onClick={()=>setCurrentStep(1)} /></h3>
+                <div className="grid grid-cols-2 gap-y-4 text-sm">
+                  <div className="text-slate-500">Job title</div><div className="font-medium text-slate-800">{formData.title || "Not specified"}</div>
+                  <div className="text-slate-500">Job type</div><div className="font-medium text-slate-800">{formData.jobType} {formData.isNightShift && "| Night shift"}</div>
+                  <div className="text-slate-500">Work type</div><div className="font-medium text-slate-800">{formData.workLocationType}</div>
+                  <div className="text-slate-500">Location</div><div className="font-medium text-slate-800">{formData.location || "Not specified"}</div>
+                  <div className="text-slate-500">Salary</div><div className="font-medium text-slate-800">₹{formData.salaryMin} - ₹{formData.salaryMax} ({formData.payType})</div>
+                  <div className="text-slate-500">Perks</div><div className="font-medium text-slate-800">{formData.perks.join(", ") || "None"}</div>
+                </div>
+              </div>
 
-          {/* Submit */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={() => router.push("/employer/manage-jobs")}
-              className="px-5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-350 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {saving ? (
-                <Loader2 className="animate-spin h-4 w-4" />
-              ) : (
-                <PlusCircle className="h-4 w-4" />
-              )}
-              <span>Post Job Opening</span>
-            </button>
+              <div className="border border-slate-200 rounded-xl p-6">
+                <h3 className="font-bold text-slate-800 mb-4 border-b pb-2 flex justify-between items-center">Candidate Requirements <Edit2 className="w-4 h-4 text-blue-500 cursor-pointer" onClick={()=>setCurrentStep(2)} /></h3>
+                <div className="grid grid-cols-2 gap-y-4 text-sm">
+                  <div className="text-slate-500">Education</div><div className="font-medium text-slate-800">{formData.minEducation}</div>
+                  <div className="text-slate-500">Experience</div><div className="font-medium text-slate-800">{formData.experienceRequired} {formData.experienceRequired === "Experienced Only" && `(${formData.experienceYears}+ years)`}</div>
+                  <div className="text-slate-500">English</div><div className="font-medium text-slate-800">{formData.englishLevel}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 flex justify-between">
+              <button onClick={() => setCurrentStep(3)} className="border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
+              <button onClick={() => setCurrentStep(5)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue to Plans</button>
+            </div>
           </div>
-        </form>
+        )}
+
+        {/* STEP 5: Pricing Plans */}
+        {currentStep === 5 && (
+          <div>
+            <div className="p-6 border-b border-slate-100 text-center">
+              <h2 className="text-2xl font-bold text-slate-800">Choose a job basis your hiring needs</h2>
+            </div>
+            
+            <div className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {/* Plan 1: Classic */}
+                <div 
+                  onClick={() => handlePillSelect("pricingPlan", "Classic")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Classic" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700">Classic Job</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Classic" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Classic" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹1</div>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Basic visibility</li>
+                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> WhatsApp notifications</li>
+                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
+                  </ul>
+                </div>
+
+                {/* Plan 2: Premium */}
+                <div 
+                  onClick={() => handlePillSelect("pricingPlan", "Premium")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Premium" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700">Premium Job</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Premium" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Premium" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹2</div>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> WhatsApp notifications</li>
+                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
+                  </ul>
+                </div>
+
+                {/* Plan 3: Premium + AI */}
+                <div 
+                  onClick={() => handlePillSelect("pricingPlan", "Premium AI")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Premium AI" ? "border-blue-600 shadow-xl scale-105 z-10 mt-4" : "border-slate-200 hover:border-blue-300 mt-4"}`}
+                >
+                  <div className="absolute -top-4 inset-x-0 bg-blue-800 text-white text-[10px] font-bold text-center py-1 rounded-t-lg uppercase tracking-wider">Introducing AI Agent</div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700">Premium Job <span className="text-purple-500">+ AI</span></h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Premium AI" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Premium AI" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mb-6">
+                    <span className="text-3xl font-black text-slate-800">₹3</span>
+                    <span className="text-sm text-slate-400 line-through">₹10</span>
+                    <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-1.5 py-0.5 rounded">25% OFF</span>
+                  </div>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> WhatsApp notifications</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="font-bold text-blue-600 bg-blue-50 px-1 rounded">AI Calling Agent</span></li>
+                  </ul>
+                </div>
+
+                {/* Plan 4: Super Premium */}
+                <div 
+                  onClick={() => handlePillSelect("pricingPlan", "Super Premium")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Super Premium" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700">Super Premium 🚀</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Super Premium" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Super Premium" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹4</div>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Maximum visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> 2x Priority WhatsApp notifications</li>
+                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 flex justify-between bg-slate-50 rounded-b-xl items-center">
+              <button onClick={() => setCurrentStep(4)} className="border border-slate-300 text-slate-700 bg-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
+              
+              <div className="flex items-center gap-4">
+                <button onClick={handleSaveDraft} disabled={saving} className="border border-[#208f60] text-[#208f60] bg-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-50 transition-colors">
+                  Save to Draft
+                </button>
+                <div className="text-right hidden sm:block">
+                  <div className="text-xs text-slate-500 font-semibold">Total Amount</div>
+                  <div className="text-xl font-black text-slate-800">
+                    {formData.pricingPlan === "Classic" ? "₹1" : formData.pricingPlan === "Premium" ? "₹2" : formData.pricingPlan === "Premium AI" ? "₹3" : "₹4"}
+                  </div>
+                </div>
+                <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#1a7650] flex items-center gap-2">
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay & Publish Job"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, TrendingUp } from "lucide-react";
 
 export default function PopularSearches() {
   const searches = [
@@ -8,104 +8,117 @@ export default function PopularSearches() {
       id: 1,
       title: "Jobs for Freshers",
       trending: "TRENDING AT #1",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop", // student girl
-      bgWord: "Jobs for F",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop", 
+      bgWord: "Freshers",
       link: "/jobs?experienceLevel=Entry-level",
-      btnStyle: "bg-orange-200 hover:bg-orange-300 text-orange-900 border-transparent",
-      cardBorder: "border-orange-200"
+      gradient: "from-blue-50 to-indigo-50",
+      accent: "text-blue-600",
+      btnHighlight: "text-blue-700 bg-blue-100/50 hover:bg-blue-100",
     },
     {
       id: 2,
-      title: "Work from home Jobs",
+      title: "Remote Work",
       trending: "TRENDING AT #2",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=300&fit=crop", // guy on laptop
-      bgWord: "Work from",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=300&fit=crop", 
+      bgWord: "Remote",
       link: "/jobs?jobType=Remote",
-      btnStyle: "bg-transparent text-slate-900 hover:bg-slate-50 border-transparent",
-      cardBorder: "border-slate-100"
+      gradient: "from-emerald-50 to-teal-50",
+      accent: "text-emerald-600",
+      btnHighlight: "text-emerald-700 bg-emerald-100/50 hover:bg-emerald-100",
     },
     {
       id: 3,
-      title: "Part time Jobs",
+      title: "Part Time Roles",
       trending: "TRENDING AT #3",
-      image: "https://images.unsplash.com/photo-1552581234-26160f608093?w=300&h=300&fit=crop", // guy with phone
-      bgWord: "Part time J",
+      image: "https://images.unsplash.com/photo-1552581234-26160f608093?w=300&h=300&fit=crop", 
+      bgWord: "Part Time",
       link: "/jobs?jobType=Part-time",
-      btnStyle: "bg-transparent text-slate-900 hover:bg-slate-50 border-transparent",
-      cardBorder: "border-slate-100"
+      gradient: "from-purple-50 to-fuchsia-50",
+      accent: "text-purple-600",
+      btnHighlight: "text-purple-700 bg-purple-100/50 hover:bg-purple-100",
     },
     {
       id: 4,
-      title: "Jobs for Women",
+      title: "Women in Tech",
       trending: "TRENDING AT #4",
-      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=300&fit=crop", // professional woman
-      bgWord: "Jobs for W",
+      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=300&fit=crop",
+      bgWord: "Diversity",
       link: "/jobs",
-      btnStyle: "bg-transparent text-slate-900 hover:bg-slate-50 border-transparent",
-      cardBorder: "border-slate-100"
+      gradient: "from-rose-50 to-pink-50",
+      accent: "text-rose-600",
+      btnHighlight: "text-rose-700 bg-rose-100/50 hover:bg-rose-100",
     },
     {
       id: 5,
-      title: "Full time Jobs",
+      title: "Executive Roles",
       trending: "TRENDING AT #5",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop", // professional man
-      bgWord: "Full time J",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop",
+      bgWord: "Executive",
       link: "/jobs?jobType=Full-time",
-      btnStyle: "bg-transparent text-slate-900 hover:bg-slate-50 border-transparent",
-      cardBorder: "border-slate-100"
+      gradient: "from-amber-50 to-orange-50",
+      accent: "text-amber-600",
+      btnHighlight: "text-amber-700 bg-amber-100/50 hover:bg-amber-100",
     }
   ];
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <section className="py-24 bg-white relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-center">
+          
           {/* Left Title */}
-          <div className="lg:col-span-1 flex flex-col justify-center">
-            <h2 className="text-4xl lg:text-5xl font-black text-[#28214c] leading-tight mb-8 lg:mb-0">
-              Popular Searches on Tejomarg
+          <div className="lg:col-span-1 flex flex-col justify-center text-center lg:text-left mb-6 lg:mb-0 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mx-auto lg:mx-0 w-max mb-6 shadow-sm">
+              <TrendingUp className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-700 text-xs font-bold uppercase tracking-wider">Top Queries</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-4">
+              Explore by <br className="hidden lg:block"/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-[#208f60]">Demand</span>
             </h2>
+            <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
+              Discover the most searched categories on our platform today. Stay ahead of the curve.
+            </p>
           </div>
 
           {/* Right Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               
-              {/* Force the first card to take full width of the first row on md screens if we wanted, 
-                  but screenshot shows it spans 2 cols roughly, or just regular grid.
-                  The screenshot shows Jobs for freshers is wider, maybe col-span-2. Let's make it col-span-2 on md */}
               {searches.map((item, index) => (
                 <Link 
                   key={item.id} 
                   href={item.link}
-                  className={`block relative bg-white border ${item.cardBorder} rounded-3xl p-6 overflow-hidden group hover:shadow-lg transition-shadow ${index === 0 ? 'md:col-span-2' : 'col-span-1'}`}
+                  className={`block relative bg-gradient-to-br ${item.gradient} border border-white/50 rounded-3xl p-6 overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up ${index === 0 ? 'md:col-span-2' : 'col-span-1'}`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Faint Background Text */}
                   <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full px-4 select-none pointer-events-none z-0">
-                     <span className="text-[50px] font-black text-slate-50 whitespace-nowrap opacity-60 overflow-hidden inline-block">{item.bgWord}</span>
+                     <span className={`text-[50px] font-black whitespace-nowrap overflow-hidden inline-block opacity-[0.03] text-slate-900`}>{item.bgWord}</span>
                   </div>
 
-                  <div className="relative z-10 h-full flex flex-col justify-between min-h-[160px]">
-                    <div className={`max-w-[55%] sm:max-w-[60%] ${index === 0 ? 'md:max-w-[70%]' : ''}`}>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">{item.trending}</p>
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">{item.title}</h3>
-                    </div>
+                  {/* Content Container */}
+                  <div className="relative z-10 h-full flex flex-col min-h-[160px]">
+                    <span className={`text-[10px] font-black tracking-widest uppercase mb-2 ${item.accent}`}>{item.trending}</span>
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 w-2/3 leading-tight mb-auto">{item.title}</h3>
                     
-                    <div className="mt-8">
-                      <span className={`inline-flex items-center text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full ${item.btnStyle}`}>
-                        View all <ChevronRight className="h-4 w-4 ml-1" />
-                      </span>
+                    <div className="mt-6 flex items-center justify-between">
+                      <div className={`px-4 py-2 rounded-full font-semibold text-xs flex items-center gap-1 transition-colors duration-300 ${item.btnHighlight}`}>
+                        Explore <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Absolute Image */}
-                  <div className="absolute bottom-0 right-0 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 z-0 drop-shadow-md overflow-hidden flex items-end justify-end">
-                    {/* Using object-top to keep faces visible */}
+                  {/* Decorative Image Mask */}
+                  <div className="absolute right-0 bottom-0 w-32 h-32 md:w-40 md:h-40 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 rounded-tl-full mix-blend-overlay"></div>
                     <img 
                       src={item.image} 
-                      alt={item.title} 
-                      className="object-cover object-top w-full h-full rounded-tl-[40px] sm:rounded-tl-[50px] md:rounded-tl-[60px]"
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-tl-[100px]"
                     />
                   </div>
                 </Link>
@@ -114,7 +127,6 @@ export default function PopularSearches() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

@@ -1,17 +1,28 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
+import { db } from "@/lib/firebaseAdmin";
 import UsersList from "@/components/admin/UsersList";
 
 async function getCandidates() {
   try {
-    await dbConnect();
-    const candidates = await User.find({ role: "candidate" })
-      .select("name email isBlocked createdAt")
-      .sort({ createdAt: -1 })
-      .lean();
+    const snapshot = await db.collection("users").where("role", "==", "candidate").get();
+    let candidates = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        _id: doc.id,
+        name: data.name,
+        email: data.email,
+        isBlocked: data.isBlocked,
+        createdAt: data.createdAt
+      };
+    });
+
+    candidates.sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     return JSON.parse(JSON.stringify(candidates));
   } catch (error) {

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Category from "@/models/Category";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function POST(req: Request) {
   try {
@@ -24,18 +23,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Name, slug, and icon are required." }, { status: 450 });
     }
 
-    await dbConnect();
-
+    const categoriesRef = db.collection("categories");
+    
     // Check if exists
-    const existing = await Category.findOne({ $or: [{ name }, { slug }] });
-    if (existing) {
+    const nameQuery = await categoriesRef.where("name", "==", name).get();
+    const slugQuery = await categoriesRef.where("slug", "==", slug).get();
+
+    if (!nameQuery.empty || !slugQuery.empty) {
       return NextResponse.json(
         { error: "A category with this name or slug already exists." },
         { status: 400 }
       );
     }
 
-    const newCategory = await Category.create({ name, slug, icon });
+    const categoryData = { name, slug, icon, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const docRef = await categoriesRef.add(categoryData);
+
+    const newCategory = { _id: docRef.id, ...categoryData };
 
     return NextResponse.json({
       message: "Category created successfully.",

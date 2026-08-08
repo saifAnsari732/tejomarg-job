@@ -3,17 +3,25 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { Briefcase, Users, Eye, Trash2, Edit2, AlertCircle, ToggleLeft, ToggleRight, Loader2, Plus } from "lucide-react";
+import { Briefcase, Users, Eye, Trash2, Edit2, AlertCircle, ToggleLeft, ToggleRight, Loader2, Plus, CreditCard } from "lucide-react";
+import Script from "next/script";
 
 interface JobItem {
   _id: string;
   title: string;
-  status: "pending" | "active" | "closed";
+  status: "pending" | "pending_payment" | "active" | "closed" | "draft";
   jobType: string;
   location: string;
   openings: number;
   applicantCount: number;
+  category: string;
+  experienceRequired: string;
+  salaryMin: number;
+  salaryMax: number;
   createdAt: string;
+  paymentId?: string;
+  paymentOrderId?: string;
+  pricingPlan?: string;
 }
 
 export default function ManageJobsPage() {
@@ -95,6 +103,74 @@ export default function ManageJobsPage() {
     }
   };
 
+  const handlePayAndPublish = async (jobId: string) => {
+    setTogglingId(jobId);
+    try {
+      const res = await fetch("/api/employer/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate payment order");
+
+      const { orderId, amount, pricingPlan } = data;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        amount: amount.toString(), 
+        currency: "INR",
+        name: "Tejomarg Job Portal",
+        description: `Payment for ${pricingPlan || 'Job'} Post`,
+        image: "https://www.tejomarg.com/favicon.ico",
+        order_id: orderId,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch("/api/employer/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                jobId: jobId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            
+            if (verifyRes.ok) {
+              toast.success("Payment successful! Your job is now active.");
+              loadJobs(); // Reload to update status
+            } else {
+              throw new Error(verifyData.error || "Payment verification failed");
+            }
+          } catch (e: any) {
+            toast.error(e.message || "Something went wrong verifying the payment");
+          }
+        },
+        prefill: {
+          name: "Employer",
+          email: "employer@example.com",
+        },
+        theme: {
+          color: "#208f60",
+        },
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on("payment.failed", function (response: any) {
+        toast.error("Payment Failed: " + response.error.description);
+      });
+      rzp1.open();
+
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process payment");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-slate-505 gap-2">
@@ -106,6 +182,7 @@ export default function ManageJobsPage() {
 
   return (
     <div className="space-y-6">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Title */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -148,6 +225,16 @@ export default function ManageJobsPage() {
                       Pending Approval
                     </span>
                   )}
+                  {job.status === "pending_payment" && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-100">
+                      Pending Payment
+                    </span>
+                  )}
+                  {job.status === "draft" && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
+                      Draft
+                    </span>
+                  )}
                   {job.status === "closed" && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-655 dark:text-slate-400 text-xs font-semibold border border-slate-200/50 dark:border-slate-700">
                       Closed
@@ -155,15 +242,51 @@ export default function ManageJobsPage() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500 font-semibold">
+                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-slate-500 font-semibold">
                   <span className="flex items-center">
-                    <Briefcase className="h-3.5 w-3.5 mr-1" />
+                    <Briefcase className="h-3.5 w-3.5 mr-1 text-slate-400" />
                     {job.jobType}
                   </span>
-                  <span>Location: {job.location}</span>
-                  <span>Openings: {job.openings}</span>
-                  <span>Posted: {new Date(job.createdAt).toLocaleDateString()}</span>
+                  <span className="flex items-center">
+                    <span className="text-slate-400 mr-1">📍</span> {job.location}
+                  </span>
+                  <span className="flex items-center">
+                    <span className="text-slate-400 mr-1">📂</span> {job.category || "General"}
+                  </span>
+                  <span className="flex items-center">
+                    <span className="text-slate-400 mr-1">💼</span> {job.experienceRequired}
+                  </span>
+                  <span className="flex items-center">
+                    <span className="text-slate-400 mr-1">₹</span> {job.salaryMin?.toLocaleString()} - {job.salaryMax?.toLocaleString()}
+                  </span>
+                  <span className="flex items-center">
+                    <span className="text-slate-400 mr-1">👥</span> Openings: {job.openings}
+                  </span>
+                  <span className="flex items-center text-slate-400">
+                    Posted: {new Date(job.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
+
+                {/* Payment History Details */}
+                {(job.paymentId || job.pricingPlan || job.paymentOrderId) && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-750 text-[11px] text-slate-500">
+                    {job.pricingPlan && (
+                      <span className="flex items-center text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">
+                        Plan: {job.pricingPlan}
+                      </span>
+                    )}
+                    {job.paymentId && (
+                      <span className="flex items-center font-mono">
+                        Payment ID: {job.paymentId}
+                      </span>
+                    )}
+                    {job.paymentOrderId && (
+                      <span className="flex items-center font-mono">
+                        Order ID: {job.paymentOrderId}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Middle Column: Stats */}
@@ -215,6 +338,18 @@ export default function ManageJobsPage() {
                 >
                   <Trash2 className="h-4.5 w-4.5" />
                 </button>
+
+                {/* Pay Now Button for Drafts / Pending Payment */}
+                {(job.status === "draft" || job.status === "pending_payment") && (
+                  <button
+                    onClick={() => handlePayAndPublish(job._id)}
+                    disabled={togglingId === job._id}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors flex items-center space-x-1.5 ml-2"
+                  >
+                    {togglingId === job._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                    <span>Pay & Publish</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}

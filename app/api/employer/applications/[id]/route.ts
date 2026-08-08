@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Application from "@/models/Application";
-import Job from "@/models/Job";
-import User from "@/models/User";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 import { sendApplicationStatusEmail } from "@/lib/mailer";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -37,18 +33,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       );
     }
 
-    await dbConnect();
-
     // 1. Find Application
-    const application = await Application.findById(id).populate("jobId");
-    if (!application) {
+    const appDoc = await db.collection("applications").doc(id).get();
+    if (!appDoc.exists) {
       return NextResponse.json({ error: "Application record not found." }, { status: 404 });
     }
+    const applicationData = appDoc.data() as any;
 
-    const job = application.jobId as any;
+    const jobDoc = await db.collection("jobs").doc(applicationData.jobId).get();
+    const job = jobDoc.data() as any;
 
     // 2. Ensure recruiter owns this job (if user is employer)
-    if (user.role === "employer" && job.employerId.toString() !== user.id) {
+    if (user.role === "employer" && job?.employerId !== user.id) {
       return NextResponse.json(
         { error: "Forbidden. You do not own the job posting associated with this application." },
         { status: 403 }
@@ -56,26 +52,46 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     // 3. Update status and append to history
-    application.status = status;
-    application.statusHistory.push({
+    const updatedStatusHistory = [
+      ...(applicationData.statusHistory || []),
+      {
+        status,
+        updatedAt: new Date(),
+        note: note || `Status updated to ${status} by Recruiter.`,
+      }
+    ];
+
+    await db.collection("applications").doc(id).update({
       status,
-      updatedAt: new Date(),
-      note: note || `Status updated to ${status} by Recruiter.`,
+      statusHistory: updatedStatusHistory
     });
 
-    await application.save();
+    const application = {
+      _id: id,
+      ...applicationData,
+      status,
+      statusHistory: updatedStatusHistory
+    };
 
     // 4. Send Email Notification to Candidate
     try {
-      const candidate = await User.findById(application.candidateId);
-      const company = await Company.findById(job.companyId);
-      if (candidate) {
+      const candidateDoc = await db.collection("users").doc(applicationData.candidateId).get();
+      let companyName = "Verified Employer";
+      if (job?.companyId) {
+        const companyDoc = await db.collection("companies").doc(job.companyId).get();
+        if (companyDoc.exists) {
+          companyName = companyDoc.data()?.name || companyName;
+        }
+      }
+      
+      if (candidateDoc.exists) {
+        const candidate = candidateDoc.data() as any;
         await sendApplicationStatusEmail(
           candidate.email,
           candidate.name,
-          job.title,
+          job?.title || "Job Application",
           status,
-          company?.name || "Verified Employer"
+          companyName
         );
       }
     } catch (mailErr) {

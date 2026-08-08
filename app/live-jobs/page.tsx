@@ -167,25 +167,7 @@ export default function LiveJobsPage() {
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors border border-white/10 text-white">
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-yellow-400" />
-                <h1 className="text-xl font-black text-white tracking-tight">Live Job Search</h1>
-                {status === "live" && (
-                  <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" /> Live
-                  </span>
-                )}
-                {status === "mock" && (
-                  <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                    Demo Mode
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-blue-300 font-medium">
-                {status === "mock" ? "Add JSEARCH_API_KEY to .env.local for real listings" : "Powered by JSearch · Indeed · LinkedIn · Glassdoor"}
-              </p>
-            </div>
+            
           </div>
 
           {/* Search Bar */}
@@ -286,15 +268,7 @@ export default function LiveJobsPage() {
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-              Fetching live jobs from Indeed, LinkedIn…
-            </p>
-          </div>
-        )}
+      
 
         {/* Error State */}
         {!loading && status === "error" && (
@@ -327,26 +301,25 @@ export default function LiveJobsPage() {
                 className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all">
 
                 <div className="flex items-start gap-4">
-                  {/* Company Logo / Initials */}
-                  <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                  <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center border border-slate-100 dark:border-slate-700">
                     {job.companyLogo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
                     ) : (
-                      <span className="text-lg font-black text-blue-600 dark:text-blue-400">
-                        {job.company.charAt(0).toUpperCase()}
-                      </span>
+                      <span className="text-base font-black text-blue-600 dark:text-blue-400">{job.company.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
+                </a>
 
                   {/* Job Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div>
-                        <h2 className="font-extrabold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-w-0">
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {job.title}
-                        </h2>
-                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        </h3>
+                        <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                           <Building2 className="h-3 w-3 text-slate-400 shrink-0" />
                           <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{job.company}</span>
                           {job.source !== "Mock Data" && (
@@ -355,7 +328,7 @@ export default function LiveJobsPage() {
                             </span>
                           )}
                         </div>
-                      </div>
+                      </a>
 
                       {/* Apply button */}
                       <a href={job.applyUrl}

@@ -1,30 +1,33 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
-import Company from "@/models/Company";
-import Job from "@/models/Job";
+import { db } from "@/lib/firebaseAdmin";
 import SavedJobsList from "@/components/candidate/SavedJobsList";
 
 async function getSavedJobs(userId: string) {
   try {
-    await dbConnect();
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) return [];
     
-    // Register Company model for deep population
-    const _dummyCompany = Company.schema;
-    const _dummyJob = Job.schema;
-
-    const user = await User.findById(userId)
-      .populate({
-        path: "savedJobs",
-        populate: { path: "companyId" },
-      })
-      .lean();
-
-    if (!user) return [];
-
-    return JSON.parse(JSON.stringify(user.savedJobs || []));
+    const savedJobIds = userDoc.data()?.savedJobs || [];
+    if (!savedJobIds.length) return [];
+    
+    const savedJobs = await Promise.all(savedJobIds.map(async (jobId: string) => {
+      const jobSnap = await db.collection("jobs").doc(jobId).get();
+      if (!jobSnap.exists) return null;
+      
+      const jobData = jobSnap.data() as any;
+      let companyData = null;
+      if (jobData.companyId) {
+         const compSnap = await db.collection("companies").doc(jobData.companyId).get();
+         if (compSnap.exists) {
+            companyData = { _id: compSnap.id, ...compSnap.data() };
+         }
+      }
+      return { _id: jobSnap.id, ...jobData, companyId: companyData || jobData.companyId };
+    }));
+    
+    return JSON.parse(JSON.stringify(savedJobs.filter(Boolean)));
   } catch (error) {
     console.error("Error loading saved jobs:", error);
     return [];

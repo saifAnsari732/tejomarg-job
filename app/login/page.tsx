@@ -1,205 +1,319 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Phone, ArrowRight, Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 
-function LoginForm() {
+export default function CandidateLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const callbackUrl = searchParams.get("callbackUrl") || "";
+  const callbackUrl = searchParams.get("callbackUrl");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [loading, setLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
+  useEffect(() => {
+    // Clear any existing verifier if it got detached from DOM (e.g., during navigation or hot reload)
+    if (typeof window !== "undefined") {
+      if ((window as any).recaptchaVerifier) {
+        try {
+          (window as any).recaptchaVerifier.clear();
+        } catch (e) {}
+        (window as any).recaptchaVerifier = undefined;
+      }
+
+      // Initialize fresh RecaptchaVerifier
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+        callback: () => {
+          // reCAPTCHA solved automatically
+        },
+      });
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (typeof window !== "undefined" && (window as any).recaptchaVerifier) {
+        try {
+          (window as any).recaptchaVerifier.clear();
+        } catch (e) {}
+        (window as any).recaptchaVerifier = undefined;
+      }
+    };
+  }, []);
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const formattedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+91${phoneNumber}`;
+      const appVerifier = (window as any).recaptchaVerifier;
+      
+      const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+      setConfirmationResult(result);
+      setStep("otp");
+      toast.success("OTP sent securely via SMS!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to send OTP. Please try again.");
+      if ((window as any).recaptchaVerifier) {
+         (window as any).recaptchaVerifier.render().then((widgetId: any) => {
+           (window as any).grecaptcha.reset(widgetId);
+         });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) {
-      toast.error("Please enter email and password");
+    if (!otp || otp.length !== 6 || !confirmationResult) {
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await signIn("credentials", {
+      const result = await confirmationResult.confirm(otp);
+      const idToken = await result.user.getIdToken(true);
+
+      const res = await signIn("phone-otp", {
         redirect: false,
-        email: formData.email,
-        password: formData.password,
+        idToken,
+        intendedRole: "candidate",
       });
 
       if (res?.error) {
         throw new Error(res.error);
       }
 
-      toast.success("Logged in successfully!");
-      
-      // Fetch session to determine role and redirect
-      const session = await getSession();
-      const role = (session?.user as any)?.role;
-
+      toast.success("Login Successful!");
       if (callbackUrl) {
         router.push(callbackUrl);
-        router.refresh();
-        return;
-      }
-
-      if (role === "admin") {
-        router.push("/admin");
-      } else if (role === "employer") {
-        router.push("/employer");
       } else {
         router.push("/");
       }
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message || "Invalid credentials");
+      console.error(err);
+      toast.error(err.message || "Invalid OTP code");
     } finally {
       setLoading(false);
     }
   };
 
+  const pageVariants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 },
+  };
+
   return (
-    <div className="max-w-md w-full space-y-6 sm:space-y-8 bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 animate-fade-in-up">
-      <div className="text-center">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Welcome back
-        </h2>
-        <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-          Log in to your account to continue
-        </p>
-      </div>
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 font-sans selection:bg-blue-500/30 overflow-hidden relative">
+      <div id="recaptcha-container"></div>
+      
+      {/* Background Shapes */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-blue-600/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[50%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-3xl pointer-events-none" />
 
-      <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="john@example.com"
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-            >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
+      {/* Left Pane - Image */}
+      <div className="hidden lg:flex w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center shadow-2xl z-10">
+        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/80 to-slate-900/40 mix-blend-multiply z-10" />
+        <img
+          src="/candidate-bg.jpg"
+          alt="Candidate Dashboard Workspace"
+          className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105 hover:scale-100 transition-transform duration-1000 ease-out"
+        />
+        
+        <div className="relative z-20 text-center px-12 max-w-xl mx-auto flex flex-col items-center">
+          <div className="mb-8 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+             <img src="/job2.png" alt="Tejomarg Icon" className="h-16 w-auto object-contain drop-shadow-lg" />
           </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center py-3 px-4 rounded-xl text-white bg-blue-600 hover:bg-blue-700 font-semibold shadow-lg shadow-blue-500/25 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-              Logging in...
-            </>
-          ) : (
-            "Log In"
-          )}
-        </button>
-      </form>
-
-      {/* OR Divider */}
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 font-semibold">
-            Or continue with
-          </span>
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
+            Your next big career move starts here.
+          </h2>
+          <p className="text-lg text-slate-200 leading-relaxed font-medium drop-shadow-md">
+            Join thousands of professionals finding dream roles through our AI-powered platform.
+          </p>
         </div>
       </div>
 
-      {/* Google Login Button */}
-      <button
-        type="button"
-        onClick={() => signIn("google", { callbackUrl: "/" })}
-        className="w-full flex items-center justify-center py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-bold transition-all duration-200 cursor-pointer shadow-sm"
-      >
-        <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-          <path
-            fill="#EA4335"
-            d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.23 2.76 1.345 6.78l3.92 2.985z"
-          />
-          <path
-            fill="#4285F4"
-            d="M23.455 12.273c0-.818-.073-1.609-.209-2.373H12v4.509h6.427a5.49 5.49 0 0 1-2.382 3.6l3.718 2.882c2.173-2.009 3.427-4.964 3.427-8.618z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.266 14.235A7.07 7.07 0 0 1 4.909 12c0-.79.136-1.545.357-2.235L1.345 6.78A11.94 11.94 0 0 0 0 12c0 1.92.455 3.736 1.255 5.355l4.01-3.12z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 24c3.24 0 5.955-1.073 7.945-2.909l-3.718-2.882c-1.036.691-2.355 1.109-4.227 1.109-3.255 0-6.018-2.2-7.009-5.164L1.08 17.28A11.96 11.96 0 0 0 12 24z"
-          />
-        </svg>
-        <span>Google</span>
-      </button>
-
-      <div className="text-center mt-6">
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          Don't have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-          >
-            Sign up
+      {/* Right Pane - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-20 overflow-y-auto">
+        <div className="w-full max-w-md mx-auto">
+          {/* Mobile Logo */}
+          <Link href="/" className="lg:hidden flex justify-center items-center mb-8">
+            <img src="/job1.png" alt="Tejomarg Icon" className="h-16 w-auto object-contain dark:invert" />
           </Link>
-        </p>
-      </div>
-    </div>
-  );
-}
 
-export default function LoginPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
-      <Suspense fallback={
-        <div className="text-slate-500 flex items-center gap-2">
-          <Loader2 className="animate-spin h-5 w-5" />
-          Loading...
+          <AnimatePresence mode="wait">
+            {step === "phone" ? (
+              <motion.div
+                key="phone-step"
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50"
+              >
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 shadow-sm border border-blue-100 dark:border-blue-800/50">
+                    <ShieldCheck className="h-7 w-7" />
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    Candidate Login
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                    Securely login or create an account with your phone number.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSendOtp} className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                      Phone Number
+                    </label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none border-r border-slate-200 dark:border-slate-700 pr-3">
+                        <span className="text-slate-500 dark:text-slate-400 font-semibold text-sm">+91</span>
+                      </div>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="9999999999"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        className="w-full pl-16 pr-4 py-3.5 rounded-xl border-2 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white font-medium focus:ring-0 focus:border-blue-500 dark:focus:border-blue-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || phoneNumber.length !== 10}
+                    className="w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-500/20 font-bold transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 group"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Send OTP</span>
+                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-8">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs font-bold uppercase tracking-wider">
+                      <span className="bg-white dark:bg-slate-800 px-3 text-slate-400">Or</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => signIn("google", { callbackUrl: "/" })}
+                    className="mt-6 w-full flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold transition-all duration-200 shadow-sm"
+                  >
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="h-5 w-5 mr-3" alt="Google" />
+                    <span>Continue with Google</span>
+                  </button>
+                </div>
+
+                <p className="mt-6 text-center text-xs text-slate-500 font-medium">
+                  Are you an Employer?{" "}
+                  <Link href="/employer/login" className="text-blue-600 dark:text-blue-400 hover:underline font-bold">
+                    Employer Login →
+                  </Link>
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="otp-step"
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50"
+              >
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-4 shadow-sm border border-indigo-100 dark:border-indigo-800/50">
+                    <CheckCircle2 className="h-7 w-7" />
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    Verify Number
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                    We've sent a 6-digit code to <br />
+                    <span className="font-bold text-slate-700 dark:text-slate-200">+91 {phoneNumber}</span>
+                  </p>
+                </div>
+
+                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 text-center">
+                      Enter OTP Code
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      placeholder="• • • • • •"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="w-full text-center text-3xl tracking-[0.5em] py-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white font-bold focus:ring-0 focus:border-indigo-500 dark:focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-700 placeholder:tracking-normal"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || otp.length !== 6}
+                    className="w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:ring-4 focus:ring-indigo-500/20 font-bold transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      "Verify & Login"
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => {
+                      setStep("phone");
+                      setOtp("");
+                    }}
+                    className="text-sm font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                  >
+                    ← Change Phone Number
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      }>
-        <LoginForm />
-      </Suspense>
+      </div>
     </div>
   );
 }

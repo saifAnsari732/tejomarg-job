@@ -6,6 +6,15 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    // Allow unauthenticated access to login and signup pages
+    if (path === "/employer/login" || path === "/employer/signup") {
+      // If they are already logged in as employer, redirect to dashboard
+      if (token?.role === "employer") {
+        return NextResponse.redirect(new URL("/employer/post-job", req.url));
+      }
+      return NextResponse.next();
+    }
+
     if (!token) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -29,7 +38,13 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        const path = req.nextUrl.pathname;
+        if (path === "/employer/login" || path === "/employer/signup") {
+          return true; // Always allow these routes
+        }
+        return !!token; // Require token for everything else matched
+      },
     },
   }
 );

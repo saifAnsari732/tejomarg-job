@@ -1,110 +1,132 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 
 export default function TopCompanies() {
-  const companies = [
+  const partners = [
     {
-      id: "1",
-      name: "Bajaj Allianz Life Insurance",
-      desc: "Provider of life insurance and financial services.",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Bajaj_Allianz_Life_Insurance_Company_Logo.svg/512px-Bajaj_Allianz_Life_Insurance_Company_Logo.svg.png",
-      color: "text-blue-700"
+      name: "Bajaj Allianz Life",
+      color: "text-[#004e9a]",
+      bg: "bg-blue-50",
+      logoText: (
+        <div className="flex items-center text-xl shrink-0 select-none">
+          <span className="font-extrabold tracking-tight">B</span>
+          <span className="font-bold tracking-tight">ajaj </span>
+          <span className="font-extrabold tracking-tight ml-1">A</span>
+          <span className="font-bold tracking-tight">llianz</span>
+        </div>
+      )
     },
     {
-      id: "2",
-      name: "Paytm Service Pvt. Ltd.",
-      desc: "Digital payment and e-commerce facilitator.",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/512px-Paytm_Logo_%28standalone%29.svg.png",
-      color: "text-blue-500"
+      name: "Paytm",
+      color: "text-[#002e6e]",
+      bg: "bg-sky-50",
+      logoText: (
+        <div className="flex items-center text-2xl shrink-0 select-none">
+          <span className="font-black italic tracking-tighter">Pay</span>
+          <span className="font-black italic tracking-tighter text-[#00b9f5]">tm</span>
+        </div>
+      )
     },
     {
-      id: "3",
       name: "Zomato",
-      desc: "Online food delivery marketplace.",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Zomato_Logo.svg/512px-Zomato_Logo.svg.png",
-      color: "text-red-500"
+      color: "text-[#cb202d]",
+      bg: "bg-red-50",
+      logoText: (
+        <div className="flex items-center text-2xl shrink-0 select-none">
+          <span className="font-black italic tracking-tighter">zomato</span>
+        </div>
+      )
     },
     {
-      id: "4",
       name: "Swiggy",
-      desc: "Food delivery and online ordering platform.",
-      logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Swiggy_logo.svg/512px-Swiggy_logo.svg.png",
-      color: "text-orange-500"
+      color: "text-[#fc8019]",
+      bg: "bg-orange-50",
+      logoText: (
+        <div className="flex items-center text-xl shrink-0 select-none">
+          <span className="font-bold tracking-tighter uppercase">Swiggy</span>
+        </div>
+      )
     },
     {
-      id: "5",
       name: "Kotak Mahindra Bank",
-      desc: "Leading banking and financial services company.",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Kotak_Mahindra_Bank_logo.svg/512px-Kotak_Mahindra_Bank_logo.svg.png",
-      color: "text-red-600"
+      color: "text-[#ed1c24]",
+      bg: "bg-rose-50",
+      logoText: (
+        <div className="flex items-center text-xl shrink-0 select-none">
+          <span className="font-black tracking-tight text-2xl mb-1">∞</span>
+          <span className="font-black tracking-tight ml-1">kotak</span>
+        </div>
+      )
     }
   ];
 
+  // Duplicate for seamless infinite marquee
+  const marqueeItems = [...partners, ...partners, ...partners];
+
   return (
-    <section className="py-16 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#28214c] text-center mb-12">
-          Job Openings in Top companies
-        </h2>
+    <section className="py-24 bg-white relative overflow-hidden">
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex flex-col items-center justify-center"
+        >
+          <div className="inline-flex items-center space-x-2 bg-slate-100 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span>TRUSTED BY TOP CLIENT PARTNERS</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-tight">
+            Join the teams that are <span className="relative whitespace-nowrap"><span className="relative z-10 text-blue-600">shaping the future</span><span className="absolute bottom-1 left-0 w-full h-3 bg-blue-100 -z-10 -rotate-1"></span></span>
+          </h2>
+        </motion.div>
+      </div>
 
-        <div className="flex overflow-x-auto pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 gap-6 hide-scrollbar snap-x">
-          {companies.map((company) => (
+      {/* Infinite Animated Slider - Clean & Light */}
+      <div className="relative w-full overflow-hidden flex py-8 bg-slate-50/50 border-y border-slate-100">
+        {/* Gradient Masks for smooth fading edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none"></div>
+
+        <motion.div 
+          className="flex space-x-12 whitespace-nowrap px-8 items-center"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ ease: "linear", duration: 40, repeat: Infinity }}
+        >
+          {marqueeItems.map((partner, idx) => (
             <div 
-              key={company.id} 
-              className="bg-white border border-slate-100 rounded-xl p-6 min-w-[280px] w-[280px] shrink-0 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between snap-start h-[260px]"
+              key={idx} 
+              className="group flex items-center space-x-4 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-500 cursor-pointer min-w-max"
             >
-              <div>
-                <div className="h-12 flex items-center justify-start mb-6">
-                  {/* Fallback to text if img fails, but attempting to use real logos from wikimedia */}
-                  <img 
-                    src={company.logo} 
-                    alt={company.name} 
-                    className="max-h-8 max-w-[120px] object-contain object-left" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                  <span className={`hidden font-black text-xl ${company.color}`}>{company.name.split(' ')[0]}</span>
-                </div>
-                
-                <h3 className="font-bold text-slate-900 mb-2 line-clamp-1">{company.name}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                  {company.desc}
-                </p>
-              </div>
-
-              <div className="mt-6">
-                <Link 
-                  href={`/jobs?search=${company.name.split(' ')[0]}`}
-                  className="text-emerald-700 font-semibold text-sm hover:text-emerald-800 flex items-center"
-                >
-                  View jobs <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
+              <div className={`px-6 h-16 rounded-2xl ${partner.bg} ${partner.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
+                {partner.logoText}
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Carousel indicators (visual only) */}
-        <div className="flex justify-center mt-2">
-           <div className="h-1.5 w-16 bg-slate-200 rounded-full flex">
-             <div className="h-full w-1/3 bg-emerald-700 rounded-full"></div>
-           </div>
-        </div>
-
-        <div className="text-center mt-12">
-           <Link 
-              href="/jobs" 
-              className="inline-flex items-center justify-center px-8 py-2.5 border border-emerald-600 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors"
-           >
-              View all <ChevronRight className="h-4 w-4 ml-2" />
-           </Link>
-        </div>
+        </motion.div>
       </div>
+
+      <div className="mt-16 text-center">
+        <Link 
+          href="/jobs" 
+          className="inline-flex items-center justify-center px-8 py-4 bg-slate-900 text-white font-bold rounded-full hover:bg-blue-600 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 group"
+        >
+          Explore Opportunities 
+          <motion.span 
+            className="ml-2 inline-block"
+            animate={{ x: [0, 4, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            →
+          </motion.span>
+        </Link>
+      </div>
+
     </section>
   );
 }

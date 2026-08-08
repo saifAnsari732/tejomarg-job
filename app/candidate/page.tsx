@@ -2,28 +2,38 @@ import React from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Application from "@/models/Application";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 import { Building2, ChevronRight, Phone, MessageCircle, AlertCircle, Inbox, Clock, MapPin, Wallet } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 async function getApplications(userId: string) {
   try {
-    await dbConnect();
+    const snapshot = await db.collection("applications").where("candidateId", "==", userId).get();
+    const apps = await Promise.all(snapshot.docs.map(async (doc) => {
+      const appData = doc.data() as any;
+      let jobData = null;
+      if (appData.jobId) {
+        const jobSnap = await db.collection("jobs").doc(appData.jobId).get();
+        if (jobSnap.exists) {
+           const jData = jobSnap.data() as any;
+           let companyData = null;
+           if (jData.companyId) {
+              const compSnap = await db.collection("companies").doc(jData.companyId).get();
+              if (compSnap.exists) {
+                 companyData = { _id: compSnap.id, ...compSnap.data() };
+              }
+           }
+           jobData = { _id: jobSnap.id, ...jData, companyId: companyData || jData.companyId };
+        }
+      }
+      return { _id: doc.id, ...appData, jobId: jobData || appData.jobId };
+    }));
     
-    // Register Company and Job schemas for populate
-    const _dummyJob = Job.schema;
-    const _dummyCompany = Company.schema;
-
-    const apps = await Application.find({ candidateId: userId })
-      .populate({
-        path: "jobId",
-        populate: { path: "companyId" },
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+    apps.sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     return JSON.parse(JSON.stringify(apps));
   } catch (error) {

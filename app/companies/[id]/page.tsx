@@ -1,9 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import dbConnect from "@/lib/dbConnect";
-import Company from "@/models/Company";
-import Job from "@/models/Job";
+import { db } from "@/lib/firebaseAdmin";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Building2, MapPin, Globe, Briefcase, ChevronRight } from "lucide-react";
@@ -15,12 +13,12 @@ interface CompanyPageProps {
 export async function generateMetadata({ params }: CompanyPageProps) {
   const { id } = await params;
   try {
-    await dbConnect();
-    const company = await Company.findById(id).lean();
-    if (!company) return { title: "Company Not Found | Tejomarg Job Portal" };
+    const companySnap = await db.collection("companies").doc(id).get();
+    if (!companySnap.exists) return { title: "Company Not Found | Tejomarg Job Portal" };
+    const company = companySnap.data();
     return {
-      title: `${company.name} Profile & Jobs | Tejomarg Job`,
-      description: company.description.slice(0, 160),
+      title: `${company?.name} Profile & Jobs | Tejomarg Job`,
+      description: company?.description?.slice(0, 160),
     };
   } catch (error) {
     return { title: "Company Profile | Tejomarg Job Portal" };
@@ -29,12 +27,19 @@ export async function generateMetadata({ params }: CompanyPageProps) {
 
 async function getCompanyData(companyId: string) {
   try {
-    await dbConnect();
-    const company = await Company.findById(companyId).lean();
-    if (!company) return null;
+    const compSnap = await db.collection("companies").doc(companyId).get();
+    if (!compSnap.exists) return null;
+    const company = { _id: compSnap.id, ...compSnap.data() };
 
     // Fetch active jobs for this company
-    const jobs = await Job.find({ companyId, status: "active" }).sort({ createdAt: -1 }).lean();
+    const jobsSnap = await db.collection("jobs").where("companyId", "==", companyId).where("status", "==", "active").get();
+    const jobs = jobsSnap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+
+    jobs.sort((a: any, b: any) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
 
     return {
       company: JSON.parse(JSON.stringify(company)),

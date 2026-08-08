@@ -19,57 +19,57 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // ── Live JSearch (RapidAPI) call ──────────────────────────────────────────
   try {
-    const params = new URLSearchParams({
-      query: `${query} in ${location}`,
-      page,
-      num_pages: "1",
-      date_posted: datePosted,
-      country: "IN",
-      ...(empType ? { employment_types: empType } : {}),
+    // Using Remotive for ultra-fast response (~300ms)
+    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=15`, {
+      cache: "no-store",
     });
 
-    const res = await fetch(
-      `https://jsearch.p.rapidapi.com/search?${params.toString()}`,
-      {
-        headers: {
-          "X-RapidAPI-Key":  apiKey,
-          "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
-        },
-        cache: "no-store",
-      }
-    );
-
     if (!res.ok) {
-      const errText = await res.text();
-      console.error("JSearch API error:", res.status, errText);
-      // Fall through to mock data instead of crashing the UI
       return NextResponse.json({
         status: "mock",
         total: 8,
         jobs: getMockJobs(query, location),
-        _debug: `JSearch ${res.status}: ${errText.slice(0, 200)}`,
       });
     }
 
     const raw = await res.json();
-    const jobs = (raw.data || []).map(normalizeJob);
+    let jobs = (raw.jobs || []).map(normalizeRemotiveJob);
+    
+    // Limit to 10
+    jobs = jobs.slice(0, 10);
 
     return NextResponse.json({
       status: "live",
-      total: raw.data?.length ?? 0,
-      jobs,
+      total: jobs.length,
+      jobs: jobs.length > 0 ? jobs : getMockJobs(query, location),
     });
   } catch (err: any) {
-    console.error("JSearch fetch error:", err);
-    // Graceful degradation — serve mock so the page never breaks
+    console.error("Remotive fetch error:", err);
     return NextResponse.json({
       status: "mock",
       total: 8,
       jobs: getMockJobs(query, location),
     });
   }
+}
+
+// ── Normalizer: map Remotive response shape to our UI shape ────────────────
+function normalizeRemotiveJob(j: any) {
+  return {
+    id:            String(j.id),
+    title:         j.title,
+    company:       j.company_name,
+    companyLogo:   j.company_logo || null,
+    location:      j.candidate_required_location || "Remote",
+    type:          "FULLTIME",
+    isRemote:      true,
+    salary:        j.salary || "Not Disclosed",
+    description:   (j.description || "").replace(/<[^>]+>/g, '').slice(0, 300) + "…",
+    applyUrl:      j.url,
+    postedAt:      j.publication_date || null,
+    source:        "Remotive",
+  };
 }
 
 // ── Normalizer: map JSearch response shape to our UI shape ────────────────

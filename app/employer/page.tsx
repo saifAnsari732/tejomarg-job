@@ -2,22 +2,13 @@ import React from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-import Company from "@/models/Company";
-import Application from "@/models/Application";
-import User from "@/models/User";
+import { db } from "@/lib/firebaseAdmin";
 import { Briefcase, Users, FileText, CheckCircle, Clock, Plus, ArrowRight, UserPlus } from "lucide-react";
 
 async function getEmployerDashboardData(userId: string) {
   try {
-    await dbConnect();
-
-    // Register User schema
-    const _dummyUser = User.schema;
-
-    // 1. Get employer jobs
-    const jobs = await Job.find({ employerId: userId }).select("_id status title").lean();
+    const jobsSnap = await db.collection("jobs").where("employerId", "==", userId).get();
+    const jobs = jobsSnap.docs.map(doc => ({ _id: doc.id, ...doc.data() as any }));
     const jobIds = jobs.map((j) => j._id);
 
     // 2. Count stats
@@ -25,21 +16,48 @@ async function getEmployerDashboardData(userId: string) {
     const pendingJobs = jobs.filter((j) => j.status === "pending").length;
     const closedJobs = jobs.filter((j) => j.status === "closed").length;
 
-    const totalApplicationsCount = await Application.countDocuments({
-      jobId: { $in: jobIds },
-    });
-
-    // 3. Fetch latest 5 applications
-    const latestApplicationsRaw = await Application.find({
-      jobId: { $in: jobIds },
-    })
-      .populate("jobId", "title")
-      .populate("candidateId", "name email")
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .lean();
-
-    const latestApplications = JSON.parse(JSON.stringify(latestApplicationsRaw));
+    let totalApplicationsCount = 0;
+    let latestApplicationsRaw: any[] = [];
+    
+    if (jobIds.length > 0) {
+       const chunkedJobIds = [];
+       for (let i = 0; i < jobIds.length; i += 10) {
+         chunkedJobIds.push(jobIds.slice(i, i + 10));
+       }
+       
+       let allApps: any[] = [];
+       for (const chunk of chunkedJobIds) {
+         const snap = await db.collection("applications").where("jobId", "in", chunk).get();
+         allApps = allApps.concat(snap.docs.map(doc => ({ _id: doc.id, ...doc.data() as any })));
+       }
+       
+       totalApplicationsCount = allApps.length;
+       
+       allApps.sort((a, b) => {
+         const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+         const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+         return dateB - dateA;
+       });
+       
+       const top5 = allApps.slice(0, 5);
+       
+       latestApplicationsRaw = await Promise.all(top5.map(async (app) => {
+          let jobData = jobs.find(j => j._id === app.jobId);
+          let candidate = null;
+          if (app.candidateId) {
+             const cSnap = await db.collection("users").doc(app.candidateId).get();
+             if (cSnap.exists) {
+                const cData = cSnap.data() as any;
+                candidate = { _id: cSnap.id, name: cData.name, email: cData.email };
+             }
+          }
+          return {
+             ...app,
+             jobId: jobData ? { _id: jobData._id, title: jobData.title } : app.jobId,
+             candidateId: candidate || app.candidateId
+          };
+       }));
+    }
 
     return {
       stats: {
@@ -49,7 +67,7 @@ async function getEmployerDashboardData(userId: string) {
         closedJobs,
         totalApplicationsCount,
       },
-      latestApplications,
+      latestApplications: JSON.parse(JSON.stringify(latestApplicationsRaw)),
     };
   } catch (error) {
     console.error("Error loading recruiter stats:", error);

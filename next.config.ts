@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: "standalone",
+  allowedDevOrigins: ["tejomargjob.com", "www.tejomargjob.com", "localhost:3045"],
 };
 
 export default nextConfig;

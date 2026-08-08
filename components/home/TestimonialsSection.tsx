@@ -1,5 +1,5 @@
 import React from "react";
-import { Star } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 export default function TestimonialsSection() {
   const testimonials = [
@@ -27,70 +27,73 @@ export default function TestimonialsSection() {
   ];
 
   return (
-    <section className="bg-slate-50 relative overflow-hidden">
-      {/* Background split (Green left, light right) */}
-      <div className="absolute inset-y-0 left-0 w-full lg:w-[35%] bg-[#208f60]"></div>
+    <section className="bg-slate-50 py-24 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-blue-100/50 rounded-bl-full blur-3xl -z-0"></div>
+      <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-sky-100/50 rounded-tr-full blur-3xl -z-0"></div>
 
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Left Column (Green Area) */}
-        <div className="lg:w-[35%] py-16 px-8 lg:pr-12 lg:pl-8 text-white flex flex-col justify-center">
-          <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8">
-            <span className="text-3xl font-serif text-white leading-none -mt-2">"</span>
-          </div>
-          
-          <h2 className="text-3xl font-bold leading-snug mb-16">
-            Join the community of 5 crore satisfied job seekers...
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+            Join the community of <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-600">5 crore</span> satisfied job seekers
           </h2>
           
-          <div>
-            <p className="text-sm font-semibold mb-2">Play Store Ratings</p>
-            <div className="flex items-center gap-1 text-amber-400">
-              <Star className="h-5 w-5 fill-current" />
-              <Star className="h-5 w-5 fill-current" />
-              <Star className="h-5 w-5 fill-current" />
-              <Star className="h-5 w-5 fill-current" />
-              <Star className="h-5 w-5 fill-current" />
+          <div className="flex flex-col items-center justify-center">
+            <p className="text-sm font-bold mb-2 text-slate-500 uppercase tracking-widest">Play Store Ratings</p>
+            <div className="flex items-center gap-1.5 text-amber-400 mb-2">
+              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
+              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
+              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
+              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
+              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
             </div>
+            <p className="text-sm text-slate-500 font-medium">Based on 1.2M+ reviews</p>
           </div>
         </div>
 
-        {/* Right Column (Cards) */}
-        <div className="lg:w-[65%] py-16 px-4 sm:px-8 lg:pl-12 flex items-center bg-slate-50">
-          <div className="flex overflow-x-auto gap-6 pb-8 hide-scrollbar snap-x w-full">
-            {testimonials.map((t, idx) => (
-              <div 
-                key={idx} 
-                className="bg-white rounded-xl shadow-md border border-slate-100 p-6 min-w-[300px] w-[300px] sm:min-w-[340px] sm:w-[340px] shrink-0 snap-start flex flex-col"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <img src={t.image} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
-                  <div>
-                    <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                      {t.name} 
-                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold uppercase">
-                        {t.tag}
-                      </span>
-                    </h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="text-xs font-bold text-slate-700">{t.rating}</span>
-                      <div className="flex items-center text-amber-400">
-                        <Star className="h-3 w-3 fill-current" />
-                        <Star className="h-3 w-3 fill-current" />
-                        <Star className="h-3 w-3 fill-current" />
-                        <Star className="h-3 w-3 fill-current" />
-                        <Star className="h-3 w-3 fill-current" />
-                      </div>
+        {/* Testimonials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {testimonials.map((t, idx) => (
+            <div 
+              key={idx} 
+              className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(79,70,229,0.1)] hover:-translate-y-2 transition-all duration-300 border border-slate-100 p-8 flex flex-col relative group animate-fade-in-up"
+              style={{ animationDelay: `${idx * 0.15}s` }}
+            >
+              {/* Gradient Top Border on Hover */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-3xl"></div>
+
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <img src={t.image} alt={t.name} className="w-14 h-14 rounded-full object-cover border-2 border-blue-50 shadow-sm" />
+                <div>
+                  <h4 className="font-bold text-slate-800 text-base flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    {t.name} 
+                    <span className="text-[10px] w-max bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      {t.tag}
+                    </span>
+                  </h4>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-xs font-bold text-slate-700">{t.rating}</span>
+                    <div className="flex items-center text-amber-400">
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <Star className="h-3.5 w-3.5 fill-current text-amber-400/30" />
                     </div>
                   </div>
                 </div>
-                
-                <p className="text-slate-600 text-sm italic leading-relaxed">
-                  {t.text}
-                </p>
               </div>
-            ))}
-          </div>
+              
+              <p className="text-slate-600 text-sm sm:text-base italic leading-relaxed relative z-10 flex-1">
+                {t.text}
+              </p>
+              
+              <Quote className="absolute bottom-6 right-6 w-16 h-16 text-blue-50 -z-0 rotate-180 transition-colors group-hover:text-blue-100/50" />
+            </div>
+          ))}
         </div>
 
       </div>

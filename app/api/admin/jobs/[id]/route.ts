@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,21 +26,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "Invalid status code" }, { status: 400 });
     }
 
-    await dbConnect();
+    const docRef = db.collection("jobs").doc(id);
+    const docSnap = await docRef.get();
 
-    const job = await Job.findByIdAndUpdate(
-      id,
-      { $set: { status } },
-      { new: true }
-    );
-
-    if (!job) {
+    if (!docSnap.exists) {
       return NextResponse.json({ error: "Job posting not found" }, { status: 404 });
     }
 
+    await docRef.update({ status });
+
+    const jobData = docSnap.data() || {};
+    const updatedJob = { _id: id, ...jobData, status };
+
     return NextResponse.json({
       message: `Job posting marked as ${status} successfully.`,
-      job,
+      job: updatedJob,
     });
   } catch (error: any) {
     console.error("Admin job PUT error:", error);

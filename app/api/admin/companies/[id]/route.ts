@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,21 +24,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "Missing verification parameters" }, { status: 400 });
     }
 
-    await dbConnect();
+    const docRef = db.collection("companies").doc(id);
+    const docSnap = await docRef.get();
 
-    const company = await Company.findByIdAndUpdate(
-      id,
-      { $set: { isVerified } },
-      { new: true }
-    );
-
-    if (!company) {
+    if (!docSnap.exists) {
       return NextResponse.json({ error: "Company profile not found" }, { status: 404 });
     }
 
+    await docRef.update({ isVerified });
+
+    const companyData = docSnap.data() || {};
+    const updatedCompany = { _id: id, ...companyData, isVerified };
+
     return NextResponse.json({
       message: `Company profile has been ${isVerified ? "verified" : "unverified"}.`,
-      company,
+      company: updatedCompany,
     });
   } catch (error: any) {
     console.error("Admin company PUT error:", error);
@@ -61,12 +60,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: "Forbidden. Admin access only." }, { status: 403 });
     }
 
-    await dbConnect();
+    const docRef = db.collection("companies").doc(id);
+    const docSnap = await docRef.get();
 
-    const company = await Company.findByIdAndDelete(id);
-    if (!company) {
+    if (!docSnap.exists) {
       return NextResponse.json({ error: "Company profile not found" }, { status: 404 });
     }
+
+    await docRef.delete();
 
     return NextResponse.json({ message: "Company profile deleted successfully." });
   } catch (error: any) {

@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Job from "@/models/Job";
-
+import { db } from "@/lib/firebaseAdmin";
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -19,15 +17,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const body = await req.json();
-    await dbConnect();
-
-    // Verify ownership
-    const job = await Job.findById(id);
-    if (!job) {
+    const jobDoc = await db.collection("jobs").doc(id).get();
+    if (!jobDoc.exists) {
       return NextResponse.json({ error: "Job posting not found" }, { status: 404 });
     }
+    const job = { _id: jobDoc.id, ...jobDoc.data() } as any;
 
-    if (user.role === "employer" && job.employerId.toString() !== user.id) {
+    if (user.role === "employer" && job.employerId !== user.id) {
       return NextResponse.json({ error: "Unauthorized to edit this job posting" }, { status: 403 });
     }
 
@@ -59,7 +55,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     });
 
-    await job.save();
+    const { _id, ...updateData } = job;
+    await db.collection("jobs").doc(id).update(updateData);
 
     return NextResponse.json({ message: "Job listing updated successfully.", job });
   } catch (error: any) {
@@ -82,19 +79,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await dbConnect();
-
-    // Verify ownership
-    const job = await Job.findById(id);
-    if (!job) {
+    const jobDoc = await db.collection("jobs").doc(id).get();
+    if (!jobDoc.exists) {
       return NextResponse.json({ error: "Job posting not found" }, { status: 404 });
     }
+    const job = jobDoc.data() as any;
 
-    if (user.role === "employer" && job.employerId.toString() !== user.id) {
+    if (user.role === "employer" && job.employerId !== user.id) {
       return NextResponse.json({ error: "Unauthorized to delete this job posting" }, { status: 403 });
     }
 
-    await Job.findByIdAndDelete(id);
+    await db.collection("jobs").doc(id).delete();
 
     return NextResponse.json({ message: "Job listing deleted successfully." });
   } catch (error: any) {

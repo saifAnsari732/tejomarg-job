@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
@@ -14,14 +13,14 @@ export async function GET() {
 
     const userSession = session.user as any;
     
-    await dbConnect();
-    const user = await User.findById(userSession.id).select("-password").lean();
+    const docRef = db.collection("users").doc(userSession.id);
+    const doc = await docRef.get();
 
-    if (!user) {
+    if (!doc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: { _id: doc.id, ...doc.data() } });
   } catch (error: any) {
     console.error("Profile GET error:", error);
     return NextResponse.json({ error: "Failed to retrieve profile data" }, { status: 500 });
@@ -45,42 +44,41 @@ export async function PUT(req: Request) {
       furtherEducationPrefs, certifications, languages, spokenEnglishLevel, preferredJobTitles
     } = body;
 
-    await dbConnect();
+    const docRef = db.collection("users").doc(userSession.id);
     
-    // Update User and candidateProfile subdocument
-    const updatedUser = await User.findByIdAndUpdate(
-      userSession.id,
-      {
-        $set: {
-          name,
-          "candidateProfile.skills": skills,
-          "candidateProfile.expectedSalary": expectedSalary ? parseInt(expectedSalary) : 0,
-          "candidateProfile.preferredLocation": preferredLocation,
-          "candidateProfile.experience": experience || [],
-          "candidateProfile.education": education || [],
-          "candidateProfile.resumeUrl": resumeUrl,
-          "candidateProfile.avatarUrl": avatarUrl,
-          "candidateProfile.mobile": mobile,
-          "candidateProfile.dob": dob,
-          "candidateProfile.gender": gender,
-          "candidateProfile.homeTown": homeTown,
-          "candidateProfile.totalExperience": totalExperience,
-          "candidateProfile.noticePeriod": noticePeriod,
-          "candidateProfile.highestEducation": highestEducation,
-          "candidateProfile.schoolMedium": schoolMedium,
-          "candidateProfile.furtherEducationPrefs": furtherEducationPrefs || [],
-          "candidateProfile.certifications": certifications || [],
-          "candidateProfile.languages": languages || [],
-          "candidateProfile.spokenEnglishLevel": spokenEnglishLevel,
-          "candidateProfile.preferredJobTitles": preferredJobTitles || [],
-        },
-      },
-      { new: true }
-    ).select("-password");
+    const updateData = {
+      name,
+      "candidateProfile.skills": skills,
+      "candidateProfile.expectedSalary": expectedSalary ? parseInt(expectedSalary) : 0,
+      "candidateProfile.preferredLocation": preferredLocation,
+      "candidateProfile.experience": experience || [],
+      "candidateProfile.education": education || [],
+      "candidateProfile.resumeUrl": resumeUrl,
+      "candidateProfile.avatarUrl": avatarUrl,
+      "candidateProfile.mobile": mobile,
+      "candidateProfile.dob": dob,
+      "candidateProfile.gender": gender,
+      "candidateProfile.homeTown": homeTown,
+      "candidateProfile.totalExperience": totalExperience,
+      "candidateProfile.noticePeriod": noticePeriod,
+      "candidateProfile.highestEducation": highestEducation,
+      "candidateProfile.schoolMedium": schoolMedium,
+      "candidateProfile.furtherEducationPrefs": furtherEducationPrefs || [],
+      "candidateProfile.certifications": certifications || [],
+      "candidateProfile.languages": languages || [],
+      "candidateProfile.spokenEnglishLevel": spokenEnglishLevel,
+      "candidateProfile.preferredJobTitles": preferredJobTitles || [],
+    };
+    
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => (updateData as any)[key] === undefined && delete (updateData as any)[key]);
+
+    await docRef.update(updateData);
+    const updatedDoc = await docRef.get();
 
     return NextResponse.json({
       message: "Profile updated successfully.",
-      user: updatedUser,
+      user: { _id: updatedDoc.id, ...updatedDoc.data() },
     });
   } catch (error: any) {
     console.error("Profile PUT error:", error);

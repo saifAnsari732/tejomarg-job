@@ -204,7 +204,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
             {/* Modal Body: Dual Pane */}
             <div className="flex-1 flex overflow-hidden">
               {/* Left Tabs */}
-              <div className="w-[120px] shrink-0 bg-slate-50 overflow-y-auto border-r border-slate-100 pb-20 custom-scrollbar">
+              <div className="w-[120px] shrink-0 bg-slate-100/50 overflow-y-auto border-r border-slate-100 pb-20 custom-scrollbar">
                 {mobileTabs.map(tab => (
                   <button 
                     key={tab.id}
@@ -319,7 +319,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
       {/* =========================================
           DESKTOP VIEW: Sidebar
       ========================================= */}
-      <div className="hidden lg:block bg-white rounded-xl border border-slate-200 shadow-sm p-0 w-full overflow-hidden text-sm">
+      <div className="hidden lg:block bg-transparent shadow-sm p-0 w-full overflow-hidden text-sm">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-slate-100">
           <div className="flex items-center space-x-2 text-slate-900 font-bold">

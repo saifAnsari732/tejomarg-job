@@ -1,14 +1,16 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import dbConnect from "@/lib/dbConnect";
-import Company from "@/models/Company";
+import { db } from "@/lib/firebaseAdmin";
 import CompaniesList from "@/components/admin/CompaniesList";
 
 async function getCompanies() {
   try {
-    await dbConnect();
-    const companies = await Company.find({}).sort({ createdAt: -1 }).lean();
+    const snapshot = await db.collection("companies").orderBy("createdAt", "desc").get();
+    const companies = snapshot.docs.map(doc => ({
+      _id: doc.id,
+      ...doc.data()
+    }));
     return JSON.parse(JSON.stringify(companies));
   } catch (error) {
     console.error("Error loading companies list:", error);

@@ -17,7 +17,7 @@ export default function Navbar() {
 
   const getDashboardLink = () => {
     if (user?.role === "admin") return "/admin";
-    if (user?.role === "employer") return "/employer";
+    if (user?.role === "employer") return "/employer/post-job";
     return "/candidate";
   };
 
@@ -33,8 +33,7 @@ export default function Navbar() {
       );
     } else if (user?.role === "employer") {
       navLinks.push(
-        { name: "Post a Job", href: "/employer/post-job" },
-        { name: "Manage Jobs", href: "/employer/manage-jobs" }
+        { name: "Post a Job", href: "/employer/post-job" }
       );
     } else if (user?.role === "admin") {
       navLinks.push(
@@ -45,35 +44,39 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b border-slate-200/50 dark:border-slate-800/50">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-100 dark:border-slate-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3">
-              {/* Stylized TM Logo Icon */}
-              <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-                <path d="M3 9h12M9 9v20" stroke="#0f2942" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M17 29V15l5.5 5.5L28 15v14" stroke="#0f2942" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M28 15l5-5m0 0h-4.5m4.5 0v4.5" stroke="#0f2942" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22.5 24.5l2 2 4.5-4.5" stroke="#208f60" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+          {/* Mobile Menu Button & Logo */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-slate-600 dark:text-slate-400 p-1 focus:outline-none"
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+            
+            <Link href="/" className="flex items-center gap-2 sm:gap-4">
+              {/* Icon Logo (Teardrop) */}
+              <img src="/job1.png" alt="Tejomarg Icon" className="h-9 sm:h-10 md:h-20 w-auto object-contain shrink-0" />
               
-              {/* Branding Text */}
-              <div className="flex flex-col">
-                <span className="font-black text-xl text-[#0f2942] tracking-tight leading-none">
-                  TejoMargJob
-                </span>
-                <span className="text-[9px] font-bold text-slate-500 tracking-wide mt-0.5 uppercase">
-                  Your Career Pathway
-                </span>
-              </div>
+              {/* Text Logo (Name) for Desktop */}
+              <img src="/job2.png" alt="Tejomarg Text" className="hidden md:block h-28 lg:h-56 -my-12 -ml-4 w-auto object-contain shrink-0 mix-blend-multiply" />
+              
+              {/* Text Logo (Image) for Mobile - Only show when logged in */}
+              {isLoggedIn && (
+                <img src="/job2.png" alt="Tejomarg Text" className="md:hidden h-24 -my-8 -ml-3 w-auto object-contain shrink-0 mix-blend-multiply" />
+              )}
             </Link>
           </div>
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex space-x-6 items-center">
-            {/* Jobs Dropdown */}
+            {user?.role !== "employer" && (
+              <>
+                {/* Jobs Dropdown */}
             <div className="relative group py-4">
               <Link href="/jobs" className="text-slate-700 hover:text-[#208f60] text-[15px] font-bold flex items-center gap-1">
                 Jobs <ChevronDown className="h-4 w-4 text-slate-400 group-hover:rotate-180 transition-transform" />
@@ -103,11 +106,11 @@ export default function Navbar() {
                 {/* Column 2 */}
                 <div className="flex-1 space-y-3.5">
                   {[
-                    { label: "Jobs By City", href: "/jobs" },
-                    { label: "Jobs By Department", href: "/jobs" },
-                    { label: "Jobs By Company", href: "/jobs" },
-                    { label: "Jobs By Qualification", href: "/jobs" },
-                    { label: "Others", href: "/jobs" }
+                    { label: "Jobs in Mumbai", href: "/jobs?location=Mumbai" },
+                    { label: "Jobs in Bangalore", href: "/jobs?location=Bangalore" },
+                    { label: "IT & Software Jobs", href: "/jobs?department=IT+%26+Software" },
+                    { label: "Graduate Jobs", href: "/jobs?education=Graduate" },
+                    { label: "Explore All Jobs", href: "/jobs" }
                   ].map(item => (
                     <Link key={item.label} href={item.href} className="flex justify-between items-center text-slate-500 hover:text-[#208f60] text-sm font-semibold transition-colors">
                       <span>{item.label}</span>
@@ -167,20 +170,22 @@ export default function Navbar() {
                 ))}
               </div>
             </div>
+            </>
+            )}
           </nav>
 
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-2 md:space-x-6">
             {isLoggedIn ? (
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center space-x-2 p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all focus:outline-none cursor-pointer"
+                  className="flex items-center space-x-2 p-1 md:p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all focus:outline-none cursor-pointer"
                 >
-                  <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <div className="h-6 w-6 md:h-8 md:w-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs md:text-base">
                     {user?.name?.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm font-bold max-w-[120px] truncate text-slate-700 pr-1">
+                  <span className="hidden md:inline-block text-sm font-bold max-w-[120px] truncate text-slate-700 pr-1">
                     {user?.name}
                   </span>
                 </button>
@@ -241,14 +246,14 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/login?role=employer"
-                  className="text-sm font-bold text-emerald-700 hover:text-emerald-800 transition-colors"
+                  href="/employer/login"
+                  className="text-xs md:text-sm font-bold text-emerald-700 hover:text-emerald-800 transition-colors"
                 >
                   Employer Login
                 </Link>
                 <Link
                   href="/login"
-                  className="text-sm font-bold text-white bg-[#208f60] hover:bg-[#1a7650] px-5 py-2.5 rounded-lg shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all"
+                  className="text-xs md:text-sm font-bold text-white bg-[#208f60] hover:bg-[#1a7650] px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all"
                 >
                   Candidate Login
                 </Link>
@@ -256,15 +261,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-slate-600 dark:text-slate-400 p-2 focus:outline-none"
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
+
         </div>
       </div>
 
