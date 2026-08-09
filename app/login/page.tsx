@@ -20,6 +20,17 @@ export default function CandidateLoginPage() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(30);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (step === "otp" && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, resendTimer]);
 
   useEffect(() => {
     // Clear any existing verifier if it got detached from DOM (e.g., during navigation or hot reload)
@@ -51,8 +62,8 @@ export default function CandidateLoginPage() {
     };
   }, []);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!phoneNumber || phoneNumber.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
@@ -66,6 +77,7 @@ export default function CandidateLoginPage() {
       const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(result);
       setStep("otp");
+      setResendTimer(30);
       toast.success("OTP sent securely via SMS!");
     } catch (err: any) {
       console.error(err);
@@ -298,7 +310,15 @@ export default function CandidateLoginPage() {
                   </button>
                 </form>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 flex flex-col items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => handleSendOtp()}
+                    disabled={resendTimer > 0 || loading}
+                    className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline transition-all"
+                  >
+                    {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
+                  </button>
                   <button
                     onClick={() => {
                       setStep("phone");
