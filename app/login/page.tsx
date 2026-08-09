@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -115,10 +115,20 @@ export default function CandidateLoginPage() {
       }
 
       toast.success("Login Successful!");
-      if (callbackUrl && !callbackUrl.includes("/login")) {
-        router.push(callbackUrl);
+
+      const session = await getSession();
+      const userRole = (session?.user as any)?.role;
+
+      if (userRole === "employer") {
+        router.push("/employer/post-job");
+      } else if (userRole === "admin") {
+        router.push("/admin");
       } else {
-        router.push("/");
+        if (callbackUrl && !callbackUrl.includes("/login")) {
+          router.push(callbackUrl);
+        } else {
+          router.push("/");
+        }
       }
       router.refresh();
     } catch (err: any) {
