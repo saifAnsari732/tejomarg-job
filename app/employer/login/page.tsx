@@ -9,6 +9,7 @@ import { Phone, ArrowRight, Loader2, Building, CheckCircle2 } from "lucide-react
 import { motion, AnimatePresence } from "framer-motion";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import confetti from "canvas-confetti";
 
 export default function EmployerLoginPage() {
   const router = useRouter();
@@ -113,6 +114,14 @@ export default function EmployerLoginPage() {
       if (res?.error) {
         throw new Error(res.error);
       }
+
+      // Trigger Confetti Animation
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#10B981", "#059669", "#3B82F6", "#F59E0B"], // Employer brand colors (Emerald focus)
+      });
 
       toast.success("Login Successful!");
 
