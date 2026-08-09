@@ -156,7 +156,7 @@ export default function HeroSection() {
           variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.4 }}
           className="w-full max-w-4xl relative z-40"
         >
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 p-2 md:p-3 space-y-3 md:space-y-0 rounded-2xl transition-all duration-300 hover:shadow-[0_8px_40px_rgb(79,70,229,0.12)] hover:border-blue-200">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 p-2 md:p-3 space-y-3 md:space-y-0 rounded-2xl transition-all duration-300 hover:shadow-[0_8px_40px_rgb(79,70,229,0.15)] hover:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/20 focus-within:border-blue-400">
             
             {/* Search Job */}
             <div className="flex items-center flex-1 px-4 py-3 w-full relative group">
@@ -222,14 +222,26 @@ export default function HeroSection() {
         </motion.div>
 
         {/* Popular Tags */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-6 text-sm animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <span className="text-slate-500 font-medium mr-1">Popular:</span>
-          {["Software Engineer", "Product Manager", "Data Scientist", "UI/UX Designer"].map((tag) => (
-            <button key={tag} onClick={() => { setSearchVal(tag); setShowSearchSuggestions(false); }} className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-colors shadow-sm font-medium text-[13px]">
+        <motion.div 
+          variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.5 }}
+          className="flex flex-wrap items-center justify-center gap-3 mt-8 text-sm"
+        >
+          <span className="text-slate-500 font-bold mr-1 uppercase tracking-wider text-[11px]">Popular Searches:</span>
+          {["Software Engineer", "Product Manager", "Data Scientist", "UI/UX Designer"].map((tag, i) => (
+            <motion.button 
+              key={tag} 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 + (i * 0.1), type: "spring", stiffness: 100 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { setSearchVal(tag); setShowSearchSuggestions(false); }} 
+              className="px-4 py-2 bg-white/60 backdrop-blur-md border border-slate-200/60 rounded-full text-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/80 transition-colors shadow-sm font-bold text-[13px]"
+            >
               {tag}
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Trusted By Marquee */}
         <div className="w-full mt-28 pt-10 border-t border-slate-200 relative z-20">
