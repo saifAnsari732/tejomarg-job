@@ -63,6 +63,7 @@ export default withAuth(
         return true;
       },
     },
+    secret: process.env.NEXTAUTH_SECRET || "super-secret-key-job-portal-platform",
   }
 );
 
