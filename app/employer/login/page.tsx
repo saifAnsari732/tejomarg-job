@@ -120,6 +120,7 @@ export default function EmployerLoginPage() {
       const userRole = (session?.user as any)?.role;
 
       if (userRole === "candidate") {
+        toast.error("This number is registered as a Candidate. Redirecting...");
         router.push("/");
       } else if (userRole === "admin") {
         router.push("/admin");
