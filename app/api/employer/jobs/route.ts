@@ -163,9 +163,9 @@ export async function POST(req: Request) {
     }
 
     // Calculate Price Based on Plan
-    let amountInRupees = 1; // Default
-    if (body.pricingPlan === "Classic") amountInRupees = 1;
-    if (body.pricingPlan === "Premium") amountInRupees = 2;
+    let amountInRupees = 10; // Default
+    if (body.pricingPlan === "Classic") amountInRupees = 10;
+    if (body.pricingPlan === "Premium") amountInRupees = 20;
     if (body.pricingPlan === "Premium AI") amountInRupees = 3;
     if (body.pricingPlan === "Super Premium") amountInRupees = 4;
 

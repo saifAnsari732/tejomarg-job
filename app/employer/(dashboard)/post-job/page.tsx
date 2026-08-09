@@ -557,7 +557,7 @@ export default function PostJobPage() {
                       {formData.pricingPlan === "Classic" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹1</div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹10</div>
                   <ul className="space-y-3 text-sm text-slate-600">
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Basic visibility</li>
@@ -577,7 +577,7 @@ export default function PostJobPage() {
                       {formData.pricingPlan === "Premium" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹2</div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹20</div>
                   <ul className="space-y-3 text-sm text-slate-600">
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
@@ -644,7 +644,7 @@ export default function PostJobPage() {
                 <div className="text-right hidden sm:block">
                   <div className="text-xs text-slate-500 font-semibold">Total Amount</div>
                   <div className="text-xl font-black text-slate-800">
-                    {formData.pricingPlan === "Classic" ? "₹1" : formData.pricingPlan === "Premium" ? "₹2" : formData.pricingPlan === "Premium AI" ? "₹3" : "₹4"}
+                    {formData.pricingPlan === "Classic" ? "₹10" : formData.pricingPlan === "Premium" ? "₹20" : formData.pricingPlan === "Premium AI" ? "₹3" : "₹4"}
                   </div>
                 </div>
                 <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#1a7650] flex items-center gap-2">
