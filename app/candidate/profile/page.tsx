@@ -216,8 +216,27 @@ export default function CandidateProfilePage() {
         }
 
         setResumeUrl(data.url);
-        await handleSave({ resumeUrl: data.url });
-        toast.success("Resume uploaded successfully!");
+        
+        const payload: any = { resumeUrl: data.url };
+        
+        if (data.parsedData) {
+          const pd = data.parsedData;
+          if (pd.name) payload.name = pd.name;
+          if (pd.mobile) payload.mobile = pd.mobile;
+          if (pd.highestEducation) payload.highestEducation = pd.highestEducation;
+          if (pd.totalExperience) payload.totalExperience = pd.totalExperience;
+          if (pd.currentLocation) payload.preferredLocation = pd.currentLocation;
+          if (pd.skills) payload.skills = typeof pd.skills === 'string' ? pd.skills.split(',').map((s: string) => s.trim()) : pd.skills;
+          if (pd.experience && Array.isArray(pd.experience)) payload.experience = pd.experience;
+          if (pd.education && Array.isArray(pd.education)) payload.education = pd.education;
+          
+          toast.success("AI successfully extracted details from your resume!");
+        }
+
+        await handleSave(payload);
+        if (!data.parsedData) {
+          toast.success("Resume uploaded successfully!");
+        }
       } catch (err: any) {
         toast.error(err.message || "Upload failed");
       } finally {
@@ -883,12 +902,25 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Resume Upload Card */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-slate-900 text-[15px]">Resume</h3>
-              <input type="file" accept=".pdf" id="resume-file-input" onChange={handleResumeUpload} className="hidden" />
-              <label htmlFor="resume-file-input" className="text-indigo-650 cursor-pointer p-1 bg-indigo-50 rounded">
-                <Edit2 className="h-3.5 w-3.5" />
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-5 pointer-events-none">
+              <svg className="w-24 h-24 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            </div>
+            <div className="flex justify-between items-start relative z-10">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-[15px] flex items-center gap-1.5">
+                  Resume
+                  <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider shadow-sm flex items-center gap-1">
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                    AI Auto-Fill
+                  </span>
+                </h3>
+                <p className="text-[10px] text-slate-500 mt-1 max-w-[200px]">Upload your resume and our AI will automatically fill your profile details.</p>
+              </div>
+              <input type="file" accept=".pdf" id="resume-file-input" onChange={handleResumeUpload} disabled={uploading} className="hidden" />
+              <label htmlFor="resume-file-input" className="group flex items-center gap-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-650 hover:text-white cursor-pointer px-3 py-1.5 rounded-lg transition-all shadow-sm">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform" />}
+                <span className="text-xs font-bold">{uploading ? "Analyzing..." : "Upload"}</span>
               </label>
             </div>
 
