@@ -114,7 +114,7 @@ export default async function LiveJobsSection({ initialQuery = "Developer", init
           "X-RapidAPI-Key": process.env.JSEARCH_API_KEY || "",
           "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
         },
-        cache: "no-store",
+        next: { revalidate: 3600 },
       }
     );
     
