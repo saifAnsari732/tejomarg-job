@@ -374,46 +374,46 @@ export default function CandidateProfilePage() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Email ID</span>
-                  <span className="text-slate-800 font-semibold break-all leading-tight flex items-center gap-1">
-                    <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              <div className="grid grid-cols-2 gap-5 text-sm">
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Email ID</span>
+                  <span className="text-slate-900 font-bold break-all leading-tight flex items-center gap-1.5">
+                    <Mail className="h-4 w-4 text-slate-400 shrink-0" />
                     {email}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Mobile Number</span>
-                  <span className="text-slate-800 font-semibold flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Mobile Number</span>
+                  <span className="text-slate-900 font-bold flex items-center gap-1.5">
+                    <Phone className="h-4 w-4 text-slate-400 shrink-0" />
                     {mobile || "Not specified"}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Date of Birth</span>
-                  <span className="text-slate-800 font-semibold flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Date of Birth</span>
+                  <span className="text-slate-900 font-bold flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
                     {dob || "Not specified"}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Gender</span>
-                  <span className="text-slate-800 font-semibold flex items-center gap-1">
-                    <UserIcon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Gender</span>
+                  <span className="text-slate-900 font-bold flex items-center gap-1.5">
+                    <UserIcon className="h-4 w-4 text-slate-400 shrink-0" />
                     {gender || "Not specified"}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Current Location</span>
-                  <span className="text-slate-800 font-semibold flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Current Location</span>
+                  <span className="text-slate-900 font-bold flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
                     {currentLocation || "Not specified"}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-bold block">Home Town</span>
-                  <span className="text-slate-800 font-semibold flex items-center gap-1">
-                    <Home className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-bold text-[11px] block uppercase tracking-wider">Home Town</span>
+                  <span className="text-slate-900 font-bold flex items-center gap-1.5">
+                    <Home className="h-4 w-4 text-slate-400 shrink-0" />
                     {homeTown || "Not specified"}
                   </span>
                 </div>
@@ -564,7 +564,7 @@ export default function CandidateProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-xs text-slate-400">
+              <div className="text-center py-5 font-medium text-sm text-slate-500">
                 No work experience listed yet.
               </div>
             )}
@@ -741,7 +741,7 @@ export default function CandidateProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-xs text-slate-400">No education qualifications specified.</div>
+              <div className="text-center py-5 text-sm font-medium text-slate-500">No education qualifications specified.</div>
             )}
           </div>
 
@@ -783,7 +783,7 @@ export default function CandidateProfilePage() {
                     <span key={idx} className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-semibold">{s}</span>
                   ))
                 ) : (
-                  <span className="text-xs text-slate-400">No professional skills saved.</span>
+                  <span className="text-sm font-medium text-slate-500">No professional skills saved.</span>
                 )}
               </div>
             )}
@@ -847,7 +847,7 @@ export default function CandidateProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-xs text-slate-400">No certifications uploaded.</div>
+              <div className="text-center py-5 text-sm font-medium text-slate-500">No certifications uploaded.</div>
             )}
           </div>
 
@@ -882,7 +882,7 @@ export default function CandidateProfilePage() {
                       <span key={i} className="text-xs bg-slate-100 font-bold px-2 py-0.5 rounded text-slate-600">{l}</span>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-400">Not specified.</span>
+                    <span className="text-sm font-medium text-slate-500">Not specified.</span>
                   )}
                 </div>
               )}
@@ -985,7 +985,7 @@ export default function CandidateProfilePage() {
                     </div>
                   ))
                 ) : (
-                  <span className="text-xs text-slate-400">No job titles selected.</span>
+                  <span className="text-sm font-medium text-slate-500">No job titles selected.</span>
                 )}
               </div>
             )}
