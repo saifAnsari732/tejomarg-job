@@ -1,63 +1,77 @@
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 import Link from "next/link";
-import { FileText, User, Bookmark, ChevronRight } from "lucide-react";
+import { Search, CheckSquare, Bookmark, FileText, Upload, HelpCircle, LogOut } from "lucide-react";
 
-export default function CandidateLayout({ children }: { children: React.ReactNode }) {
+export default async function CandidateLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+
   return (
-    <>
-      <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 flex flex-col md:flex-row gap-8">
-        {/* Candidate Sidebar */}
-        <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 h-fit space-y-2 shadow-sm">
-          <div className="pb-4 mb-4 border-b border-slate-100 dark:border-slate-700">
-            <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Workspace</span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Job Seeker Portal</h2>
+    <div className="flex flex-col h-screen bg-white font-sans overflow-hidden">
+      <div className="shrink-0 border-b border-slate-200 shadow-sm z-20 bg-white">
+         <Navbar />
+      </div>
+      
+      <div className="flex flex-1 overflow-hidden relative z-10">
+        {/* Sidebar */}
+        <aside className="w-[260px] shrink-0 bg-[#f8f9fc] border-r border-slate-200 flex flex-col justify-between hidden md:flex h-full">
+          <div className="p-6">
+            {/* User Profile */}
+            <div className="flex items-center gap-3 mb-8">
+              {user?.image ? (
+                <img src={user.image} alt={user.name} className="w-11 h-11 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-slate-300 flex items-center justify-center shrink-0 ring-2 ring-white shadow-sm">
+                  <span className="text-sm font-bold text-slate-600">{user?.name?.charAt(0) || "U"}</span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <h3 className="font-bold text-[#2a2a72] text-sm truncate">{user?.name || "Candidate"}</h3>
+                <p className="text-xs font-medium text-slate-500 truncate mt-0.5">{user?.email || "candidate@example.com"}</p>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="space-y-2">
+              <Link href="/jobs" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 transition-all">
+                <Search className="w-5 h-5 text-slate-400" /> Find Jobs
+              </Link>
+              {/* Active State matches screenshot (Dark Indigo) */}
+              <Link href="/candidate" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold bg-[#2e2f8c] text-white transition-all shadow-md hover:bg-[#232470]">
+                <CheckSquare className="w-5 h-5 text-indigo-200" /> Applied
+              </Link>
+              <Link href="/candidate/bookmarks" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 transition-all">
+                <Bookmark className="w-5 h-5 text-slate-400" /> Saved
+              </Link>
+              <Link href="/candidate/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 transition-all">
+                <FileText className="w-5 h-5 text-slate-400" /> Resume
+              </Link>
+            </nav>
           </div>
-          
-          <nav className="space-y-1">
-            <Link
-              href="/candidate"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              <div className="flex items-center space-x-2.5">
-                <FileText className="h-5 w-5 text-slate-400" />
-                <span>My Applications</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </Link>
 
-            <Link
-              href="/candidate/profile"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              <div className="flex items-center space-x-2.5">
-                <User className="h-5 w-5 text-slate-400" />
-                <span>My Profile</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </Link>
-
-            <Link
-              href="/candidate/bookmarks"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              <div className="flex items-center space-x-2.5">
-                <Bookmark className="h-5 w-5 text-slate-400" />
-                <span>Saved Jobs</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </Link>
-          </nav>
+          <div className="p-6 space-y-5">
+            <button className="w-full flex items-center justify-center gap-2 bg-[#2e2f8c] hover:bg-[#232470] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm">
+              <Upload className="w-4 h-4" /> Upload Resume
+            </button>
+            <div className="pt-5 border-t border-slate-200 space-y-2">
+              <Link href="/support" className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
+                <HelpCircle className="w-4 h-4" /> Help Center
+              </Link>
+              <Link href="/api/auth/signout" className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
+                <LogOut className="w-4 h-4" /> Logout
+              </Link>
+            </div>
+          </div>
         </aside>
 
-        {/* Candidate Dashboard Workspace */}
-        <section className="flex-1 min-w-0">
+        {/* Main Content */}
+        <main className="flex-1 h-full overflow-y-auto bg-white flex flex-col">
           {children}
-        </section>
+        </main>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
