@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, MapPin, ChevronDown, Sparkles, Briefcase, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeroSection() {
   const router = useRouter();
@@ -14,6 +14,15 @@ export default function HeroSection() {
   const [debouncedLocationVal, setDebouncedLocationVal] = useState("");
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+  const animatedWords = ["Dream Job", "Career Move", "Next Big Role", "Remote Work", "Perfect Match"];
+
+  useEffect(() => {
+    const wordTimer = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % animatedWords.length);
+    }, 2500);
+    return () => clearInterval(wordTimer);
+  }, [animatedWords.length]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -122,8 +131,23 @@ export default function HeroSection() {
           variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.1 }}
           className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight w-full break-words"
         >
-          Find Your Dream Job <br className="hidden md:block"/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x" style={{ backgroundSize: '200% 200%' }}>With Tejomarg JOB</span>
+          Find Your{" "}
+          <span className="inline-grid align-bottom w-[200px] sm:w-[320px] md:w-[400px] lg:w-[480px] text-left">
+            <AnimatePresence mode="popLayout">
+              <motion.span
+                key={wordIndex}
+                initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: -30, opacity: 0, filter: "blur(8px)" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="col-start-1 row-start-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x" style={{ backgroundSize: '200% 200%' }}
+              >
+                {animatedWords[wordIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+          <br className="hidden md:block"/>
+          With Tejomarg JOB
         </motion.h1>
         
         <motion.p 
