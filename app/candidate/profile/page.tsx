@@ -608,26 +608,26 @@ export default function CandidateProfilePage() {
               </div>
             ) : (
               <>
-                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Total Experience</span>
-                    <span className="text-slate-800 font-bold text-xs mt-1 block">{totalExperience || "Fresher"}</span>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm overflow-hidden">
+                  <div className="overflow-hidden pr-2">
+                    <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider truncate">Total Experience</span>
+                    <span className="text-slate-900 font-bold text-sm mt-1 block truncate">{totalExperience || "Fresher"}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                  <ChevronRight className="h-4 w-4 text-slate-350 shrink-0" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Monthly Salary</span>
-                    <span className="text-slate-800 font-bold text-xs mt-1 block">₹ {parseInt(expectedSalary).toLocaleString()}</span>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm overflow-hidden">
+                  <div className="overflow-hidden pr-2">
+                    <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider truncate">Monthly Salary</span>
+                    <span className="text-slate-900 font-bold text-sm mt-1 block truncate">₹ {parseInt(expectedSalary).toLocaleString()}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                  <ChevronRight className="h-4 w-4 text-slate-350 shrink-0" />
                 </div>
-                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block uppercase">Notice Period</span>
-                    <span className="text-slate-800 font-bold text-xs mt-1 block">{noticePeriod || "Immediate"}</span>
+                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm overflow-hidden">
+                  <div className="overflow-hidden pr-2">
+                    <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider truncate">Notice Period</span>
+                    <span className="text-slate-900 font-bold text-sm mt-1 block truncate">{noticePeriod || "Immediate"}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-350" />
+                  <ChevronRight className="h-4 w-4 text-slate-350 shrink-0" />
                 </div>
               </>
             )}
