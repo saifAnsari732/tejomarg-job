@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Briefcase, Menu, X, User, LogOut, LayoutDashboard, ChevronDown, ChevronRight, FileText, Search, BookOpen } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const user = session?.user as any;
+  const user = userOverride || (session?.user as any);
   const isLoggedIn = status === "authenticated";
 
   const getDashboardLink = () => {

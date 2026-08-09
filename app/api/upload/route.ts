@@ -45,11 +45,8 @@ export async function POST(request: Request) {
       },
     });
 
-    // Make the file publicly accessible
-    await fileRef.makePublic();
-
-    // Construct the public URL
-    const fileUrl = `https://storage.googleapis.com/${bucketName}/uploads/${filename}`;
+    // Construct the public URL (relies on Firebase Security Rules allowing read)
+    const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(`uploads/${filename}`)}?alt=media`;
 
     return NextResponse.json({ 
       url: fileUrl,
