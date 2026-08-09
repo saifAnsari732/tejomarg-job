@@ -3,9 +3,19 @@ import { storageAdmin } from "@/lib/firebaseAdmin";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import path from "path";
 
-// Fix for pdf-parse default export error in Next.js
+// Fix for pdf-parse default export error in Next.js across different versions
 const pdfParseModule = require("pdf-parse");
-const pdfParse = typeof pdfParseModule === "function" ? pdfParseModule : pdfParseModule.default;
+let pdfParse = typeof pdfParseModule === "function" ? pdfParseModule : pdfParseModule.default;
+
+// Fallback for pdf-parse v2.4.5+ which exports a PDFParse class instead of a function
+if (typeof pdfParse !== "function" && pdfParseModule.PDFParse) {
+  pdfParse = async (buffer: Buffer) => {
+    const parser = new pdfParseModule.PDFParse();
+    await parser.load(buffer);
+    const text = await parser.getText();
+    return { text };
+  };
+}
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
