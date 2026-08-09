@@ -35,7 +35,8 @@ export async function POST(request: Request) {
     const filename = `${Date.now()}-${sanitizedFilename}`;
     
     // Upload to Firebase Storage
-    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "tejomart-trade.firebasestorage.app";
+    // Use .appspot.com as it's the standard internal Google Cloud Storage bucket name for Firebase projects
+    const bucketName = process.env.FIREBASE_STORAGE_BUCKET || "tejomart-trade.appspot.com";
     const bucket = storageAdmin.bucket(bucketName);
     const fileRef = bucket.file(`uploads/${filename}`);
     
