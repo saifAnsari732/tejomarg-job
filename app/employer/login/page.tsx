@@ -133,7 +133,14 @@ export default function EmployerLoginPage() {
       router.refresh();
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Invalid OTP code");
+      const msg = err.message || "";
+      if (msg.includes("auth/user-disabled") || msg.includes("suspended")) {
+        toast.error("Your account has been disabled. Please contact support.");
+      } else if (msg.includes("auth/invalid-verification-code")) {
+        toast.error("Invalid OTP code. Please try again.");
+      } else {
+        toast.error(msg || "Invalid OTP code");
+      }
     } finally {
       setLoading(false);
     }
