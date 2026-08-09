@@ -68,6 +68,13 @@ export const authOptions: NextAuthOptions = {
         } else {
           user = querySnapshot.docs[0].data();
           userId = querySnapshot.docs[0].id;
+          
+          const intendedRole = credentials.intendedRole || "candidate";
+          // If they login via a different portal, update their role to match the portal they are using
+          if (user.role !== intendedRole) {
+            await usersRef.doc(userId).update({ role: intendedRole });
+            user.role = intendedRole;
+          }
         }
 
         if (user.isBlocked) {
