@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/authOptions";
 import { db } from "@/lib/firebaseAdmin";
 import Link from "next/link";
 import { Search, CheckSquare, Bookmark, FileText, Upload, HelpCircle, LogOut } from "lucide-react";
+import SidebarUploadButton from "@/components/candidate/SidebarUploadButton";
 
 export default async function CandidateLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -71,9 +72,7 @@ export default async function CandidateLayout({ children }: { children: React.Re
           </div>
 
           <div className="p-6 space-y-5">
-            <Link href="/candidate/profile" className="w-full flex items-center justify-center gap-2 bg-[#2e2f8c] hover:bg-[#232470] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer">
-              <Upload className="w-4 h-4" /> Upload Resume
-            </Link>
+            <SidebarUploadButton />
             <div className="pt-5 border-t border-slate-200 space-y-2">
               <Link href="/support" className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
                 <HelpCircle className="w-4 h-4" /> Help Center
