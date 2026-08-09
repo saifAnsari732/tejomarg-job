@@ -383,6 +383,7 @@ export default function CandidateProfilePage() {
                   </span>
                 </div>
               </div>
+            )}
             </div>
           </div>
 
