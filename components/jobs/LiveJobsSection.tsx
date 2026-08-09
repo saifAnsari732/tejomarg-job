@@ -254,7 +254,7 @@ export default async function LiveJobsSection({ initialQuery = "Developer", init
                     Apply
                   </a>
                   <Link href={`/jobs/live/${job.id}`}
-                    className="text-sm font-bold bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-600 hover:text-white hover:border-teal-600 px-4 py-2 rounded-xl flex items-center transition-all duration-300 shadow-sm">
+                    className="text-sm font-bold bg-teal-50 text-teal-700 border border-teal-100 bg-teal-600 text-white hover:border-teal-600 px-4 py-2 rounded-xl flex items-center transition-all duration-300 shadow-sm">
                     View Details <ChevronRight className="w-4 h-4 ml-0.5" />
                   </Link>
                 </div>

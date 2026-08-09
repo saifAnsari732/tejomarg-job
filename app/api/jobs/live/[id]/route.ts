@@ -20,7 +20,7 @@ export async function GET(
           "X-RapidAPI-Key":  apiKey,
           "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
         },
-        cache: "no-store",
+        next: { revalidate: 3600 },
       }
     );
 

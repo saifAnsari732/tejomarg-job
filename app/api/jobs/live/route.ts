@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   try {
     // Using Remotive for ultra-fast response (~300ms)
     const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=15`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
