@@ -100,54 +100,57 @@ export default function LiveJobDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-900 relative overflow-hidden">
+      {/* Subtle Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-blue-50 to-transparent -z-10"></div>
+      <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
       {/* ── Top Nav Bar ─────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div className="bg-white/80 backdrop-blur-md dark:bg-slate-800/80 border-b border-slate-200/60 dark:border-slate-700 sticky top-0 z-20 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
           <Link href="/jobs"
-            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+            className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to Jobs
           </Link>
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+          <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 font-medium">
             <Link href="/jobs" className="hover:text-slate-600">Jobs</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-slate-600 dark:text-slate-300 font-bold truncate max-w-48">{job.title}</span>
+            <span className="text-slate-700 font-bold truncate max-w-[300px]">{job.title}</span>
           </div>
           <a href={job.applyUrl} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-blue-500/20">
-            Apply Now <ExternalLink className="h-3 w-3" />
+            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-indigo-600 text-white text-sm font-bold rounded-full transition-all shadow-md hover:shadow-indigo-500/25">
+            Apply Now <ExternalLink className="h-4 w-4" />
           </a>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start relative z-10">
 
         {/* ── Left / Main Column ───────────────────────────────────── */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
 
           {/* Hero Card */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className="flex items-start gap-4">
               {/* Logo */}
-              <div className="shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center border border-slate-100 dark:border-slate-700 overflow-hidden">
+              <div className="shrink-0 w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center p-2 overflow-hidden">
                 {job.companyLogo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
+                  <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain" />
                 ) : (
-                  <span className="text-2xl font-black text-blue-600 dark:text-blue-400">
+                  <span className="text-3xl font-black text-indigo-600 dark:text-blue-400">
                     {job.company.charAt(0)}
                   </span>
                 )}
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex-1 min-w-0 mt-1">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">{job.title}</h1>
-                    <div className="flex items-center gap-1.5 mt-2">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">{job.title}</h1>
+                    <div className="flex items-center gap-2 mt-3">
                       <Building2 className="h-4 w-4 text-slate-400" />
-                      <span className="text-base font-bold text-indigo-700">{job.company}</span>
+                      <span className="text-base font-bold text-indigo-600">{job.company}</span>
                       {job.source !== "Mock Data" && (
                         <span title="Verified" className="flex items-center">
                           <BadgeCheck className="h-3.5 w-3.5 text-blue-400" />
@@ -163,20 +166,20 @@ export default function LiveJobDetailPage() {
                 </div>
 
                 {/* Meta chips */}
-                <div className="flex flex-wrap items-center gap-2.5 mt-4">
-                  <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" /> {job.location}
+                <div className="flex flex-wrap items-center gap-3 mt-5">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                    <MapPin className="h-4 w-4 shrink-0 text-slate-400" /> {job.location}
                   </span>
                   {job.isRemote && (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                      <Wifi className="h-3.5 w-3.5" /> Remote
+                    <span className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                      <Wifi className="h-4 w-4" /> Remote
                     </span>
                   )}
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${typeColor(job.type)}`}>
+                  <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${typeColor(job.type)}`}>
                     {typeLabel(job.type)}
                   </span>
-                  <span className="flex items-center gap-1 text-xs text-slate-400">
-                    <Clock className="h-3.5 w-3.5" /> {timeAgo(job.postedAt)}
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                    <Clock className="h-4 w-4 text-slate-400" /> {timeAgo(job.postedAt)}
                   </span>
                 </div>
               </div>
@@ -184,25 +187,25 @@ export default function LiveJobDetailPage() {
           </div>
 
           {/* Job Description */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
-            <h2 className="font-extrabold text-slate-900 text-xl mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-indigo-600" /> Job Description
+          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h2 className="font-black text-slate-900 text-xl mb-6 flex items-center gap-2.5">
+              <BookOpen className="h-5 w-5 text-indigo-500" /> Job Description
             </h2>
-            <div className="text-base font-medium text-slate-700 leading-relaxed whitespace-pre-line">
+            <div className="text-base text-slate-600 leading-loose whitespace-pre-line">
               {job.description}
             </div>
           </div>
 
           {/* Responsibilities */}
           {job.highlights?.Responsibilities && job.highlights.Responsibilities.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
-              <h2 className="font-extrabold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-indigo-500" /> Responsibilities
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h2 className="font-black text-slate-900 dark:text-white text-lg mb-6 flex items-center gap-2.5">
+                <Briefcase className="h-5 w-5 text-blue-500" /> Responsibilities
               </h2>
-              <ul className="space-y-2.5">
+              <ul className="space-y-4">
                 {job.highlights.Responsibilities.map((r, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-400">
-                    <CheckCircle className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                  <li key={i} className="flex items-start gap-3 text-base text-slate-600 dark:text-slate-400">
+                    <CheckCircle className="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" />
                     {r}
                   </li>
                 ))}
@@ -212,14 +215,14 @@ export default function LiveJobDetailPage() {
 
           {/* Qualifications */}
           {job.highlights?.Qualifications && job.highlights.Qualifications.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
-              <h2 className="font-extrabold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-emerald-500" /> Qualifications & Requirements
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h2 className="font-black text-slate-900 dark:text-white text-lg mb-6 flex items-center gap-2.5">
+                <GraduationCap className="h-5 w-5 text-emerald-500" /> Qualifications & Requirements
               </h2>
-              <ul className="space-y-2.5">
+              <ul className="space-y-4">
                 {job.highlights.Qualifications.map((q, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-400">
-                    <Award className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <li key={i} className="flex items-start gap-3 text-base text-slate-600 dark:text-slate-400">
+                    <Award className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                     {q}
                   </li>
                 ))}
@@ -229,15 +232,15 @@ export default function LiveJobDetailPage() {
 
           {/* Benefits */}
           {job.highlights?.Benefits && job.highlights.Benefits.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
-              <h2 className="font-extrabold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
-                <Gift className="h-4 w-4 text-pink-500" /> Benefits & Perks
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h2 className="font-black text-slate-900 dark:text-white text-lg mb-6 flex items-center gap-2.5">
+                <Gift className="h-5 w-5 text-rose-500" /> Benefits & Perks
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {job.highlights.Benefits.map((b, i) => (
                   <span key={i}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 border border-pink-100 dark:border-pink-800 text-pink-700 dark:text-pink-400 text-xs font-semibold rounded-xl">
-                    <Star className="h-3 w-3" /> {b}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-sm font-semibold rounded-xl">
+                    <Star className="h-4 w-4" /> {b}
                   </span>
                 ))}
               </div>
@@ -246,37 +249,39 @@ export default function LiveJobDetailPage() {
         </div>
 
         {/* ── Right Sidebar ────────────────────────────────────────── */}
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* Apply CTA Card */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 shadow-lg shadow-blue-500/20 text-white space-y-4">
-            <div>
-              <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">Ready to apply?</p>
-              <h3 className="text-lg font-black mt-1">{job.title}</h3>
-              <p className="text-sm text-blue-200 mt-0.5">{job.company}</p>
+          <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border-t-4 border-t-indigo-600 space-y-6 relative overflow-hidden">
+            <div className="relative z-10">
+              <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-2">Ready to apply?</p>
+              <h3 className="text-xl font-black text-slate-900">{job.title}</h3>
+              <p className="text-base text-slate-500 font-medium mt-1">{job.company}</p>
             </div>
             {job.salary !== "Not Disclosed" && (
-              <div className="bg-white/15 rounded-xl px-4 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Salary</p>
-                <p className="text-sm font-black mt-0.5">💰 {job.salary}</p>
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 relative z-10">
+                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Expected Salary</p>
+                <p className="text-lg font-black text-emerald-600">💰 {job.salary}</p>
               </div>
             )}
-            <a href={job.applyUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-white text-blue-700 font-extrabold text-sm rounded-2xl hover:bg-blue-50 transition-colors shadow-sm">
-              Apply Now <ExternalLink className="h-4 w-4" />
-            </a>
-            {job.companyWebsite && (
-              <a href={job.companyWebsite} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-2xl transition-colors border border-white/20">
-                <Globe className="h-3.5 w-3.5" /> Visit Company Website
+            <div className="space-y-3 relative z-10">
+              <a href={job.applyUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black text-base rounded-2xl hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition-all">
+                Apply Now <ExternalLink className="h-4 w-4" />
               </a>
-            )}
+              {job.companyWebsite && (
+                <a href={job.companyWebsite} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-white hover:bg-slate-50 text-slate-600 font-bold text-sm rounded-2xl transition-colors border border-slate-200">
+                  <Globe className="h-4 w-4" /> Visit Website
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Job Overview */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm space-y-4">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">Job Overview</h3>
-            <div className="space-y-3">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
+            <h3 className="font-black text-slate-900 dark:text-white text-lg">Job Overview</h3>
+            <div className="space-y-4">
               {[
                 { icon: Briefcase,  label: "Job Type",  value: typeLabel(job.type) },
                 { icon: MapPin,     label: "Location",  value: job.location },
@@ -284,13 +289,13 @@ export default function LiveJobDetailPage() {
                 { icon: Clock,      label: "Posted",    value: timeAgo(job.postedAt) },
                 { icon: Zap,        label: "Source",    value: job.source },
               ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-700 shrink-0">
-                    <Icon className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+                <div key={label} className="flex items-center gap-4">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 shrink-0 border border-slate-100">
+                    <Icon className="h-4 w-4 text-indigo-500 dark:text-slate-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{label}</p>
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{value}</p>
+                    <p className="text-[11px] uppercase font-bold tracking-wider text-slate-400">{label}</p>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-0.5">{value}</p>
                   </div>
                 </div>
               ))}
@@ -299,12 +304,12 @@ export default function LiveJobDetailPage() {
 
           {/* Required Skills */}
           {job.requiredSkills && job.requiredSkills.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm">
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-sm mb-3">Required Skills</h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/60 dark:border-slate-700 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4">Required Skills</h3>
+              <div className="flex flex-wrap gap-2.5">
                 {job.requiredSkills.map((skill, i) => (
                   <span key={i}
-                    className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-[11px] font-bold rounded-lg">
+                    className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-600 hover:text-indigo-600 text-xs font-bold rounded-xl transition-colors cursor-default">
                     {skill}
                   </span>
                 ))}
@@ -314,7 +319,7 @@ export default function LiveJobDetailPage() {
 
           {/* Back to Jobs */}
           <Link href="/jobs"
-            className="flex items-center justify-center gap-2 w-full py-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs rounded-2xl hover:border-blue-400 hover:text-blue-600 transition-all">
+            className="flex items-center justify-center gap-2 w-full py-4 border-2 border-slate-200 dark:border-slate-700 bg-transparent text-slate-600 dark:text-slate-400 font-bold text-sm rounded-2xl hover:border-indigo-400 hover:text-indigo-600 transition-all">
             <ArrowLeft className="h-4 w-4" /> Back to All Jobs
           </Link>
         </div>
