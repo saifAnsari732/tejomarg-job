@@ -68,7 +68,7 @@ export default function CandidateProfilePage() {
   const [editOther, setEditOther] = useState(false);
 
   // Temporary edit states
-  const [tempBasic, setTempBasic] = useState({ mobile: "", dob: "", gender: "", homeTown: "", currentLocation: "" });
+  const [tempBasic, setTempBasic] = useState({ name: "", mobile: "", dob: "", gender: "", homeTown: "", currentLocation: "" });
   const [tempSingle, setTempSingle] = useState({ totalExperience: "", expectedSalary: "0", noticePeriod: "" });
   const [tempEdu, setTempEdu] = useState({ highestEducation: "", schoolMedium: "" });
   const [tempSkillsText, setTempSkillsText] = useState("");
@@ -260,6 +260,7 @@ export default function CandidateProfilePage() {
                 onClick={() => {
                   if (editBasic) {
                     handleSave({
+                      name: tempBasic.name,
                       mobile: tempBasic.mobile,
                       dob: tempBasic.dob,
                       gender: tempBasic.gender,
@@ -268,7 +269,7 @@ export default function CandidateProfilePage() {
                     });
                     setEditBasic(false);
                   } else {
-                    setTempBasic({ mobile, dob, gender, homeTown, currentLocation });
+                    setTempBasic({ name, mobile, dob, gender, homeTown, currentLocation });
                     setEditBasic(true);
                   }
                 }}
@@ -312,6 +313,10 @@ export default function CandidateProfilePage() {
             {/* Details Grid */}
             {editBasic ? (
               <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Full Name</label>
+                  <input type="text" value={tempBasic.name} onChange={e => setTempBasic({...tempBasic, name: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />
+                </div>
                 <div>
                   <label className="text-[10px] uppercase font-bold text-slate-400">Mobile</label>
                   <input type="text" value={tempBasic.mobile} onChange={e => setTempBasic({...tempBasic, mobile: e.target.value})} className="w-full mt-0.5 border border-slate-200 rounded px-2.5 py-1 text-xs" />

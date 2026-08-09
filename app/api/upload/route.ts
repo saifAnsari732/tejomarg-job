@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
+import { storageAdmin } from "@/lib/firebaseAdmin";
 import path from "path";
 
 export async function POST(request: Request) {
@@ -30,18 +30,26 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure uploads directory exists
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
     // Generate clean unique filename
     const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `${Date.now()}-${sanitizedFilename}`;
-    const filePath = path.join(uploadDir, filename);
     
-    await writeFile(filePath, buffer);
+    // Upload to Firebase Storage
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "tejomart-trade.firebasestorage.app";
+    const bucket = storageAdmin.bucket(bucketName);
+    const fileRef = bucket.file(`uploads/${filename}`);
+    
+    await fileRef.save(buffer, {
+      metadata: { 
+        contentType: file.type,
+      },
+    });
 
-    const fileUrl = `/uploads/${filename}`;
+    // Make the file publicly accessible
+    await fileRef.makePublic();
+
+    // Construct the public URL
+    const fileUrl = `https://storage.googleapis.com/${bucketName}/uploads/${filename}`;
 
     return NextResponse.json({ 
       url: fileUrl,
