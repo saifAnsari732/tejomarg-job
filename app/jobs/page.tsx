@@ -191,18 +191,29 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
   const liveLocation = currentFilters.location || "India";
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-500/30">
       <Navbar />
       
-      {/* Search Header Banner */}
-      <div className="bg-white border-b border-slate-200 py-8 mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Find your next dream job</h1>
-          <p className="text-slate-500">Explore thousands of job opportunities with all the information you need.</p>
+      {/* Hero Header Banner */}
+      <div className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 pt-16 pb-20 mb-8 overflow-hidden shadow-inner">
+        {/* Abstract background shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-indigo-500/10 rounded-full blur-3xl transform rotate-12"></div>
+          <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-blue-500/10 rounded-full blur-3xl transform -rotate-12"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-purple-500/5 rounded-full blur-[100px]"></div>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-md">
+            Find your next <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">dream job</span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-300 max-w-2xl drop-shadow-sm font-medium">
+            Explore thousands of premium opportunities to make the best career move.
+          </p>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 flex-1">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 flex-1 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           
           {/* ── Left: Filter Sidebar ─────────────────────────────── */}
@@ -214,33 +225,33 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
           <div className="lg:col-span-3 space-y-6">
             
             {/* Section Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <h2 className="font-bold text-slate-900 text-lg">
+            <div className="bg-white p-4 sm:px-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+              <div className="flex items-center gap-3">
+                <h2 className="font-extrabold text-slate-900 text-xl tracking-tight">
                   {jobs.length > 0 ? "Recommended Jobs" : "All Jobs"}
                 </h2>
-                <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                <span className="text-[10px] uppercase font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
                   Portal & Live
                 </span>
               </div>
 
               {/* Sort controls */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 font-medium">Sort by:</span>
-                <div className="flex rounded-md bg-slate-100 p-1">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Sort by:</span>
+                <div className="flex rounded-lg bg-slate-100 p-1 border border-slate-200/60">
                   <Link href={getSortLink("latest")}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${
+                    className={`text-xs font-bold px-4 py-1.5 rounded-md transition-all duration-200 ${
                       currentFilters.sort === "latest"
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-indigo-700 shadow-sm border border-slate-200/50"
+                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                     }`}>
                     Latest
                   </Link>
                   <Link href={getSortLink("salary-desc")}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${
+                    className={`text-xs font-bold px-4 py-1.5 rounded-md transition-all duration-200 ${
                       currentFilters.sort === "salary-desc"
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-indigo-700 shadow-sm border border-slate-200/50"
+                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                     }`}>
                     Salary
                   </Link>
@@ -295,7 +306,7 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 

@@ -169,7 +169,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
         {activeChips.length > 0 && (
           <div className="shrink-0 flex items-center gap-2 mr-2 border-r border-slate-300 pr-2">
             {activeChips.map((chip, idx) => (
-              <div key={idx} className="flex items-center gap-1 px-3 py-1.5 border border-emerald-600 bg-emerald-50 rounded-full text-xs text-emerald-700 font-semibold">
+              <div key={idx} className="flex items-center gap-1 px-3 py-1.5 border border-indigo-600 bg-indigo-50 rounded-full text-xs text-indigo-700 font-semibold">
                 {chip.display}
                 <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveChip(chip.key, chip.key === "experience" || chip.key === "minSalary" || chip.key === "datePosted" || chip.key === "sort" ? undefined : chip.val)} />
               </div>
@@ -209,7 +209,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <button 
                     key={tab.id}
                     onClick={() => setMobileTab(tab.id)} 
-                    className={`w-full text-left p-4 text-[11px] font-bold transition-colors ${mobileTab === tab.id ? 'bg-white border-l-4 border-emerald-600 text-emerald-800' : 'text-slate-600 border-l-4 border-transparent hover:bg-slate-100'}`}
+                    className={`w-full text-left p-4 text-[11px] font-bold transition-colors ${mobileTab === tab.id ? 'bg-white border-l-4 border-indigo-600 text-indigo-800' : 'text-slate-600 border-l-4 border-transparent hover:bg-slate-100'}`}
                   >
                     {tab.label}
                   </button>
@@ -222,7 +222,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div className="space-y-4">
                     {filterOptions.datePosted.map((opt) => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <input type="radio" checked={filters.datePosted === opt || (!filters.datePosted && opt === "All")} onChange={() => handleRadio("datePosted", opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded-full checked:border-emerald-600 checked:border-[4px] transition-all" />
+                        <input type="radio" checked={filters.datePosted === opt || (!filters.datePosted && opt === "All")} onChange={() => handleRadio("datePosted", opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded-full checked:border-indigo-600 checked:border-[4px] transition-all" />
                         <span className="text-xs text-slate-700 font-semibold">{opt}</span>
                       </label>
                     ))}
@@ -232,7 +232,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div className="space-y-4">
                     {filterOptions.sortBy.map((opt) => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <input type="radio" checked={filters.sort === opt || (!filters.sort && opt === "Relevant")} onChange={() => handleRadio("sort", opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded-full checked:border-emerald-600 checked:border-[4px] transition-all" />
+                        <input type="radio" checked={filters.sort === opt || (!filters.sort && opt === "Relevant")} onChange={() => handleRadio("sort", opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded-full checked:border-indigo-600 checked:border-[4px] transition-all" />
                         <span className="text-xs text-slate-700 font-semibold">{opt}</span>
                       </label>
                     ))}
@@ -242,14 +242,14 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div className="pt-2">
                     <p className="text-[11px] text-slate-500 mb-6 font-semibold">Minimum monthly salary</p>
                     <div className="relative pt-1 px-1">
-                      <div className="absolute -top-4 left-[calc(var(--val)*0.6%)] bg-emerald-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.minSalary || "0") / 1000 } as any}>
+                      <div className="absolute -top-4 left-[calc(var(--val)*0.6%)] bg-indigo-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.minSalary || "0") / 1000 } as any}>
                         ₹{(parseInt(filters.minSalary || "0") / 1000)}k
                       </div>
                       <input
                         type="range" min="0" max="150000" step="10000"
                         value={filters.minSalary || "0"}
                         onChange={(e) => setFilters({ ...filters, minSalary: e.target.value })}
-                        className="w-full h-1 bg-emerald-100 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                        className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-indigo-700"
                       />
                       <div className="flex justify-between mt-3">
                         <span className="text-[10px] font-bold text-slate-500">0</span>
@@ -262,14 +262,14 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div className="pt-2">
                     <p className="text-[11px] text-slate-500 mb-6 font-semibold">Your work experience</p>
                     <div className="relative pt-1 px-1">
-                      <div className="absolute -top-4 left-[calc(var(--val)*3.1%)] bg-emerald-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.experience || "0") } as any}>
+                      <div className="absolute -top-4 left-[calc(var(--val)*3.1%)] bg-indigo-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.experience || "0") } as any}>
                         {filters.experience || "0"}
                       </div>
                       <input
                         type="range" min="0" max="31" step="1"
                         value={filters.experience || "0"}
                         onChange={(e) => setFilters({ ...filters, experience: e.target.value })}
-                        className="w-full h-1 bg-emerald-100 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                        className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-indigo-700"
                       />
                       <div className="flex justify-between mt-3">
                         <span className="text-[10px] font-bold text-slate-500">0 years</span>
@@ -282,12 +282,12 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div>
                     <div className="relative mb-4">
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                      <input type="text" placeholder="Search department..." value={deptSearch} onChange={(e) => setDeptSearch(e.target.value)} className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                      <input type="text" placeholder="Search department..." value={deptSearch} onChange={(e) => setDeptSearch(e.target.value)} className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                     </div>
                     <div className="space-y-4">
                       {categories.filter(c => c.name.toLowerCase().includes(deptSearch.toLowerCase())).map((cat) => (
                         <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" checked={filters.department?.split(",").includes(cat.name)} onChange={() => handleCheckbox("department", cat.name)} className="appearance-none w-4 h-4 border border-slate-300 rounded flex-shrink-0 checked:bg-emerald-600 checked:border-emerald-600 transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                          <input type="checkbox" checked={filters.department?.split(",").includes(cat.name)} onChange={() => handleCheckbox("department", cat.name)} className="appearance-none w-4 h-4 border border-slate-300 rounded flex-shrink-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                           <span className="text-xs text-slate-700 font-semibold group-hover:text-slate-900 leading-snug">{cat.name}</span>
                         </label>
                       ))}
@@ -298,7 +298,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   <div className="space-y-4">
                     {filterOptions[mobileTab as keyof typeof filterOptions].map((opt) => (
                       <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" checked={filters[mobileTab as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(mobileTab as keyof typeof filters, opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded flex-shrink-0 checked:bg-emerald-600 checked:border-emerald-600 transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                        <input type="checkbox" checked={filters[mobileTab as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(mobileTab as keyof typeof filters, opt)} className="appearance-none w-4 h-4 border border-slate-300 rounded flex-shrink-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                         <span className="text-xs text-slate-700 font-semibold group-hover:text-slate-900 leading-snug">{opt}</span>
                       </label>
                     ))}
@@ -309,8 +309,8 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
             
             {/* Modal Footer */}
             <div className="p-3 border-t border-slate-100 flex items-center justify-between gap-3 bg-white">
-              <button onClick={handleClearAll} className="text-emerald-700 font-bold text-sm w-1/2 text-center py-2.5">Clear Filters</button>
-              <button onClick={() => setIsMobileModalOpen(false)} className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm w-1/2 py-2.5 rounded-xl transition-colors shadow-sm">Apply</button>
+              <button onClick={handleClearAll} className="text-indigo-700 font-bold text-sm w-1/2 text-center py-2.5">Clear Filters</button>
+              <button onClick={() => setIsMobileModalOpen(false)} className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-sm w-1/2 py-2.5 rounded-xl transition-colors shadow-sm">Apply</button>
             </div>
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
       {/* =========================================
           DESKTOP VIEW: Sidebar
       ========================================= */}
-      <div className="hidden lg:block bg-transparent shadow-sm p-0 w-full overflow-hidden text-sm">
+      <div className="hidden lg:block bg-white rounded-2xl border border-slate-200 shadow-sm p-0 w-full overflow-hidden text-sm relative">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-slate-100">
           <div className="flex items-center space-x-2 text-slate-900 font-bold">
@@ -360,7 +360,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <p className="text-xs text-slate-500 mb-4">Your work experience</p>
                 <div className="relative pt-1 px-1">
                   {/* Tooltip for slider */}
-                  <div className="absolute -top-3 left-[calc(var(--val)*3.1%)] bg-[#0f5a36] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.experience || "0") } as any}>
+                  <div className="absolute -top-3 left-[calc(var(--val)*3.1%)] bg-[indigo-600] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.experience || "0") } as any}>
                     {filters.experience || "0"}
                   </div>
                   <input
@@ -368,7 +368,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                     value={filters.experience || "0"}
                     onChange={(e) => setFilters({ ...filters, experience: e.target.value })}
                     onMouseUp={() => applyFilters()}
-                    className="w-full h-1 bg-emerald-100 rounded-lg appearance-none cursor-pointer accent-[#0f5a36]"
+                    className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-[indigo-600]"
                   />
                   <div className="flex justify-between mt-2">
                     <span className="text-xs text-slate-600">0 years</span>
@@ -390,7 +390,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
               <div className="space-y-3">
                 {filterOptions.datePosted.map((opt) => (
                   <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="radio" checked={filters.datePosted === opt || (!filters.datePosted && opt === "All")} onChange={() => handleRadio("datePosted", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded-full checked:border-[#0f5a36] checked:border-[3px] transition-all cursor-pointer" />
+                    <input type="radio" checked={filters.datePosted === opt || (!filters.datePosted && opt === "All")} onChange={() => handleRadio("datePosted", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded-full checked:border-[indigo-600] checked:border-[3px] transition-all cursor-pointer" />
                     <span className="text-xs text-slate-600 group-hover:text-slate-900">{opt}</span>
                   </label>
                 ))}
@@ -410,7 +410,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <p className="text-xs text-slate-500 mb-4">Minimum monthly salary</p>
                 <div className="relative pt-1 px-1">
                   {/* Tooltip for slider */}
-                  <div className="absolute -top-3 left-[calc(var(--val)*0.6%)] bg-[#0f5a36] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.minSalary || "0") / 1000 } as any}>
+                  <div className="absolute -top-3 left-[calc(var(--val)*0.6%)] bg-[indigo-600] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.minSalary || "0") / 1000 } as any}>
                     ₹{(parseInt(filters.minSalary || "0") / 1000)}k
                   </div>
                   <input
@@ -418,7 +418,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                     value={filters.minSalary || "0"}
                     onChange={(e) => setFilters({ ...filters, minSalary: e.target.value })}
                     onMouseUp={() => applyFilters()}
-                    className="w-full h-1 bg-emerald-100 rounded-lg appearance-none cursor-pointer accent-[#0f5a36]"
+                    className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-[indigo-600]"
                   />
                   <div className="flex justify-between mt-2">
                     <span className="text-xs text-slate-600">0</span>
@@ -442,7 +442,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <div className="space-y-3">
                   {filterOptions.education.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" checked={filters.education?.split(",").includes(opt)} onChange={() => handleCheckbox("education", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[#0f5a36] checked:border-[#0f5a36] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                      <input type="checkbox" checked={filters.education?.split(",").includes(opt)} onChange={() => handleCheckbox("education", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                       <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
@@ -467,7 +467,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <div className="space-y-3">
                   {options.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[#0f5a36] checked:border-[#0f5a36] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                      <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                       <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
@@ -492,7 +492,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
                   {categories.filter(c => c.name.toLowerCase().includes(deptSearch.toLowerCase())).map((cat) => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" checked={filters.department?.split(",").includes(cat.name)} onChange={() => handleCheckbox("department", cat.name)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[#0f5a36] checked:border-[#0f5a36] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                      <input type="checkbox" checked={filters.department?.split(",").includes(cat.name)} onChange={() => handleCheckbox("department", cat.name)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                       <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{cat.name}</span>
                     </label>
                   ))}
@@ -516,7 +516,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 <div className="space-y-3">
                   {options.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
-                      <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[#0f5a36] checked:border-[#0f5a36] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
+                      <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
                       <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
