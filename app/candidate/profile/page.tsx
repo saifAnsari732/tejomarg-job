@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -29,6 +31,7 @@ interface CertificationItem {
 }
 
 export default function CandidateProfilePage() {
+  const { update } = useSession();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -175,6 +178,14 @@ export default function CandidateProfilePage() {
       if (sectionPayload.languages !== undefined) setLanguages(sectionPayload.languages);
       if (sectionPayload.spokenEnglishLevel !== undefined) setSpokenEnglishLevel(sectionPayload.spokenEnglishLevel);
       if (sectionPayload.preferredJobTitles !== undefined) setPreferredJobTitles(sectionPayload.preferredJobTitles);
+
+      // Update NextAuth session so Navbar and Sidebar reflect changes instantly
+      if (sectionPayload.name !== undefined || sectionPayload.avatarUrl !== undefined) {
+        await update({
+          name: sectionPayload.name !== undefined ? sectionPayload.name : name,
+          picture: sectionPayload.avatarUrl !== undefined ? sectionPayload.avatarUrl : avatarUrl,
+        });
+      }
 
       toast.success("Profile section updated successfully!");
     } catch (err: any) {
