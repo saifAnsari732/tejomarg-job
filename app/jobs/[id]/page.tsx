@@ -123,14 +123,14 @@ export default async function JobDetailPage({ params }: PageProps) {
   const company = job.companyId as any;
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-50 font-sans">
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
         {/* Back Link */}
         <div className="mb-6">
           <Link
             href="/jobs"
-            className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to search listings
@@ -141,7 +141,7 @@ export default async function JobDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Job Description & Details */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-8">
               
               {/* Header Info: Logo on left, details on right */}
               <div className="flex flex-col sm:flex-row gap-5">
@@ -156,10 +156,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                 
                 {/* Titles and Badges */}
                 <div className="flex-1">
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                     {job.title}
                   </h1>
-                  <p className="text-sm font-semibold text-slate-600 mt-1">
+                  <p className="text-base font-bold text-indigo-700 mt-1.5">
                     {company?.name || "Verified Employer"}
                   </p>
                   
@@ -211,24 +211,24 @@ export default async function JobDetailPage({ params }: PageProps) {
 
               {/* Job Description */}
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-xl font-extrabold text-slate-900 mb-4">
                   Job Description
                 </h3>
-                <div className="text-slate-650 dark:text-slate-350 text-sm leading-relaxed space-y-4 whitespace-pre-line">
+                <div className="text-slate-700 text-base leading-relaxed space-y-5 whitespace-pre-line font-medium">
                   {job.description}
                 </div>
               </div>
 
               {/* Skills Required */}
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-xl font-extrabold text-slate-900 mb-4">
                   Skills Required
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5">
                   {job.skillsRequired.map((skill: string) => (
                     <span
                       key={skill}
-                      className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 rounded-xl text-xs font-semibold"
+                      className="px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/50 rounded-xl text-sm font-bold shadow-sm"
                     >
                       {skill}
                     </span>
@@ -317,7 +317,7 @@ export default async function JobDetailPage({ params }: PageProps) {
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 export const dynamic = "force-dynamic";

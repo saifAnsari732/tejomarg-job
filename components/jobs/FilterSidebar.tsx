@@ -357,7 +357,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
             </button>
             {expanded.experience && (
               <div className="pt-2 pb-1">
-                <p className="text-xs text-slate-500 mb-4">Your work experience</p>
+                <p className="text-[13px] text-slate-600 font-medium mb-4">Your work experience</p>
                 <div className="relative pt-1 px-1">
                   {/* Tooltip for slider */}
                   <div className="absolute -top-3 left-[calc(var(--val)*3.1%)] bg-[indigo-600] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.experience || "0") } as any}>
@@ -371,8 +371,8 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                     className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-[indigo-600]"
                   />
                   <div className="flex justify-between mt-2">
-                    <span className="text-xs text-slate-600">0 years</span>
-                    <span className="text-xs text-slate-600">31 years</span>
+                    <span className="text-[13px] text-slate-700 font-medium">0 years</span>
+                    <span className="text-[13px] text-slate-700 font-medium">31 years</span>
                   </div>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                 {filterOptions.datePosted.map((opt) => (
                   <label key={opt} className="flex items-center gap-3 cursor-pointer group">
                     <input type="radio" checked={filters.datePosted === opt || (!filters.datePosted && opt === "All")} onChange={() => handleRadio("datePosted", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded-full checked:border-[indigo-600] checked:border-[3px] transition-all cursor-pointer" />
-                    <span className="text-xs text-slate-600 group-hover:text-slate-900">{opt}</span>
+                    <span className="text-[13px] text-slate-700 font-medium group-hover:text-slate-900">{opt}</span>
                   </label>
                 ))}
               </div>
@@ -407,7 +407,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
             </button>
             {expanded.salary && (
               <div className="pt-2 pb-1">
-                <p className="text-xs text-slate-500 mb-4">Minimum monthly salary</p>
+                <p className="text-[13px] text-slate-600 font-medium mb-4">Minimum monthly salary</p>
                 <div className="relative pt-1 px-1">
                   {/* Tooltip for slider */}
                   <div className="absolute -top-3 left-[calc(var(--val)*0.6%)] bg-[indigo-600] text-white text-[10px] font-bold px-1.5 rounded -translate-x-1/2" style={{ "--val": parseInt(filters.minSalary || "0") / 1000 } as any}>
@@ -421,8 +421,8 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                     className="w-full h-1 bg-indigo-100/50 rounded-lg appearance-none cursor-pointer accent-[indigo-600]"
                   />
                   <div className="flex justify-between mt-2">
-                    <span className="text-xs text-slate-600">0</span>
-                    <span className="text-xs text-slate-600">1.5 Lakhs</span>
+                    <span className="text-[13px] text-slate-700 font-medium">0</span>
+                    <span className="text-[13px] text-slate-700 font-medium">1.5 Lakhs</span>
                   </div>
                 </div>
               </div>
@@ -438,12 +438,12 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
             </button>
             {expanded.education && (
               <div className="pt-2">
-                <p className="text-xs text-slate-500 mb-3 leading-relaxed">Select your highest education level to see all eligible jobs</p>
+                <p className="text-[13px] text-slate-600 font-medium mb-3 leading-relaxed">Select your highest education level to see all eligible jobs</p>
                 <div className="space-y-3">
                   {filterOptions.education.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
                       <input type="checkbox" checked={filters.education?.split(",").includes(opt)} onChange={() => handleCheckbox("education", opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
-                      <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
+                      <span className="text-[13px] text-slate-700 font-medium group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
                 </div>
@@ -468,7 +468,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   {options.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
                       <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
-                      <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
+                      <span className="text-[13px] text-slate-700 font-medium group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
                 </div>
@@ -493,7 +493,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   {categories.filter(c => c.name.toLowerCase().includes(deptSearch.toLowerCase())).map((cat) => (
                     <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group">
                       <input type="checkbox" checked={filters.department?.split(",").includes(cat.name)} onChange={() => handleCheckbox("department", cat.name)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
-                      <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{cat.name}</span>
+                      <span className="text-[13px] text-slate-700 font-medium group-hover:text-slate-900 leading-snug">{cat.name}</span>
                     </label>
                   ))}
                 </div>
@@ -517,7 +517,7 @@ export default function FilterSidebar({ categories, initialFilters }: FilterSide
                   {options.map((opt) => (
                     <label key={opt} className="flex items-center gap-3 cursor-pointer group">
                       <input type="checkbox" checked={filters[key as keyof typeof filters]?.split(",").includes(opt)} onChange={() => handleCheckbox(key as keyof typeof filters, opt)} className="appearance-none w-3.5 h-3.5 border border-slate-300 rounded flex-shrink-0 checked:bg-[indigo-600] checked:border-[indigo-600] transition-colors cursor-pointer flex items-center justify-center after:content-[''] after:w-1.5 after:h-2 after:border-white after:border-r-2 after:border-b-2 after:rotate-45 after:hidden checked:after:block after:-mt-0.5" />
-                      <span className="text-xs text-slate-600 group-hover:text-slate-900 leading-snug">{opt}</span>
+                      <span className="text-[13px] text-slate-700 font-medium group-hover:text-slate-900 leading-snug">{opt}</span>
                     </label>
                   ))}
                 </div>

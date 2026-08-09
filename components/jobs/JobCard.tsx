@@ -29,7 +29,7 @@ export default function JobCard({ job }: JobCardProps) {
 
             {/* Info */}
             <div className="min-w-0 z-10">
-              <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-indigo-700 transition-colors line-clamp-1">
+              <h3 className="text-lg font-extrabold text-indigo-900 group-hover:text-indigo-700 transition-colors line-clamp-1">
                 {job.title}
               </h3>
               <div className="text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-2 flex-wrap">
@@ -45,7 +45,7 @@ export default function JobCard({ job }: JobCardProps) {
 
           {/* Apply Button */}
           <div className="hidden sm:flex shrink-0 items-center z-10">
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-600 group-hover:text-white group-hover:border-transparent group-hover:shadow-md transition-all duration-300">
+            <span className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-300">
               View Job <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
           </div>

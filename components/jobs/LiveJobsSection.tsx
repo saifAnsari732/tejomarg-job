@@ -187,7 +187,7 @@ export default async function LiveJobsSection({ initialQuery = "Developer", init
                   {/* Info */}
                   <div className="min-w-0 z-10">
                     <Link href={`/jobs/live/${job.id}`}>
-                      <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-indigo-700 transition-colors line-clamp-1">
+                      <h3 className="text-lg font-extrabold text-indigo-900 group-hover:text-indigo-700 transition-colors line-clamp-1">
                         {job.title}
                       </h3>
                     </Link>
@@ -210,8 +210,8 @@ export default async function LiveJobsSection({ initialQuery = "Developer", init
                 {/* Apply Button (Desktop) */}
                 <div className="hidden sm:flex shrink-0 items-center z-10">
                   <a href={job.applyUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-600 group-hover:text-white group-hover:border-transparent group-hover:shadow-md transition-all duration-300">
-                    Apply <ExternalLink className="w-4 h-4" />
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-300">
+                    Apply <ExternalLink className="w-4 h-4 group-hover:-mt-0.5 group-hover:ml-0.5 transition-all" />
                   </a>
                 </div>
               </div>
@@ -235,7 +235,7 @@ export default async function LiveJobsSection({ initialQuery = "Developer", init
               </div>
 
               {/* Description Snippet */}
-              <p className="mt-4 text-sm text-slate-500 leading-relaxed line-clamp-2">
+              <p className="mt-5 text-base font-medium text-slate-600 leading-relaxed line-clamp-2 z-10 relative">
                 {job.description}
               </p>
 

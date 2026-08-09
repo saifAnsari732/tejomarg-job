@@ -214,15 +214,15 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 flex-1 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
           
           {/* ── Left: Filter Sidebar ─────────────────────────────── */}
-          <div className="lg:col-span-1 lg:sticky lg:top-24">
+          <div className="w-full lg:w-[320px] shrink-0 lg:sticky lg:top-24">
             <FilterSidebar categories={categories} initialFilters={currentFilters} />
           </div>
 
           {/* ── Right: Jobs List ──────────────────────────────────── */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="flex-1 w-full space-y-6">
             
             {/* Section Header */}
             <div className="bg-white p-4 sm:px-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">

@@ -44,7 +44,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-100 dark:border-slate-800/50">
+    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Mobile Menu Button & Logo */}
@@ -58,17 +58,12 @@ export default function Navbar() {
               </button>
             </div>
             
-            <Link href="/" className="flex items-center gap-2 sm:gap-4">
-              {/* Icon Logo (Teardrop) */}
-              <img src="/job1.png" alt="Tejomarg Icon" className="h-9 sm:h-10 md:h-20 w-auto object-contain shrink-0" />
+            <Link href="/" className="flex items-center gap-3">
+              {/* Icon Logo */}
+              <img src="/job1.png" alt="Tejomarg Icon" className="h-10 w-auto object-contain shrink-0" />
               
-              {/* Text Logo (Name) for Desktop */}
-              <img src="/job2.png" alt="Tejomarg Text" className="hidden md:block h-28 lg:h-56 -my-12 -ml-4 w-auto object-contain shrink-0 mix-blend-multiply" />
-              
-              {/* Text Logo (Image) for Mobile - Only show when logged in */}
-              {isLoggedIn && (
-                <img src="/job2.png" alt="Tejomarg Text" className="md:hidden h-24 -my-8 -ml-3 w-auto object-contain shrink-0 mix-blend-multiply" />
-              )}
+              {/* Text Logo */}
+              <img src="/job2.png" alt="Tejomarg Text" className="hidden sm:block h-8 w-auto object-contain shrink-0 mix-blend-multiply" />
             </Link>
           </div>
 
@@ -78,7 +73,7 @@ export default function Navbar() {
               <>
                 {/* Jobs Dropdown */}
             <div className="relative group py-4">
-              <Link href="/jobs" className="text-slate-700 hover:text-[#208f60] text-[15px] font-bold flex items-center gap-1">
+              <Link href="/jobs" className="text-slate-700 hover:text-indigo-600 text-sm font-bold flex items-center gap-1">
                 Jobs <ChevronDown className="h-4 w-4 text-slate-400 group-hover:rotate-180 transition-transform" />
               </Link>
               
@@ -94,7 +89,7 @@ export default function Navbar() {
                     { label: "Full Time Jobs", href: "/jobs?workType=Full+time" },
                     { label: "Night Shift Jobs", href: "/jobs?workShift=Night+shift" }
                   ].map(item => (
-                    <Link key={item.href} href={item.href} className="block text-slate-500 hover:text-[#208f60] text-sm font-semibold transition-colors">
+                    <Link key={item.href} href={item.href} className="block text-slate-500 hover:text-indigo-600 text-sm font-semibold transition-colors">
                       {item.label}
                     </Link>
                   ))}
@@ -112,23 +107,23 @@ export default function Navbar() {
                     { label: "Graduate Jobs", href: "/jobs?education=Graduate" },
                     { label: "Explore All Jobs", href: "/jobs" }
                   ].map(item => (
-                    <Link key={item.label} href={item.href} className="flex justify-between items-center text-slate-500 hover:text-[#208f60] text-sm font-semibold transition-colors">
+                    <Link key={item.label} href={item.href} className="flex justify-between items-center text-slate-500 hover:text-indigo-600 text-sm font-semibold transition-colors">
                       <span>{item.label}</span>
-                      <ChevronRight className="h-4 w-4 text-emerald-600" />
+                      <ChevronRight className="h-4 w-4 text-indigo-500" />
                     </Link>
                   ))}
                 </div>
               </div>
             </div>
 
-            <Link href="/resume-tools/job-prep" className="text-slate-700 hover:text-[#208f60] text-[15px] font-bold flex items-center">
-              Job Prep <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[8px] font-black px-1.5 py-1 rounded ml-1 tracking-wider leading-none">NEW</span>
+            <Link href="/resume-tools/job-prep" className="text-slate-700 hover:text-indigo-600 text-sm font-bold flex items-center">
+              Job Prep <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded ml-1.5 tracking-wider leading-none">NEW</span>
             </Link>
             
 
             {/* Resume Tools Dropdown */}
             <div className="relative group py-4">
-              <span className="text-slate-700 hover:text-[#208f60] text-[15px] font-bold flex items-center gap-1 cursor-pointer">
+              <span className="text-slate-700 hover:text-indigo-600 text-sm font-bold flex items-center gap-1 cursor-pointer">
                 Resume Tools <ChevronDown className="h-4 w-4 text-slate-400 group-hover:rotate-180 transition-transform" />
               </span>
               

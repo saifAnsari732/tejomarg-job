@@ -144,10 +144,10 @@ export default function LiveJobDetailPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
-                    <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight">{job.title}</h1>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{job.company}</span>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">{job.title}</h1>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Building2 className="h-4 w-4 text-slate-400" />
+                      <span className="text-base font-bold text-indigo-700">{job.company}</span>
                       {job.source !== "Mock Data" && (
                         <span title="Verified" className="flex items-center">
                           <BadgeCheck className="h-3.5 w-3.5 text-blue-400" />
@@ -185,10 +185,10 @@ export default function LiveJobDetailPage() {
 
           {/* Job Description */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm">
-            <h2 className="font-extrabold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-blue-500" /> Job Description
+            <h2 className="font-extrabold text-slate-900 text-xl mb-4 flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-indigo-600" /> Job Description
             </h2>
-            <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+            <div className="text-base font-medium text-slate-700 leading-relaxed whitespace-pre-line">
               {job.description}
             </div>
           </div>
