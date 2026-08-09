@@ -129,30 +129,31 @@ export default function HeroSection() {
         {/* Main Heading */}
         <motion.h1 
           variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight w-full break-words"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight w-full flex flex-col items-center"
         >
-          Find Your{" "}
-          <motion.span 
-            whileHover={{ scale: 1.05, rotate: -1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            className="inline-grid align-bottom min-w-[280px] sm:min-w-[400px] md:min-w-[500px] lg:min-w-[600px] text-left cursor-pointer origin-left"
-          >
-            <AnimatePresence mode="popLayout">
-              <motion.span
-                key={wordIndex}
-                initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
-                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                exit={{ y: -30, opacity: 0, filter: "blur(8px)" }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="col-start-1 row-start-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x whitespace-nowrap" style={{ backgroundSize: '200% 200%' }}
-              >
-                {animatedWords[wordIndex]}
-              </motion.span>
-            </AnimatePresence>
-          </motion.span>
-          <br className="hidden md:block"/>
-          With Tejomarg JOB
+          <div className="flex flex-col md:flex-row justify-center items-center md:gap-x-4 w-full">
+            <span className="shrink-0 whitespace-nowrap">Find Your</span>
+            <motion.span 
+              whileHover={{ scale: 1.05, rotate: -1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              className="inline-grid align-bottom min-w-[220px] sm:min-w-[340px] md:min-w-[420px] text-center md:text-left cursor-pointer origin-center md:origin-left"
+            >
+              <AnimatePresence mode="popLayout">
+                <motion.span
+                  key={wordIndex}
+                  initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  exit={{ y: -30, opacity: 0, filter: "blur(8px)" }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="col-start-1 row-start-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x whitespace-nowrap" style={{ backgroundSize: '200% 200%' }}
+                >
+                  {animatedWords[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </motion.span>
+          </div>
+          <span className="mt-2 md:mt-4 whitespace-nowrap text-[0.85em]">With Tejomarg JOB</span>
         </motion.h1>
         
         <motion.p 

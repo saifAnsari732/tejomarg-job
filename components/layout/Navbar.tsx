@@ -60,10 +60,10 @@ export default function Navbar() {
             
             <Link href="/" className="flex items-center gap-3">
               {/* Icon Logo */}
-              <img src="/job1.png" alt="Tejomarg Icon" className="h-10 w-auto object-contain shrink-0" />
+              <img src="/job1.png" alt="Tejomarg Icon" className="h-15 w-auto object-contain shrink-0" />
               
               {/* Text Logo */}
-              <img src="/job2.png" alt="Tejomarg Text" className="hidden sm:block h-28 -my-10 -ml-5 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
+              <img src="/job2.png" alt="Tejomarg Text" className="hidden sm:block h-48 -my-14 -ml-6 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
             </Link>
           </div>
 
