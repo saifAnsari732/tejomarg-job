@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   Upload, FileText, Plus, Trash2, Loader2, Save, MapPin, 
   Building2, Briefcase, Mail, Phone, Calendar, User as UserIcon, 
-  Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare
+  Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare, Camera
 } from "lucide-react";
 
 interface ExperienceItem {
@@ -32,8 +32,10 @@ export default function CandidateProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Profile data states
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -106,6 +108,7 @@ export default function CandidateProfilePage() {
         setLanguages(cp.languages || []);
         setSpokenEnglishLevel(cp.spokenEnglishLevel || "");
         setResumeUrl(cp.resumeUrl || "");
+        setAvatarUrl(cp.avatarUrl || "");
         setPreferredJobTitles(cp.preferredJobTitles || []);
       } catch (err: any) {
         toast.error(err.message || "Failed to retrieve profile data");
@@ -212,10 +215,31 @@ export default function CandidateProfilePage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Upload failed");
+        setAvatarUrl(data.url);
+        await handleSave({ avatarUrl: data.url });
+        toast.success("Profile picture updated!");
+      } catch (err: any) {
+        toast.error(err.message || "Upload failed");
+      } finally {
+        setUploadingAvatar(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-slate-500 gap-2 bg-slate-50 min-h-screen">
-        <Loader2 className="animate-spin h-6 w-6 text-emerald-600" />
+        <Loader2 className="animate-spin h-6 w-6 text-indigo-600" />
         <span className="font-semibold">Loading profile information...</span>
       </div>
     );
@@ -229,47 +253,61 @@ export default function CandidateProfilePage() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Profile Card */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-5 relative">
-            <button 
-              onClick={() => {
-                if (editBasic) {
-                  handleSave({
-                    mobile: tempBasic.mobile,
-                    dob: tempBasic.dob,
-                    gender: tempBasic.gender,
-                    homeTown: tempBasic.homeTown,
-                    preferredLocation: tempBasic.currentLocation
-                  });
-                  setEditBasic(false);
-                } else {
-                  setTempBasic({ mobile, dob, gender, homeTown, currentLocation });
-                  setEditBasic(true);
-                }
-              }}
-              className="absolute top-4 right-4 text-emerald-600 hover:text-emerald-700 p-1 bg-emerald-50 rounded"
-            >
-              {editBasic ? <Check className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
-            </button>
-
-            {/* Initials & Top Bio */}
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-slate-700 text-white font-extrabold flex items-center justify-center text-lg shadow-inner">
-                {name.split(" ").map(n => n[0]).join("").toUpperCase() || "C"}
-              </div>
-              <div>
-                <h2 className="font-extrabold text-slate-900 text-lg leading-tight">{name}</h2>
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                  <Briefcase className="h-3 w-3 shrink-0" />
-                  {experience[0]?.role ? `${experience[0].role} at ${experience[0].company}` : "Fresher"}
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                  <MapPin className="h-3 w-3 shrink-0" />
-                  {currentLocation || "Location unspecified"}
-                </p>
-              </div>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative">
+            {/* Banner */}
+            <div className="h-28 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 relative">
+               <button 
+                onClick={() => {
+                  if (editBasic) {
+                    handleSave({
+                      mobile: tempBasic.mobile,
+                      dob: tempBasic.dob,
+                      gender: tempBasic.gender,
+                      homeTown: tempBasic.homeTown,
+                      preferredLocation: tempBasic.currentLocation
+                    });
+                    setEditBasic(false);
+                  } else {
+                    setTempBasic({ mobile, dob, gender, homeTown, currentLocation });
+                    setEditBasic(true);
+                  }
+                }}
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-1.5 bg-white/10 backdrop-blur-md rounded transition-all z-10"
+              >
+                {editBasic ? <Check className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
+              </button>
             </div>
 
-            <hr className="border-slate-100" />
+            <div className="px-5 pb-5 relative -mt-12">
+              {/* Initials/Avatar & Top Bio */}
+              <div className="flex flex-col gap-3">
+                <div className="relative w-24 h-24 rounded-full border-4 border-white bg-slate-100 shadow-sm flex items-center justify-center overflow-hidden group">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-extrabold text-slate-400">{name.split(" ").map(n => n[0]).join("").toUpperCase() || "C"}</span>
+                  )}
+                  {/* Hover Overlay */}
+                  <label className="absolute inset-0 bg-black/50 hidden group-hover:flex flex-col items-center justify-center cursor-pointer text-white transition-all">
+                    {uploadingAvatar ? <Loader2 className="animate-spin h-5 w-5" /> : <Camera className="h-6 w-6" />}
+                    <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+                  </label>
+                </div>
+                
+                <div className="mt-1">
+                  <h2 className="font-extrabold text-slate-900 text-xl leading-tight">{name}</h2>
+                  <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                    <Briefcase className="h-4 w-4 shrink-0 text-indigo-400" />
+                    {experience[0]?.role ? `${experience[0].role} at ${experience[0].company}` : "Fresher"}
+                  </p>
+                  <p className="text-sm text-slate-400 font-medium mt-1 flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 shrink-0 text-indigo-400" />
+                    {currentLocation || "Location unspecified"}
+                  </p>
+                </div>
+              </div>
+
+            <hr className="border-slate-100 my-5" />
 
             {/* Details Grid */}
             {editBasic ? (
@@ -345,7 +383,7 @@ export default function CandidateProfilePage() {
                   </span>
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Activities Card */}
@@ -353,10 +391,10 @@ export default function CandidateProfilePage() {
             <h3 className="font-extrabold text-slate-900 text-sm">My Activities</h3>
             <Link 
               href="/candidate" 
-              className="flex items-center justify-between border border-slate-200 hover:border-emerald-250 p-3.5 rounded-lg bg-slate-50 hover:bg-slate-100/50 transition-all text-left"
+              className="flex items-center justify-between border border-slate-200 hover:border-indigo-250 p-3.5 rounded-lg bg-slate-50 hover:bg-slate-100/50 transition-all text-left"
             >
               <div className="flex gap-3 items-start">
-                <FileText className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                <FileText className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-slate-900 text-xs">My Applications</h4>
                   <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">Check all your jobs applied and interview invites here</p>
@@ -382,7 +420,7 @@ export default function CandidateProfilePage() {
                     setExperience(newExp);
                     setEditWork(true);
                   }}
-                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                  className="text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
@@ -395,7 +433,7 @@ export default function CandidateProfilePage() {
                       setEditWork(true);
                     }
                   }}
-                  className="text-emerald-605 text-xs font-bold p-1 bg-emerald-50 rounded"
+                  className="text-indigo-605 text-xs font-bold p-1 bg-indigo-50 rounded"
                 >
                   {editWork ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
                 </button>
@@ -407,8 +445,8 @@ export default function CandidateProfilePage() {
                 {experience.map((exp, idx) => (
                   <div key={idx} className="relative space-y-2">
                     {/* Timeline dot */}
-                    <div className="absolute -left-[26px] top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-100 border-2 border-emerald-600 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-600"></div>
+                    <div className="absolute -left-[26px] top-1.5 w-3.5 h-3.5 rounded-full bg-indigo-100 border-2 border-indigo-600 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600"></div>
                     </div>
 
                     {editWork ? (
@@ -468,7 +506,7 @@ export default function CandidateProfilePage() {
                             <h4 className="font-extrabold text-slate-900 text-sm leading-snug">{exp.role}</h4>
                             <p className="text-xs font-bold text-slate-500">{exp.company}</p>
                           </div>
-                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{exp.duration}</span>
+                          <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{exp.duration}</span>
                         </div>
                         
                         {exp.description && (
@@ -512,9 +550,9 @@ export default function CandidateProfilePage() {
                   setEditSingle(true);
                 }
               }}
-              className="absolute -top-3 right-0 text-emerald-650 p-1.5 bg-white border border-slate-200 rounded shadow-sm z-10"
+              className="absolute -top-3 right-0 text-indigo-650 p-1.5 bg-white border border-slate-200 rounded shadow-sm z-10"
             >
-              {editSingle ? <Check className="h-4 w-4 text-emerald-600" /> : <Edit2 className="h-3.5 w-3.5" />}
+              {editSingle ? <Check className="h-4 w-4 text-indigo-600" /> : <Edit2 className="h-3.5 w-3.5" />}
             </button>
 
             {editSingle ? (
@@ -570,7 +608,7 @@ export default function CandidateProfilePage() {
                     setEducation(newEdu);
                     setEditEdu(true);
                   }}
-                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                  className="text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
@@ -588,7 +626,7 @@ export default function CandidateProfilePage() {
                       setEditEdu(true);
                     }
                   }}
-                  className="text-emerald-650 p-1 bg-emerald-50 rounded"
+                  className="text-indigo-650 p-1 bg-indigo-50 rounded"
                 >
                   {editEdu ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
                 </button>
@@ -684,7 +722,7 @@ export default function CandidateProfilePage() {
                   setEditSkills(true);
                 }
               }}
-              className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+              className="absolute top-4 right-4 text-indigo-650 p-1 bg-indigo-50 rounded"
             >
               {editSkills ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
             </button>
@@ -726,7 +764,7 @@ export default function CandidateProfilePage() {
                     setCertifications(newCert);
                     setEditCert(true);
                   }}
-                  className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1"
+                  className="text-indigo-600 hover:text-indigo-700 font-bold text-xs flex items-center gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
@@ -739,7 +777,7 @@ export default function CandidateProfilePage() {
                       setEditCert(true);
                     }
                   }}
-                  className="text-emerald-650 p-1 bg-emerald-50 rounded"
+                  className="text-indigo-650 p-1 bg-indigo-50 rounded"
                 >
                   {editCert ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
                 </button>
@@ -793,7 +831,7 @@ export default function CandidateProfilePage() {
                     setEditLang(true);
                   }
                 }}
-                className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+                className="absolute top-4 right-4 text-indigo-650 p-1 bg-indigo-50 rounded"
               >
                 {editLang ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
               </button>
@@ -819,9 +857,9 @@ export default function CandidateProfilePage() {
               <h3 className="font-extrabold text-slate-900 text-sm">Spoken English</h3>
               <p className="text-[10px] text-slate-500 leading-tight">Having the required level of English speaking proficiency will help you find jobs at top companies.</p>
               
-              <div className="flex items-center justify-between border border-emerald-500 rounded p-2.5 bg-emerald-50 text-emerald-700 font-bold text-xs">
+              <div className="flex items-center justify-between border border-indigo-500 rounded p-2.5 bg-indigo-50 text-indigo-700 font-bold text-xs">
                 <span>Verification Pending</span>
-                <button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded px-3 py-1 transition-all">Verify now</button>
+                <button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded px-3 py-1 transition-all">Verify now</button>
               </div>
             </div>
 
@@ -832,7 +870,7 @@ export default function CandidateProfilePage() {
             <div className="flex justify-between items-center">
               <h3 className="font-extrabold text-slate-900 text-[15px]">Resume</h3>
               <input type="file" accept=".pdf" id="resume-file-input" onChange={handleResumeUpload} className="hidden" />
-              <label htmlFor="resume-file-input" className="text-emerald-650 cursor-pointer p-1 bg-emerald-50 rounded">
+              <label htmlFor="resume-file-input" className="text-indigo-650 cursor-pointer p-1 bg-indigo-50 rounded">
                 <Edit2 className="h-3.5 w-3.5" />
               </label>
             </div>
@@ -840,7 +878,7 @@ export default function CandidateProfilePage() {
             {resumeUrl ? (
               <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex items-center justify-between">
                 <div className="flex items-center space-x-3 text-sm">
-                  <FileText className="h-8 w-8 text-emerald-650 shrink-0" />
+                  <FileText className="h-8 w-8 text-indigo-650 shrink-0" />
                   <div>
                     <p className="font-bold text-slate-800 truncate">Uploaded Resume</p>
                     <p className="text-[10px] text-slate-400">PDF document format</p>
@@ -850,7 +888,7 @@ export default function CandidateProfilePage() {
                   href={resumeUrl} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-1.5 rounded transition-all"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-1.5 rounded transition-all"
                 >
                   View PDF
                 </a>
@@ -858,7 +896,7 @@ export default function CandidateProfilePage() {
             ) : (
               <div className="text-center p-6 border-2 border-dashed border-slate-200 rounded-xl">
                 {uploading ? (
-                  <Loader2 className="animate-spin h-8 w-8 text-emerald-600 mx-auto" />
+                  <Loader2 className="animate-spin h-8 w-8 text-indigo-600 mx-auto" />
                 ) : (
                   <FileText className="h-8 w-8 text-slate-350 mx-auto" />
                 )}
@@ -880,7 +918,7 @@ export default function CandidateProfilePage() {
                   setEditOther(true);
                 }
               }}
-              className="absolute top-4 right-4 text-emerald-650 p-1 bg-emerald-50 rounded"
+              className="absolute top-4 right-4 text-indigo-650 p-1 bg-indigo-50 rounded"
             >
               {editOther ? <Check className="h-4 w-4" /> : <Edit2 className="h-3.5 w-3.5" />}
             </button>
