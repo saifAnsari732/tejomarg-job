@@ -130,6 +130,8 @@ export default function HeroSection() {
           variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.2 }}
           className="text-slate-600 text-sm sm:text-lg max-w-2xl mb-8 leading-relaxed font-medium px-2 w-full"
         >
+          Join thousands of professionals who have accelerated their careers. 
+          Discover opportunities that match your skills, values, and ambitions in just a few clicks.
         </motion.p>
 
         {/* Feature Highlights */}

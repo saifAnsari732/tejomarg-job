@@ -3,7 +3,7 @@ import { Briefcase, Globe, ChevronDown } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-400 py-16 border-t border-slate-900 relative overflow-hidden">
+    <footer className="bg-[#0B0F19] text-slate-400 py-16 border-t border-slate-900 relative overflow-hidden">
       {/* Decorative gradient blur */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-1/2 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -12,9 +12,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
-            <div className="flex items-center -ml-2 bg-white/5 p-2 rounded-xl w-max backdrop-blur-sm border border-white/10">
-              <img src="/job1.png" alt="Tejomarg Icon" className="h-8 md:h-10 w-auto object-contain shrink-0 brightness-110" />
-              <img src="/job2.png" alt="Tejomarg Text" className="h-20 -my-8 -ml-3 w-auto object-contain shrink-0 invert brightness-0" />
+            <div className="flex items-center -ml-2">
+              <img src="/job1.png" alt="Tejomarg Icon" className="h-10 md:h-12 w-auto object-contain shrink-0 brightness-125" />
+              <img src="/job2.png" alt="Tejomarg Text" className="h-24 -my-8 -ml-6 w-auto object-contain shrink-0 invert brightness-0 pointer-events-none" />
             </div>
             <p className="text-sm text-slate-400 pr-4 leading-relaxed">
               India's #1 Job Platform. Connecting talent with the best opportunities across the nation with AI-powered precision.
