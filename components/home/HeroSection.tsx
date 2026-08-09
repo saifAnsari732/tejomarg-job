@@ -132,7 +132,12 @@ export default function HeroSection() {
           className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight w-full break-words"
         >
           Find Your{" "}
-          <span className="inline-grid align-bottom w-[200px] sm:w-[320px] md:w-[400px] lg:w-[480px] text-left">
+          <motion.span 
+            whileHover={{ scale: 1.05, rotate: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="inline-grid align-bottom min-w-[280px] sm:min-w-[400px] md:min-w-[500px] lg:min-w-[600px] text-left cursor-pointer origin-left"
+          >
             <AnimatePresence mode="popLayout">
               <motion.span
                 key={wordIndex}
@@ -140,12 +145,12 @@ export default function HeroSection() {
                 animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                 exit={{ y: -30, opacity: 0, filter: "blur(8px)" }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="col-start-1 row-start-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x" style={{ backgroundSize: '200% 200%' }}
+                className="col-start-1 row-start-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 animate-gradient-x whitespace-nowrap" style={{ backgroundSize: '200% 200%' }}
               >
                 {animatedWords[wordIndex]}
               </motion.span>
             </AnimatePresence>
-          </span>
+          </motion.span>
           <br className="hidden md:block"/>
           With Tejomarg JOB
         </motion.h1>
