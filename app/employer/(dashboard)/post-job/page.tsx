@@ -12,6 +12,11 @@ export default function PostJobPage() {
   const [loadingCats, setLoadingCats] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Coupon states
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(0); // 0 is initial choice, 1-5 are wizard steps
 
   // Form State matching all screenshot fields
@@ -84,12 +89,47 @@ export default function PostJobPage() {
     });
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setApplyingCoupon(true);
+    try {
+      const res = await fetch(`/api/coupons/verify?code=${encodeURIComponent(couponCode)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setAppliedDiscount(data.discountPercentage);
+      toast.success(`Coupon applied! ${data.discountPercentage}% discount.`);
+    } catch (err: any) {
+      toast.error(err.message || "Invalid or inactive coupon");
+      setAppliedDiscount(0);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const getBasePrice = (plan: string) => {
+    if (plan === "Premium") return 20;
+    if (plan === "Premium AI") return 3;
+    if (plan === "Super Premium") return 4;
+    return 10;
+  };
+
+  const getFinalPrice = (plan: string) => {
+    const base = getBasePrice(plan);
+    if (appliedDiscount > 0) {
+      const discounted = Math.max(1, Math.round(base * (1 - appliedDiscount / 100)));
+      return discounted;
+    }
+    return base;
+  };
+
   const handleSubmit = async () => {
     setSaving(true);
     try {
       const payload = {
         ...formData,
         experienceLevel: formData.experienceRequired === "Fresher Only" ? "Entry-level" : "Mid-level",
+        couponCode: appliedDiscount > 0 ? couponCode : undefined,
       };
 
       const res = await fetch("/api/employer/jobs", {
@@ -634,21 +674,42 @@ export default function PostJobPage() {
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 flex justify-between bg-slate-50 rounded-b-xl items-center">
-              <button onClick={() => setCurrentStep(4)} className="border border-slate-300 text-slate-700 bg-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
+            <div className="p-6 border-t border-slate-100 flex flex-col md:flex-row justify-between bg-slate-50 rounded-b-xl items-center gap-4">
+              <button onClick={() => setCurrentStep(4)} className="border border-slate-300 text-slate-700 bg-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50 w-full md:w-auto">Back</button>
               
-              <div className="flex items-center gap-4">
-                <button onClick={handleSaveDraft} disabled={saving} className="border border-[#208f60] text-[#208f60] bg-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-50 transition-colors">
+              <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <input 
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Coupon Code"
+                    className="px-4 py-2.5 border border-slate-300 rounded-lg text-sm w-full md:w-40 font-mono outline-none focus:ring-2 focus:ring-[#208f60]"
+                    disabled={appliedDiscount > 0}
+                  />
+                  {appliedDiscount > 0 ? (
+                    <button onClick={() => {setAppliedDiscount(0); setCouponCode("");}} className="px-4 py-2.5 bg-red-100 text-red-600 font-bold rounded-lg text-sm hover:bg-red-200">Remove</button>
+                  ) : (
+                    <button onClick={handleApplyCoupon} disabled={applyingCoupon || !couponCode} className="px-4 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-sm hover:bg-slate-700 disabled:opacity-50 min-w-[80px]">
+                      {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Apply"}
+                    </button>
+                  )}
+                </div>
+                
+                <button onClick={handleSaveDraft} disabled={saving} className="border border-[#208f60] text-[#208f60] bg-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-50 transition-colors w-full md:w-auto">
                   Save to Draft
                 </button>
                 <div className="text-right hidden sm:block">
                   <div className="text-xs text-slate-500 font-semibold">Total Amount</div>
-                  <div className="text-xl font-black text-slate-800">
-                    {formData.pricingPlan === "Classic" ? "₹10" : formData.pricingPlan === "Premium" ? "₹20" : formData.pricingPlan === "Premium AI" ? "₹3" : "₹4"}
+                  <div className="text-xl font-black text-slate-800 flex items-center gap-2">
+                    {appliedDiscount > 0 && (
+                      <span className="text-sm line-through text-slate-400">₹{getBasePrice(formData.pricingPlan)}</span>
+                    )}
+                    <span>₹{getFinalPrice(formData.pricingPlan)}</span>
                   </div>
                 </div>
-                <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#1a7650] flex items-center gap-2">
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay & Publish Job"}
+                <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#1a7650] flex items-center justify-center gap-2 w-full md:w-auto">
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay & Publish"}
                 </button>
               </div>
             </div>

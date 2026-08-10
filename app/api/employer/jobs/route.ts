@@ -169,6 +169,24 @@ export async function POST(req: Request) {
     if (body.pricingPlan === "Premium AI") amountInRupees = 3;
     if (body.pricingPlan === "Super Premium") amountInRupees = 4;
 
+    // Apply Coupon Discount if valid
+    if (body.couponCode) {
+      try {
+        const normalizedCode = body.couponCode.toUpperCase().trim();
+        const couponSnap = await db.collection("coupons")
+          .where("code", "==", normalizedCode)
+          .where("isActive", "==", true)
+          .get();
+          
+        if (!couponSnap.empty) {
+          const discountPercentage = couponSnap.docs[0].data().discountPercentage;
+          amountInRupees = Math.max(1, Math.round(amountInRupees * (1 - discountPercentage / 100)));
+        }
+      } catch (err) {
+        console.error("Error applying coupon in checkout:", err);
+      }
+    }
+
     const amountInPaise = amountInRupees * 100;
 
     // Initialize Razorpay

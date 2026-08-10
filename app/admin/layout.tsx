@@ -71,6 +71,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <ChevronRight className="h-4 w-4 text-slate-400" />
             </Link>
+
+            <Link
+              href="/admin/coupons"
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              <div className="flex items-center space-x-2.5">
+                <svg className="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                <span>Discount Coupons</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </Link>
           </nav>
         </aside>
 

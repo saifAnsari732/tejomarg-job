@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Loader2, Receipt, ArrowUpRight, Search, FileText } from "lucide-react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 export default function PaymentHistoryPage() {
   const [jobs, setJobs] = useState<any[]>([]);
