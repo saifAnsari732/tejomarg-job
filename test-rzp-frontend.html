@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Test</title>
+</head>
+<body>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        setTimeout(() => {
+            try {
+                const rzp = new Razorpay({
+                    key: "",
+                    amount: "100",
+                    currency: "INR"
+                });
+                rzp.open();
+            } catch (err) {
+                console.error("Caught error:", err.message);
+                document.body.innerHTML = err.message;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -55,6 +55,10 @@ export async function POST(req: Request) {
     const key_id = (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").replace(/['"]/g, '').trim();
     const key_secret = (process.env.RAZORPAY_KEY_SECRET || "").replace(/['"]/g, '').trim();
 
+    console.log("DEBUG: Razorpay Initialization");
+    console.log("key_id:", key_id.substring(0, 5) + "..." + key_id.substring(key_id.length - 3));
+    console.log("key_secret:", key_secret.substring(0, 3) + "..." + key_secret.substring(key_secret.length - 2));
+
     if (!key_id || !key_secret) {
       return NextResponse.json({ error: "Razorpay keys are missing from server configuration" }, { status: 500 });
     }
