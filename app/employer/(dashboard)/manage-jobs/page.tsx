@@ -56,7 +56,7 @@ export default function ManageJobsPage() {
     
     // If the employer tries to turn it ON (active) but they haven't paid
     if (job.status !== "active" && !job.paymentId) {
-      toast.error("Redirecting to payment. Please complete your payment to activate this job.");
+      toast.loading("Redirecting to payment...", { duration: 2000 });
       handlePayAndPublish(job._id);
       return;
     }
