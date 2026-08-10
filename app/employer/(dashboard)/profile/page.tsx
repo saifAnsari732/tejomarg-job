@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Upload, Building2, Globe, MapPin, Loader2, Save } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,8 @@ export default function EmployerProfilePage() {
     }
   };
 
+  const { update } = useSession();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -107,6 +110,11 @@ export default function EmployerProfilePage() {
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to save company");
+      }
+
+      // Update session dynamically
+      if (employerName || logo) {
+        await update({ name: employerName, companyLogo: logo });
       }
 
       toast.success("Company profile saved successfully!");

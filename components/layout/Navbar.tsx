@@ -177,9 +177,13 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex items-center space-x-2 p-1 md:p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all focus:outline-none cursor-pointer"
                 >
-                  <div className="h-6 w-6 md:h-8 md:w-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs md:text-base">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.companyLogo ? (
+                    <img src={user.companyLogo} alt="Company Logo" className="h-6 w-6 md:h-8 md:w-8 rounded-lg object-cover" />
+                  ) : (
+                    <div className="h-6 w-6 md:h-8 md:w-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs md:text-base">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden md:inline-block text-sm font-bold max-w-[120px] truncate text-slate-700 pr-1">
                     {user?.name}
                   </span>

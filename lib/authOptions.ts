@@ -81,11 +81,20 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Your account has been suspended.");
         }
 
+        let companyLogo = null;
+        if (user.role === "employer") {
+          const companySnap = await db.collection("companies").where("employerId", "==", userId).limit(1).get();
+          if (!companySnap.empty) {
+            companyLogo = companySnap.docs[0].data().logo;
+          }
+        }
+
         return {
           id: userId,
           phone: user.phone,
           name: user.name,
           role: user.role,
+          companyLogo: companyLogo,
         };
       },
     }),
@@ -139,9 +148,22 @@ export const authOptions: NextAuthOptions = {
             token.id = querySnapshot.docs[0].id;
             token.role = dbUser.role;
             token.phone = dbUser.phone;
+            token.name = dbUser.name;
           }
         } catch (e) {
           console.error("JWT DB fetch error:", e);
+        }
+      }
+      
+      // Fetch company logo for employer if missing
+      if (token.role === "employer" && !token.companyLogo) {
+        try {
+          const companySnap = await db.collection("companies").where("employerId", "==", token.id).limit(1).get();
+          if (!companySnap.empty) {
+            token.companyLogo = companySnap.docs[0].data().logo;
+          }
+        } catch (e) {
+          console.error("JWT company logo fetch error:", e);
         }
       }
       
@@ -157,6 +179,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
         (session.user as any).phone = token.phone;
+        if (token.companyLogo) (session.user as any).companyLogo = token.companyLogo;
+        if (token.name) session.user.name = token.name as string;
       }
       return session;
     },

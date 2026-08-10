@@ -76,6 +76,11 @@ export async function PUT(req: Request) {
       await db.collection("companies").doc(companyId).update(updatedData);
     }
 
+    // Also update the user's name in the users collection
+    if (employerName) {
+      await db.collection("users").doc(user.id).update({ name: employerName });
+    }
+
     return NextResponse.json({
       message: "Company profile updated successfully.",
       company: { _id: companyId, ...updatedData },
