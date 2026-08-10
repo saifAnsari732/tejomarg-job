@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
 
   // If user is already logged in and tries to access any login/signup page
   if (token) {
-    if (path === "/login" || path === "/signup" || path === "/employer/login" || path === "/employer/signup" || path === "/admin/login") {
+    if (path === "/login" || path === "/signup" || path === "/employer/login" || path === "/employer/signup") {
       if (token.role === "employer") {
         return NextResponse.redirect(new URL("/employer/post-job", req.url));
       } else if (token.role === "admin") {
@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!token) {
-    if (path === "/employer/login" || path === "/employer/signup" || path === "/login" || path === "/signup" || path === "/admin/login") {
+    if (path === "/employer/login" || path === "/employer/signup" || path === "/login" || path === "/signup") {
       return NextResponse.next();
     }
 
@@ -45,7 +45,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
     if (path.startsWith("/admin")) {
-      const url = new URL("/admin/login", req.url);
+      const url = new URL("/login", req.url);
       url.searchParams.set("callbackUrl", req.nextUrl.href);
       return NextResponse.redirect(url);
     }
