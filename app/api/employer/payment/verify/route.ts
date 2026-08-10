@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, jobId } = await req.json();
 
-    const secret = process.env.RAZORPAY_KEY_SECRET as string;
+    const secret = (process.env.RAZORPAY_KEY_SECRET || "").replace(/['"]/g, '').trim();
     
     // Verify the signature
     const shasum = crypto.createHmac("sha256", secret);

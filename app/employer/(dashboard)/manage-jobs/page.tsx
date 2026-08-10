@@ -125,7 +125,7 @@ export default function ManageJobsPage() {
       const { orderId, amount, pricingPlan } = data;
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        key: (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").replace(/['"]/g, '').trim(), 
         amount: amount.toString(), 
         currency: "INR",
         name: "Tejomarg Job Portal",

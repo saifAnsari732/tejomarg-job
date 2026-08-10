@@ -52,8 +52,8 @@ export async function POST(req: Request) {
     const amountInPaise = amountInRupees * 100;
 
     // Check if Razorpay keys are configured
-    const key_id = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    const key_secret = process.env.RAZORPAY_KEY_SECRET;
+    const key_id = (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").replace(/['"]/g, '').trim();
+    const key_secret = (process.env.RAZORPAY_KEY_SECRET || "").replace(/['"]/g, '').trim();
 
     if (!key_id || !key_secret) {
       return NextResponse.json({ error: "Razorpay keys are missing from server configuration" }, { status: 500 });
