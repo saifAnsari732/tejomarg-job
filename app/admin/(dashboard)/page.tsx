@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { db } from "@/lib/firebaseAdmin";
-import { Users, Briefcase, FileText, CheckCircle, AlertTriangle, ShieldCheck, Building2, ChevronRight, BarChart3, TrendingUp } from "lucide-react";
+import { Users, Briefcase, FileText, CheckCircle, AlertTriangle, ShieldCheck, Building2, ChevronRight, BarChart3, TrendingUp, Activity, Server, Database, Clock, Settings, Bell, RefreshCw, Zap } from "lucide-react";
 
 async function getAdminDashboardData() {
   try {
@@ -207,6 +207,73 @@ export default async function AdminDashboardPage() {
             <span>Verify Employer Profiles</span>
             <ChevronRight className="h-5 w-5 ml-4 group-hover:translate-x-1 transition-transform" />
           </Link>
+        </div>
+      </div>
+
+      {/* New Sections: System Health & Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6">
+        {/* System Health */}
+        <div className="lg:col-span-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-3xl border border-white/60 dark:border-slate-700 shadow-xl shadow-slate-200/40">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="p-2.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-xl">
+              <Activity className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">System Health</h3>
+          </div>
+          
+          <div className="space-y-5">
+            <div>
+              <div className="flex justify-between text-sm mb-1.5">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2"><Server className="h-4 w-4" /> Server Load</span>
+                <span className="font-bold text-green-500">Normal</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: '35%' }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1.5">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2"><Database className="h-4 w-4" /> Database Usage</span>
+                <span className="font-bold text-blue-500">24%</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '24%' }}></div>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-500"><Clock className="h-4 w-4 inline mr-1" /> Uptime</span>
+              <span className="text-sm font-black text-slate-900 dark:text-white">99.99%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Shortcuts */}
+        <div className="lg:col-span-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-3xl border border-white/60 dark:border-slate-700 shadow-xl shadow-slate-200/40">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
+              <Zap className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Quick Actions</h3>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 border border-slate-100 dark:border-slate-600 rounded-2xl transition-colors group cursor-not-allowed opacity-70">
+              <RefreshCw className="h-6 w-6 text-slate-400 group-hover:text-indigo-500 mb-2" />
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Sync Database</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 border border-slate-100 dark:border-slate-600 rounded-2xl transition-colors group cursor-not-allowed opacity-70">
+              <Bell className="h-6 w-6 text-slate-400 group-hover:text-indigo-500 mb-2" />
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Broadcast Alert</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 border border-slate-100 dark:border-slate-600 rounded-2xl transition-colors group cursor-not-allowed opacity-70">
+              <FileText className="h-6 w-6 text-slate-400 group-hover:text-indigo-500 mb-2" />
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Export Report</span>
+            </button>
+            <button className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 border border-slate-100 dark:border-slate-600 rounded-2xl transition-colors group cursor-not-allowed opacity-70">
+              <Settings className="h-6 w-6 text-slate-400 group-hover:text-indigo-500 mb-2" />
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Platform Config</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

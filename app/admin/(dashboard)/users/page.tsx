@@ -11,8 +11,9 @@ async function getCandidates() {
       const data = doc.data();
       return {
         _id: doc.id,
-        name: data.name,
-        email: data.email,
+        name: data.name || "Unknown Candidate",
+        email: data.email || "",
+        phone: data.phone || "",
         isBlocked: data.isBlocked,
         createdAt: data.createdAt
       };

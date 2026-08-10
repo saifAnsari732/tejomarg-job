@@ -8,6 +8,7 @@ interface UserItem {
   _id: string;
   name: string;
   email: string;
+  phone?: string;
   isBlocked: boolean;
   createdAt: string;
 }
@@ -74,11 +75,13 @@ export default function UsersList({ initialUsers }: UsersListProps) {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUsers = users.filter((u) => {
+    const searchLower = search.toLowerCase();
+    const nameMatch = (u.name || "").toLowerCase().includes(searchLower);
+    const emailMatch = (u.email || "").toLowerCase().includes(searchLower);
+    const phoneMatch = (u.phone || "").toLowerCase().includes(searchLower);
+    return nameMatch || emailMatch || phoneMatch;
+  });
 
   return (
     <div className="space-y-6">
@@ -127,7 +130,7 @@ export default function UsersList({ initialUsers }: UsersListProps) {
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-bold text-slate-900 dark:text-white truncate">{user.name}</h4>
-                          <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+                          <p className="text-xs text-slate-500 truncate mt-0.5">{user.email || user.phone || "No contact info"}</p>
                         </div>
                       </div>
                     </td>
