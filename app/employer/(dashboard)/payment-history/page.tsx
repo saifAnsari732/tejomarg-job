@@ -102,9 +102,9 @@ export default function PaymentHistoryPage() {
                       </span>
                     </td>
                     <td className="p-4 pr-6 md:pr-8 text-right">
-                      <button className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                      <a href={`/invoice/${job._id}`} target="_blank" className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
                         <FileText className="w-4 h-4" />
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 ))}
