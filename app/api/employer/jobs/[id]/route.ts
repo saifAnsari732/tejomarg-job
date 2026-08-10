@@ -43,6 +43,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       "status", // Can toggle "active" / "closed"
     ];
 
+    if (body.status === "active" && !job.paymentId) {
+      return NextResponse.json({ error: "Cannot activate job without completing payment." }, { status: 402 });
+    }
+
     fieldsToUpdate.forEach((field) => {
       if (body[field] !== undefined) {
         if (field === "skillsRequired" && typeof body[field] === "string") {

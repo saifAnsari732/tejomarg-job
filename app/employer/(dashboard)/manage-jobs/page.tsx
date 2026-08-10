@@ -53,8 +53,11 @@ export default function ManageJobsPage() {
       toast.error("Pending jobs require Admin review before they can be activated.");
       return;
     }
-    if (job.status === "draft" || job.status === "pending_payment") {
-      toast.error("You must complete payment before activating this job.");
+    
+    // If the employer tries to turn it ON (active) but they haven't paid
+    if (job.status !== "active" && !job.paymentId) {
+      toast.error("Redirecting to payment. Please complete your payment to activate this job.");
+      handlePayAndPublish(job._id);
       return;
     }
 
@@ -107,7 +110,7 @@ export default function ManageJobsPage() {
     }
   };
 
-  const handlePayAndPublish = async (jobId: string) => {
+  async function handlePayAndPublish(jobId: string) {
     setTogglingId(jobId);
     try {
       const res = await fetch("/api/employer/payment/create-order", {
