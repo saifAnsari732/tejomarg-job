@@ -38,8 +38,8 @@ export default function Footer() {
             <ul className="space-y-4 text-base text-slate-500 font-medium">
               <li><Link href="/employer/post-job" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Post a Job</Link></li>
               <li><Link href="/employer" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Employer Dashboard</Link></li>
-              <li><Link href="/pricing" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Pricing Plans</Link></li>
-              <li><Link href="/employer-guidelines" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Hiring Guidelines</Link></li>
+              <li><Link href="/pricing" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Pricing Plans</Link></li>
+              <li><Link href="/employer-guidelines" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Hiring Guidelines</Link></li>
             </ul>
           </div>
 
@@ -47,10 +47,10 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-slate-900 text-lg mb-6 tracking-wide">Company</h3>
             <ul className="space-y-4 text-base text-slate-500 font-medium">
-              <li><Link href="/about" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Contact Us</Link></li>
-              <li><Link href="/privacy" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Terms of Service</Link></li>
+              <li><Link href="/about" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> About Us</Link></li>
+              <li><Link href="/contact" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Contact Us</Link></li>
+              <li><Link href="/privacy" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Privacy Policy</Link></li>
+              <li><Link href="/terms" prefetch={false} className="hover:text-blue-600 transition-colors flex items-center gap-2"><ChevronDown className="h-4 w-4 -rotate-90 text-blue-400" /> Terms of Service</Link></li>
             </ul>
           </div>
         </div>
