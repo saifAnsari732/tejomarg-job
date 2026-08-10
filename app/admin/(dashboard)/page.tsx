@@ -7,11 +7,14 @@ import { Users, Briefcase, FileText, CheckCircle, AlertTriangle, ShieldCheck, Bu
 
 async function getAdminDashboardData() {
   try {
+    const activeJobsSnap = await db.collection("jobs").where("status", "==", "active").get();
+    const activeJobsCount = activeJobsSnap.size;
+    const activeJobsList = activeJobsSnap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+
     const [
       seekersCount,
       employersCount,
       totalJobs,
-      activeJobs,
       pendingJobs,
       totalApplications,
       unverifiedCompaniesCount
@@ -19,20 +22,36 @@ async function getAdminDashboardData() {
       db.collection("users").where("role", "==", "candidate").count().get().then(s => s.data().count),
       db.collection("users").where("role", "==", "employer").count().get().then(s => s.data().count),
       db.collection("jobs").count().get().then(s => s.data().count),
-      db.collection("jobs").where("status", "==", "active").count().get().then(s => s.data().count),
       db.collection("jobs").where("status", "==", "pending").count().get().then(s => s.data().count),
       db.collection("applications").count().get().then(s => s.data().count),
       db.collection("companies").where("isVerified", "==", false).count().get().then(s => s.data().count),
     ]);
 
+    const expiringJobs = activeJobsList.map(job => {
+      let daysActive = 15;
+      if (job.pricingPlan === "Standard") daysActive = 30;
+      else if (job.pricingPlan === "Premium") daysActive = 45;
+      else if (job.pricingPlan === "Enterprise") daysActive = 60;
+      
+      const createdTime = job.createdAt?.toDate ? job.createdAt.toDate().getTime() : new Date(job.createdAt || Date.now()).getTime();
+      const expiresAt = createdTime + (daysActive * 24 * 60 * 60 * 1000);
+      const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+      
+      return { _id: job._id, title: job.title as string, companyName: (job.companyName || "Unknown") as string, daysLeft };
+    })
+    .filter(job => job.daysLeft <= 10 && job.daysLeft >= 0)
+    .sort((a, b) => a.daysLeft - b.daysLeft)
+    .slice(0, 4);
+
     return {
       seekersCount,
       employersCount,
       totalJobs,
-      activeJobs,
+      activeJobs: activeJobsCount,
       pendingJobs,
       totalApplications,
       unverifiedCompaniesCount,
+      expiringJobs,
     };
   } catch (error) {
     console.error("Error loading admin stats:", error);
@@ -44,6 +63,7 @@ async function getAdminDashboardData() {
       pendingJobs: 0,
       totalApplications: 0,
       unverifiedCompaniesCount: 0,
+      expiringJobs: [],
     };
   }
 }
@@ -148,7 +168,7 @@ export default async function AdminDashboardPage() {
       {/* Actionable Alerts Row */}
       <h2 className="text-xl font-bold text-slate-800 dark:text-white pt-4 px-2">Priority Action Items</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Pending Moderation Jobs */}
         <div className="bg-gradient-to-br from-orange-50 to-amber-50/50 dark:from-orange-950/20 dark:to-amber-900/10 p-8 rounded-[2rem] border border-orange-200/50 dark:border-orange-800/30 shadow-lg shadow-orange-100 dark:shadow-none flex flex-col justify-between group relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-200/30 dark:bg-orange-800/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
@@ -162,11 +182,11 @@ export default async function AdminDashboardPage() {
                 {stats.pendingJobs} pending
               </span>
             </div>
-            <h3 className="text-2xl font-black text-orange-950 dark:text-orange-100 mb-2">
+            <h3 className="text-xl font-black text-orange-950 dark:text-orange-100 mb-2">
               Jobs Awaiting Approval
             </h3>
             <p className="text-orange-800/80 dark:text-orange-200/70 font-medium leading-relaxed mb-8 max-w-sm">
-              Review and moderate new job postings submitted by employers before they are visible to candidates.
+              Review and moderate new job postings submitted by employers.
             </p>
           </div>
           
@@ -174,7 +194,7 @@ export default async function AdminDashboardPage() {
             href="/admin/jobs"
             className="inline-flex items-center justify-between w-full md:w-max px-6 py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-2xl transition-all duration-300 shadow-md shadow-orange-600/30 hover:shadow-orange-600/50"
           >
-            <span>Moderate Job Postings</span>
+            <span>Moderate Postings</span>
             <ChevronRight className="h-5 w-5 ml-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -192,11 +212,11 @@ export default async function AdminDashboardPage() {
                 {stats.unverifiedCompaniesCount} pending
               </span>
             </div>
-            <h3 className="text-2xl font-black text-indigo-950 dark:text-indigo-100 mb-2">
+            <h3 className="text-xl font-black text-indigo-950 dark:text-indigo-100 mb-2">
               Company Verifications
             </h3>
             <p className="text-indigo-800/80 dark:text-indigo-200/70 font-medium leading-relaxed mb-8 max-w-sm">
-              Verify and audit corporate registration credentials for new employer accounts to ensure platform trust.
+              Verify and audit corporate registration credentials for new employers.
             </p>
           </div>
           
@@ -204,7 +224,52 @@ export default async function AdminDashboardPage() {
             href="/admin/companies"
             className="inline-flex items-center justify-between w-full md:w-max px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all duration-300 shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/50"
           >
-            <span>Verify Employer Profiles</span>
+            <span>Verify Profiles</span>
+            <ChevronRight className="h-5 w-5 ml-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {/* Expiring Jobs Reminder */}
+        <div className="bg-gradient-to-br from-rose-50 to-pink-50/50 dark:from-rose-950/20 dark:to-pink-900/10 p-8 rounded-[2rem] border border-rose-200/50 dark:border-rose-800/30 shadow-lg shadow-rose-100 dark:shadow-none flex flex-col justify-between group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-200/30 dark:bg-rose-800/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+          
+          <div>
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-3 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-2xl">
+                <Clock className="h-8 w-8" />
+              </div>
+              <span className="text-sm font-black bg-rose-200 text-rose-800 dark:bg-rose-800 dark:text-rose-200 px-4 py-1.5 rounded-full shadow-sm">
+                {stats.expiringJobs.length} expiring soon
+              </span>
+            </div>
+            <h3 className="text-xl font-black text-rose-950 dark:text-rose-100 mb-2">
+              Upcoming Expired Jobs
+            </h3>
+            
+            <div className="space-y-3 mb-6 relative z-10">
+              {stats.expiringJobs.length > 0 ? (
+                stats.expiringJobs.map((job: any) => (
+                  <div key={job._id} className="flex justify-between items-center bg-white/60 dark:bg-slate-900/50 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/50">
+                    <div className="overflow-hidden pr-2">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{job.title}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{job.companyName}</p>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-black uppercase bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400 px-2 py-1 rounded-md">
+                      {job.daysLeft === 0 ? "Expires Today" : `${job.daysLeft} days left`}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-rose-800/80 dark:text-rose-200/70 font-medium text-sm">No jobs expiring in the next 10 days.</p>
+              )}
+            </div>
+          </div>
+          
+          <Link
+            href="/admin/jobs"
+            className="inline-flex items-center justify-between w-full md:w-max px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl transition-all duration-300 shadow-md shadow-rose-600/30 hover:shadow-rose-600/50"
+          >
+            <span>Manage All Jobs</span>
             <ChevronRight className="h-5 w-5 ml-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

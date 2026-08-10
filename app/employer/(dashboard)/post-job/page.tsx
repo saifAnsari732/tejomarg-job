@@ -42,7 +42,7 @@ export default function PostJobPage() {
     description: "",
     isWalkInInterview: false,
     communicationPreference: "Yes, to myself",
-    pricingPlan: "Classic Job",
+    pricingPlan: "Basic",
     openings: "1",
     deadline: "",
     skillsRequired: "General",
@@ -108,10 +108,10 @@ export default function PostJobPage() {
   };
 
   const getBasePrice = (plan: string) => {
-    if (plan === "Premium") return 20;
-    if (plan === "Premium AI") return 3;
-    if (plan === "Super Premium") return 4;
-    return 10;
+    if (plan === "Enterprise") return 599;
+    if (plan === "Premium") return 499;
+    if (plan === "Standard") return 399;
+    return 199;
   };
 
   const getFinalPrice = (plan: string) => {
@@ -586,88 +586,86 @@ export default function PostJobPage() {
             <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
-                {/* Plan 1: Classic */}
+                {/* Plan 1: Basic */}
                 <div 
-                  onClick={() => handlePillSelect("pricingPlan", "Classic")}
-                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Classic" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                  onClick={() => handlePillSelect("pricingPlan", "Basic")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Basic" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-slate-700">Classic Job</h3>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Classic" ? "border-blue-600" : "border-slate-300"}`}>
-                      {formData.pricingPlan === "Classic" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    <h3 className="font-bold text-slate-700">Basic Job</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Basic" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Basic" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹1</div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹199</div>
                   <ul className="space-y-3 text-sm text-slate-600">
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Basic visibility</li>
-                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> WhatsApp notifications</li>
-                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job active for 15 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Standard visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Email notifications</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Basic support</li>
                   </ul>
                 </div>
 
-                {/* Plan 2: Premium */}
+                {/* Plan 2: Standard */}
+                <div 
+                  onClick={() => handlePillSelect("pricingPlan", "Standard")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Standard" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700">Standard Job</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Standard" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Standard" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹399</div>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job active for 30 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> WhatsApp notifications</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Priority email support</li>
+                  </ul>
+                </div>
+
+                {/* Plan 3: Premium */}
                 <div 
                   onClick={() => handlePillSelect("pricingPlan", "Premium")}
                   className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Premium" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
                 >
+                  <div className="absolute -top-4 inset-x-0 bg-blue-800 text-white text-[10px] font-bold text-center py-1 rounded-t-lg uppercase tracking-wider">Most Popular</div>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-slate-700">Premium Job</h3>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Premium" ? "border-blue-600" : "border-slate-300"}`}>
                       {formData.pricingPlan === "Premium" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹20</div>
-                  <ul className="space-y-3 text-sm text-slate-600">
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> WhatsApp notifications</li>
-                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
-                  </ul>
-                </div>
-
-                {/* Plan 3: Premium + AI */}
-                <div 
-                  onClick={() => handlePillSelect("pricingPlan", "Premium AI")}
-                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Premium AI" ? "border-blue-600 shadow-xl scale-105 z-10 mt-4" : "border-slate-200 hover:border-blue-300 mt-4"}`}
-                >
-                  <div className="absolute -top-4 inset-x-0 bg-blue-800 text-white text-[10px] font-bold text-center py-1 rounded-t-lg uppercase tracking-wider">Introducing AI Agent</div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-slate-700">Premium Job <span className="text-purple-500">+ AI</span></h3>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Premium AI" ? "border-blue-600" : "border-slate-300"}`}>
-                      {formData.pricingPlan === "Premium AI" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
-                    </div>
-                  </div>
                   <div className="flex items-center gap-2 mb-6">
-                    <span className="text-3xl font-black text-slate-800">₹3</span>
-                    <span className="text-sm text-slate-400 line-through">₹10</span>
-                    <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-1.5 py-0.5 rounded">25% OFF</span>
+                    <span className="text-3xl font-black text-slate-800">₹499</span>
                   </div>
                   <ul className="space-y-3 text-sm text-slate-600">
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Higher visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job active for 45 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Top-tier visibility</li>
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> WhatsApp notifications</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> <span className="font-bold text-blue-600 bg-blue-50 px-1 rounded">AI Calling Agent</span></li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Dedicated account manager</li>
                   </ul>
                 </div>
 
-                {/* Plan 4: Super Premium */}
+                {/* Plan 4: Enterprise */}
                 <div 
-                  onClick={() => handlePillSelect("pricingPlan", "Super Premium")}
-                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Super Premium" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
+                  onClick={() => handlePillSelect("pricingPlan", "Enterprise")}
+                  className={`border-2 rounded-xl p-6 cursor-pointer transition-all bg-white relative ${formData.pricingPlan === "Enterprise" ? "border-blue-600 shadow-xl scale-105 z-10" : "border-slate-200 hover:border-blue-300"}`}
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-slate-700">Super Premium 🚀</h3>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Super Premium" ? "border-blue-600" : "border-slate-300"}`}>
-                      {formData.pricingPlan === "Super Premium" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                    <h3 className="font-bold text-slate-700">Enterprise Job 🚀</h3>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.pricingPlan === "Enterprise" ? "border-blue-600" : "border-slate-300"}`}>
+                      {formData.pricingPlan === "Enterprise" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹4</div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹599</div>
                   <ul className="space-y-3 text-sm text-slate-600">
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
-                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Maximum visibility</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job active for 60 days</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Maximum sticky visibility</li>
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> 2x Priority WhatsApp notifications</li>
-                    <li className="flex gap-2 items-start text-slate-400"><Plus className="w-4 h-4 rotate-45 mt-0.5 shrink-0" /> AI Calling Agent</li>
+                    <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Custom recruitment solutions</li>
                   </ul>
                 </div>
 
