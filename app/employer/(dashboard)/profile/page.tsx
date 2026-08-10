@@ -16,6 +16,9 @@ export default function EmployerProfilePage() {
   const [website, setWebsite] = useState("");
   const [industry, setIndustry] = useState("");
   const [location, setLocation] = useState("");
+  const [employerName, setEmployerName] = useState("");
+  const [billingEmail, setBillingEmail] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [isVerified, setIsVerified] = useState(false);
 
   // Fetch company details
@@ -36,6 +39,9 @@ export default function EmployerProfilePage() {
         setWebsite(c.website || "");
         setIndustry(c.industry || "");
         setLocation(c.location || "");
+        setEmployerName(c.employerName || "");
+        setBillingEmail(c.billingEmail || "");
+        setContactNumber(c.contactNumber || "");
         setIsVerified(c.isVerified || false);
       } catch (err: any) {
         toast.error(err.message || "Failed to retrieve company data");
@@ -92,6 +98,9 @@ export default function EmployerProfilePage() {
           website,
           industry,
           location,
+          employerName,
+          billingEmail,
+          contactNumber,
         }),
       });
 
@@ -203,6 +212,55 @@ export default function EmployerProfilePage() {
 
         {/* Right: Company details */}
         <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-4 mb-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-105 dark:border-slate-700">
+              Billing & Contact Details
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  Employer Full Name
+                </label>
+                <input
+                  type="text"
+                  value={employerName}
+                  onChange={(e) => setEmployerName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  Billing Email (For Invoices)
+                </label>
+                <input
+                  type="email"
+                  value={billingEmail}
+                  onChange={(e) => setBillingEmail(e.target.value)}
+                  placeholder="e.g. accounts@company.com"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  Contact Number
+                </label>
+                <input
+                  type="tel"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  placeholder="e.g. +91 9876543210"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-105 dark:border-slate-700">
               Corporate Details

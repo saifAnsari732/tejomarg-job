@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { name, logo, description, website, industry, location } = body;
+    const { name, logo, description, website, industry, location, employerName, billingEmail, contactNumber } = body;
 
     if (!name || !description || !industry || !location) {
       return NextResponse.json({ error: "Required fields are missing." }, { status: 400 });
@@ -60,6 +60,9 @@ export async function PUT(req: Request) {
       website,
       industry,
       location,
+      employerName: employerName || "",
+      billingEmail: billingEmail || "",
+      contactNumber: contactNumber || "",
       employerId: user.id,
       updatedAt: new Date().toISOString()
     };
