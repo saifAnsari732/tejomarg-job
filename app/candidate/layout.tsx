@@ -74,7 +74,7 @@ export default async function CandidateLayout({ children }: { children: React.Re
           <div className="p-6 space-y-5">
             <SidebarUploadButton />
             <div className="pt-5 border-t border-slate-200 space-y-2">
-              <Link href="/support" className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
+              <Link href="/support" prefetch={false} className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
                 <HelpCircle className="w-4 h-4" /> Help Center
               </Link>
               <Link href="/api/auth/signout" className="flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
