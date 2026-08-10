@@ -29,7 +29,7 @@ async function getJobApplicantsData(jobId: string, recruiterId: string) {
         const candSnap = await db.collection("users").doc(data.candidateId).get();
         if (candSnap.exists) {
            const cData = candSnap.data() as any;
-           candidate = { _id: candSnap.id, name: cData?.name, email: cData?.email, candidateProfile: cData?.candidateProfile };
+           candidate = { _id: candSnap.id, name: cData?.name, email: cData?.email, phone: cData?.phone, candidateProfile: cData?.candidateProfile };
         }
       }
       return { _id: doc.id, ...data, candidateId: candidate || data.candidateId };
