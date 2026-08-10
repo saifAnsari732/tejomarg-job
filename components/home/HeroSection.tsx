@@ -3,8 +3,8 @@ import dynamic from "next/dynamic";
 import HeroSearchClient from "./HeroSearchClient";
 import AnimatedHeroText from "./AnimatedHeroText";
 
-// Dynamically import heavy framer-motion background without SSR to speed up initial load
-const HeroBackgroundClient = dynamic(() => import("./HeroBackgroundClient"), { ssr: false });
+// Dynamically import heavy framer-motion background to speed up initial load
+const HeroBackgroundClient = dynamic(() => import("./HeroBackgroundClient"));
 
 export default function HeroSection() {
   return (
