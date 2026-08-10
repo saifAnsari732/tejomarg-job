@@ -1,7 +1,4 @@
 import React from "react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions";
-import { redirect } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
@@ -11,16 +8,12 @@ import JobPrepBanner from "@/components/home/JobPrepBanner";
 import TrendingRoles from "@/components/home/TrendingRoles";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import EmployerCTA from "@/components/home/EmployerCTA";
+import EmployerRedirect from "@/components/home/EmployerRedirect";
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-  
-  if (session?.user && (session.user as any).role === "employer") {
-    redirect("/employer");
-  }
-
+export default function HomePage() {
   return (
     <>
+      <EmployerRedirect />
       <Navbar />
       
       <main className="flex-1 bg-white">
@@ -38,4 +31,3 @@ export default async function HomePage() {
   );
 }
 
-export const dynamic = "force-dynamic";
