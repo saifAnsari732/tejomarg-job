@@ -200,7 +200,7 @@ export default function ManageJobsPage() {
         </div>
         <Link
           href="/employer/post-job"
-          className="bg-blue-605 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 transition-all flex items-center gap-2"
+          className="bg-blue-605 bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 transition-all flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           <span>Post a Job</span>

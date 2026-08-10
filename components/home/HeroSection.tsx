@@ -1,7 +1,10 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import HeroSearchClient from "./HeroSearchClient";
 import AnimatedHeroText from "./AnimatedHeroText";
-import HeroBackgroundClient from "./HeroBackgroundClient";
+
+// Dynamically import heavy framer-motion background without SSR to speed up initial load
+const HeroBackgroundClient = dynamic(() => import("./HeroBackgroundClient"), { ssr: false });
 
 export default function HeroSection() {
   return (
@@ -120,6 +123,8 @@ function BrandLogos() {
             src={`/partner-image/${img}`} 
             alt={`Partner ${idx + 1}`} 
             className="max-h-full max-w-full object-contain"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       ))}
