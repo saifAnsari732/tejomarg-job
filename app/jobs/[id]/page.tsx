@@ -205,6 +205,8 @@ export default async function JobDetailPage({ params }: PageProps) {
                   alreadyApplied={alreadyApplied}
                   profileResumeUrl={resumeUrl}
                   whatsappNumber={company?.contactNumber}
+                  isExternal={job.isExternal}
+                  applyUrl={job.applyUrl}
                 />
               </div>
 

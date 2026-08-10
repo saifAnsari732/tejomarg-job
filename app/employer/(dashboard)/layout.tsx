@@ -5,21 +5,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import { LayoutDashboard, FilePlus2, Briefcase, Building2, ChevronRight } from "lucide-react";
+import { 
+  BarChart3, 
+  PlusSquare, 
+  Briefcase, 
+  Building, 
+  CreditCard, 
+  ChevronRight, 
+  Headset 
+} from "lucide-react";
 
 export default async function EmployerLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   
-  // We can't access headers/pathname easily in layout, but we should not block the layout for auth pages if they exist here.
-  // Actually, the login/signup pages are inside `app/employer/login` which uses this layout.
-  // If we redirect them to login while they are on login, it causes a loop.
-  // We will let the individual pages handle auth if needed, or check a custom property.
-  // For now, if no session, just return children without the sidebar, because it's probably login/signup page.
   if (!session) {
     return <>{children}</>;
   }
 
-  // If candidate tries to access employer area, redirect to home
   if ((session.user as any)?.role === "candidate") {
     redirect("/");
   }
@@ -29,66 +31,94 @@ export default async function EmployerLayout({ children }: { children: React.Rea
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 flex flex-col md:flex-row gap-8">
         {/* Employer Sidebar */}
-        <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 h-fit space-y-2 shadow-sm">
+        <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 h-fit space-y-2 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
           <div className="pb-4 mb-4 border-b border-slate-100 dark:border-slate-700">
-            <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Employer Panel</span>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Recruiter Hub</h2>
+            <span className="text-[10px] uppercase text-blue-500 font-extrabold tracking-wider block mb-1">Employer Panel</span>
+            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Recruiter Hub</h2>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="space-y-1.5">
             <Link
               href="/employer"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
             >
-              <div className="flex items-center space-x-2.5">
-                <LayoutDashboard className="h-5 w-5 text-slate-400" />
+              <div className="flex items-center space-x-3">
+                <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <BarChart3 className="h-4 w-4" strokeWidth={2.5} />
+                </div>
                 <span>Recruiter Stats</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
             </Link>
 
             <Link
               href="/employer/post-job"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
             >
-              <div className="flex items-center space-x-2.5">
-                <FilePlus2 className="h-5 w-5 text-slate-400" />
+              <div className="flex items-center space-x-3">
+                <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <PlusSquare className="h-4 w-4" strokeWidth={2.5} />
+                </div>
                 <span>Post a Job</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
             </Link>
 
             <Link
               href="/employer/manage-jobs"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-650 dark:hover:text-blue-400 transition-colors"
+              className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
             >
-              <div className="flex items-center space-x-2.5">
-                <Briefcase className="h-5 w-5 text-slate-400" />
+              <div className="flex items-center space-x-3">
+                <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <Briefcase className="h-4 w-4" strokeWidth={2.5} />
+                </div>
                 <span>Manage Jobs</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
             </Link>
 
             <Link
               href="/employer/profile"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
             >
-              <div className="flex items-center space-x-2.5">
-                <Building2 className="h-5 w-5 text-slate-400" />
+              <div className="flex items-center space-x-3">
+                <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <Building className="h-4 w-4" strokeWidth={2.5} />
+                </div>
                 <span>Company Profile</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
             </Link>
+
             <Link
               href="/employer/payment-history"
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
             >
-              <div className="flex items-center space-x-2.5">
-                <svg className="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <div className="flex items-center space-x-3">
+                <div className="p-1.5 bg-slate-100 text-slate-500 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <CreditCard className="h-4 w-4" strokeWidth={2.5} />
+                </div>
                 <span>Payment History</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-400 transition-colors" />
             </Link>
+
+            <div className="pt-5 mt-5 border-t border-slate-100 dark:border-slate-700">
+              <a
+                href="https://wa.me/919651111303?text=Hi%20Tejomarg%20Employer%20Support"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#25D366]/10 to-[#128C7E]/5 text-[#128C7E] hover:from-[#25D366]/20 hover:to-[#128C7E]/10 transition-all border border-[#25D366]/30 shadow-sm"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="p-1.5 bg-[#25D366]/20 text-[#128C7E] rounded-lg group-hover:scale-110 transition-transform">
+                    <Headset className="h-4 w-4" strokeWidth={2.5} />
+                  </div>
+                  <span>Help & Support</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-[#25D366]" />
+              </a>
+            </div>
           </nav>
         </aside>
 

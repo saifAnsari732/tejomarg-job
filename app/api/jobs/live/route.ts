@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebaseAdmin";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -20,8 +21,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Using Remotive for ultra-fast response (~300ms)
-    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=15`, {
+    // Using Remotive for ultra-fast response (~300ms), increase limit to 100
+    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=100`, {
       next: { revalidate: 3600 },
     });
 
@@ -35,9 +36,39 @@ export async function GET(req: NextRequest) {
 
     const raw = await res.json();
     let jobs = (raw.jobs || []).map(normalizeRemotiveJob);
-    
-    // Limit to 10
-    jobs = jobs.slice(0, 10);
+
+    // Sync to Firestore asynchronously in background to not block response
+    Promise.all(jobs.map(async (job: any) => {
+      try {
+        const docId = `ext_remotive_${job.id}`;
+        
+        // Expiration logic: 60 days from now
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 60);
+
+        const newJob = {
+          title: job.title,
+          companyName: job.company,
+          companyLogo: job.companyLogo,
+          location: job.location,
+          type: job.type,
+          workMode: job.isRemote ? "remote" : "onsite",
+          salaryMin: job.salary !== "Not Disclosed" ? job.salary : "",
+          description: job.description, // using full description
+          applyUrl: job.applyUrl,
+          source: job.source,
+          isExternal: true,
+          status: "active",
+          createdAt: new Date().toISOString(),
+          expiresAt: expiresAt.toISOString(),
+          employerId: "SYSTEM_EXTERNAL",
+        };
+
+        await db.collection("jobs").doc(docId).set(newJob, { merge: true });
+      } catch (err) {
+        console.error("Failed to sync job to DB:", err);
+      }
+    }));
 
     return NextResponse.json({
       status: "live",

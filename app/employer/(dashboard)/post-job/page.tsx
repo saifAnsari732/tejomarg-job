@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Loader2, Plus, ArrowLeft, Check, CheckCircle2, Circle, Eye, Edit2 } from "lucide-react";
+import { Loader2, Plus, ArrowLeft, Check, CheckCircle2, Circle, Eye, Edit2, Sparkles } from "lucide-react";
 import Script from "next/script";
 
 export default function PostJobPage() {
@@ -11,6 +11,7 @@ export default function PostJobPage() {
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   // Coupon states
   const [couponCode, setCouponCode] = useState("");
@@ -104,6 +105,45 @@ export default function PostJobPage() {
       setAppliedDiscount(0);
     } finally {
       setApplyingCoupon(false);
+    }
+  };
+
+  const handleGenerateAI = async () => {
+    if (!formData.title) {
+      toast.error("Please enter a Job Title first to generate AI content.");
+      return;
+    }
+    
+    setIsGeneratingAI(true);
+    const loadingToast = toast.loading("Generating description and skills with AI...");
+    
+    try {
+      const res = await fetch("/api/employer/ai/generate-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          category: formData.category,
+          experienceRequired: formData.experienceRequired,
+          jobType: formData.jobType,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setFormData(prev => ({
+        ...prev,
+        description: data.description || prev.description,
+        skillsRequired: data.skills || prev.skillsRequired,
+      }));
+      
+      toast.success("AI Generation complete!", { id: loadingToast });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to generate AI content", { id: loadingToast });
+    } finally {
+      setIsGeneratingAI(false);
     }
   };
 
@@ -463,7 +503,17 @@ export default function PostJobPage() {
               </div>
               
               <div className="pt-6 border-t border-slate-100">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Job Description <span className="text-red-500">*</span></label>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-semibold text-slate-700">Job Description <span className="text-red-500">*</span></label>
+                  <button 
+                    onClick={handleGenerateAI} 
+                    disabled={isGeneratingAI}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg hover:bg-indigo-100 transition-colors"
+                  >
+                    {isGeneratingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                    Generate with AI
+                  </button>
+                </div>
                 <textarea 
                   name="description" 
                   value={formData.description} 
@@ -471,6 +521,18 @@ export default function PostJobPage() {
                   rows={5} 
                   placeholder="Enter the job description, including the main responsibilities and tasks..."
                   className="w-full p-4 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60] resize-none" 
+                />
+              </div>
+
+              <div className="pt-6 border-t border-slate-100">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Skills Required <span className="text-slate-400 font-normal ml-1">(comma-separated)</span> <span className="text-red-500">*</span></label>
+                <input 
+                  type="text"
+                  name="skillsRequired" 
+                  value={formData.skillsRequired} 
+                  onChange={handleChange} 
+                  placeholder="e.g. React, Node.js, Communication, SEO"
+                  className="w-full p-4 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" 
                 />
               </div>
             </div>

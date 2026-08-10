@@ -14,6 +14,8 @@ interface JobDetailActionsProps {
   alreadyApplied: boolean;
   profileResumeUrl?: string;
   whatsappNumber?: string;
+  isExternal?: boolean;
+  applyUrl?: string;
 }
 
 export default function JobDetailActions({
@@ -25,6 +27,8 @@ export default function JobDetailActions({
   alreadyApplied,
   profileResumeUrl,
   whatsappNumber,
+  isExternal,
+  applyUrl,
 }: JobDetailActionsProps) {
   const [showModal, setShowModal] = useState(false);
   const [applied, setApplied] = useState(alreadyApplied);
@@ -121,12 +125,23 @@ export default function JobDetailActions({
     <>
       <div className="flex flex-col gap-3">
         <div className="flex gap-4">
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
-          >
-            <span>Apply Now</span> <ChevronRight className="h-4 w-4" />
-          </button>
+          {isExternal && applyUrl ? (
+            <a
+              href={applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <span>Apply Externally</span> <ChevronRight className="h-4 w-4" />
+            </a>
+          ) : (
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <span>Apply Now</span> <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
           <ShareButton />
         </div>
         {whatsappNumber && (

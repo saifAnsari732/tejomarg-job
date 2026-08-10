@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { Briefcase, Users, Eye, Trash2, Edit2, AlertCircle, ToggleLeft, ToggleRight, Loader2, Plus, CreditCard } from "lucide-react";
+import { Briefcase, Users, Eye, Trash2, Edit2, AlertCircle, ToggleLeft, ToggleRight, Loader2, Plus, CreditCard, MapPin, FolderOpen, IndianRupee, Clock, GraduationCap } from "lucide-react";
 import Script from "next/script";
 
 interface JobItem {
@@ -51,6 +51,10 @@ export default function ManageJobsPage() {
   const handleStatusToggle = async (job: JobItem) => {
     if (job.status === "pending") {
       toast.error("Pending jobs require Admin review before they can be activated.");
+      return;
+    }
+    if (job.status === "draft" || job.status === "pending_payment") {
+      toast.error("You must complete payment before activating this job.");
       return;
     }
 
@@ -242,27 +246,33 @@ export default function ManageJobsPage() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-slate-500 font-semibold">
+                <div className="flex flex-wrap gap-x-5 gap-y-3 mt-4 text-sm text-slate-600 font-semibold">
                   <span className="flex items-center">
-                    <Briefcase className="h-3.5 w-3.5 mr-1 text-slate-400" />
+                    <Briefcase className="h-4 w-4 mr-1.5 text-blue-500" />
                     {job.jobType}
                   </span>
                   <span className="flex items-center">
-                    <span className="text-slate-400 mr-1">📍</span> {job.location}
+                    <MapPin className="h-4 w-4 mr-1.5 text-rose-500" /> 
+                    {job.location}
                   </span>
                   <span className="flex items-center">
-                    <span className="text-slate-400 mr-1">📂</span> {job.category || "General"}
+                    <FolderOpen className="h-4 w-4 mr-1.5 text-amber-500" /> 
+                    {job.category || "General"}
                   </span>
                   <span className="flex items-center">
-                    <span className="text-slate-400 mr-1">💼</span> {job.experienceRequired}
+                    <GraduationCap className="h-4 w-4 mr-1.5 text-indigo-500" /> 
+                    {job.experienceRequired}
                   </span>
                   <span className="flex items-center">
-                    <span className="text-slate-400 mr-1">₹</span> {job.salaryMin?.toLocaleString()} - {job.salaryMax?.toLocaleString()}
+                    <IndianRupee className="h-4 w-4 mr-1 text-emerald-500" /> 
+                    {job.salaryMin?.toLocaleString()} - {job.salaryMax?.toLocaleString()}
                   </span>
                   <span className="flex items-center">
-                    <span className="text-slate-400 mr-1">👥</span> Openings: {job.openings}
+                    <Users className="h-4 w-4 mr-1.5 text-sky-500" /> 
+                    Openings: {job.openings}
                   </span>
                   <span className="flex items-center text-slate-400">
+                    <Clock className="h-4 w-4 mr-1.5" />
                     Posted: {new Date(job.createdAt).toLocaleDateString()}
                   </span>
                 </div>
