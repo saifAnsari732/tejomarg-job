@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     // Calculate Price Based on Plan
     let amountInRupees = 10; // Default
     if (job.pricingPlan === "Classic") amountInRupees = 10;
-    if (job.pricingPlan === "Premium") amountInRupees = 20;
+    if (job.pricingPlan === "Premium") amountInRupees = 2;
     if (job.pricingPlan === "Premium AI") amountInRupees = 3;
     if (job.pricingPlan === "Super Premium") amountInRupees = 4;
 

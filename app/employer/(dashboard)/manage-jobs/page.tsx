@@ -269,21 +269,24 @@ export default function ManageJobsPage() {
 
                 {/* Payment History Details */}
                 {(job.paymentId || job.pricingPlan || job.paymentOrderId) && (
-                  <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-750 text-[11px] text-slate-500">
+                  <div className="flex flex-wrap items-center gap-3 mt-4 p-3 bg-slate-50 dark:bg-slate-750/30 rounded-xl border border-slate-100 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
                     {job.pricingPlan && (
-                      <span className="flex items-center text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded">
-                        Plan: {job.pricingPlan}
-                      </span>
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-100">
+                        <span className="text-slate-400">Plan:</span>
+                        <span className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg text-blue-700 dark:text-blue-400 shadow-sm">{job.pricingPlan}</span>
+                      </div>
                     )}
                     {job.paymentId && (
-                      <span className="flex items-center font-mono">
-                        Payment ID: {job.paymentId}
-                      </span>
+                      <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-600 pl-3">
+                        <span className="text-slate-400">Pay ID:</span>
+                        <span className="font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded-md shadow-sm">{job.paymentId}</span>
+                      </div>
                     )}
-                    {job.paymentOrderId && (
-                      <span className="flex items-center font-mono">
-                        Order ID: {job.paymentOrderId}
-                      </span>
+                    {job.paymentOrderId && !job.paymentId && (
+                      <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-600 pl-3">
+                        <span className="text-slate-400">Order ID:</span>
+                        <span className="font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded-md shadow-sm">{job.paymentOrderId}</span>
+                      </div>
                     )}
                   </div>
                 )}

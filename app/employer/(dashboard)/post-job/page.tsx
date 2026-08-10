@@ -557,7 +557,7 @@ export default function PostJobPage() {
                       {formData.pricingPlan === "Classic" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-slate-800 mb-6">₹10</div>
+                  <div className="text-3xl font-black text-slate-800 mb-6">₹1</div>
                   <ul className="space-y-3 text-sm text-slate-600">
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Job will be active for 15 days</li>
                     <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /> Basic visibility</li>

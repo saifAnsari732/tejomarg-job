@@ -79,6 +79,16 @@ export default async function EmployerLayout({ children }: { children: React.Rea
               </div>
               <ChevronRight className="h-4 w-4 text-slate-400" />
             </Link>
+            <Link
+              href="/employer/payment-history"
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              <div className="flex items-center space-x-2.5">
+                <svg className="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Payment History</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            </Link>
           </nav>
         </aside>
 
