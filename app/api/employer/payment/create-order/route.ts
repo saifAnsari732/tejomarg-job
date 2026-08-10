@@ -26,11 +26,10 @@ export async function POST(req: Request) {
     const job = jobDoc.data() as any;
 
     // Calculate Price Based on Plan
-    let amountInRupees = 1; // Default
-    if (job.pricingPlan === "Classic") amountInRupees = 1;
-    if (job.pricingPlan === "Premium") amountInRupees = 20;
-    if (job.pricingPlan === "Premium AI") amountInRupees = 3;
-    if (job.pricingPlan === "Super Premium") amountInRupees = 4;
+    let amountInRupees = 199; // Default for Basic
+    if (job.pricingPlan === "Standard") amountInRupees = 399;
+    if (job.pricingPlan === "Premium") amountInRupees = 499;
+    if (job.pricingPlan === "Enterprise") amountInRupees = 599;
 
     // Apply Coupon Discount if saved on job
     if (job.couponCode) {
@@ -52,10 +51,18 @@ export async function POST(req: Request) {
 
     const amountInPaise = amountInRupees * 100;
 
+    // Check if Razorpay keys are configured
+    const key_id = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!key_id || !key_secret) {
+      return NextResponse.json({ error: "Razorpay keys are missing from server configuration" }, { status: 500 });
+    }
+
     // Initialize Razorpay
     const instance = new Razorpay({
-      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-      key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+      key_id,
+      key_secret,
     });
 
     const options = {
@@ -80,6 +87,10 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("Order creation error:", error);
-    return NextResponse.json({ error: "Failed to create payment order" }, { status: 500 });
+    
+    // Extract Razorpay specific error if available
+    const errorMessage = error?.error?.description || error?.message || "Failed to create payment order";
+    
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
