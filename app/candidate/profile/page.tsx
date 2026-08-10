@@ -8,7 +8,7 @@ import Link from "next/link";
 import { 
   Upload, FileText, Plus, Trash2, Loader2, Save, MapPin, 
   Building2, Briefcase, Mail, Phone, Calendar, User as UserIcon, 
-  Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare, Camera
+  Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare, Camera, ExternalLink
 } from "lucide-react";
 import { TagInput } from "@/components/ui/TagInput";
 
