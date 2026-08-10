@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { FileText, ExternalLink, Check, X, Calendar, User, Eye, Loader2, ArrowLeft, Mail, Phone, MapPin, DollarSign, Briefcase } from "lucide-react";
+import { FileText, ExternalLink, Check, X, Calendar, User, Eye, Loader2, ArrowLeft, Mail, Phone, MapPin, DollarSign, Briefcase, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Candidate {
   _id: string;
@@ -80,129 +82,168 @@ export default function ApplicantsList({ initialApplications, jobTitle }: Applic
     return `inline-flex items-center px-3 py-1 rounded-full text-[11px] font-black tracking-wide uppercase border ${badges[status] || badges.applied}`;
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Applicants Report", 14, 22);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Job Title: ${jobTitle}`, 14, 30);
+    doc.text(`Total Applicants: ${applications.length}`, 14, 36);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 42);
+
+    const tableColumn = ["Candidate Name", "Email", "Phone", "Location", "Applied Date", "Status"];
+    const tableRows: any[] = [];
+
+    applications.forEach(app => {
+      const c = app.candidateId;
+      const profile = c?.candidateProfile || {};
+      const appData = [
+        c.name || "N/A",
+        c.email || "N/A",
+        c.phone || "N/A",
+        profile.preferredLocation || "N/A",
+        new Date(app.createdAt).toLocaleDateString(),
+        app.status.toUpperCase()
+      ];
+      tableRows.push(appData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 50,
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [79, 70, 229] }, // Indigo 600
+    });
+
+    doc.save(`Applicants_${jobTitle.replace(/\s+/g, '_')}.pdf`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+      <div className="bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 p-8 rounded-3xl border border-indigo-500/30 shadow-2xl shadow-indigo-900/20 flex flex-col sm:flex-row sm:items-center justify-between relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div className="relative z-10">
-          <Link href="/employer/manage-jobs" className="inline-flex items-center text-indigo-300 hover:text-white transition-colors text-sm font-bold mb-4">
+          <Link href="/employer/manage-jobs" className="inline-flex items-center text-indigo-200 hover:text-white transition-colors text-sm font-bold mb-4 bg-white/10 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-sm">
             <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to Jobs
           </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight">Applicants Dashboard</h1>
-          <p className="text-indigo-200 font-medium mt-2 text-sm sm:text-base">
-            Reviewing candidates for: <span className="text-white font-bold px-2 py-1 bg-white/10 rounded-lg ml-1">{jobTitle}</span>
+          <h1 className="text-4xl font-black text-white tracking-tight drop-shadow-md">Applicants Dashboard</h1>
+          <p className="text-indigo-100 font-medium mt-2 text-sm sm:text-base flex items-center gap-2">
+            Reviewing candidates for <span className="text-white font-bold px-3 py-1 bg-white/20 rounded-lg shadow-inner">{jobTitle}</span>
           </p>
         </div>
-        <div className="relative z-10 mt-6 sm:mt-0 bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center min-w-[140px]">
-          <div className="text-4xl font-black text-white">{applications.length}</div>
-          <div className="text-xs font-bold text-indigo-200 uppercase tracking-wider mt-1">Total Applicants</div>
+        <div className="relative z-10 mt-6 sm:mt-0 flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 px-6 py-4 rounded-2xl shadow-lg">
+            <div className="text-4xl font-black text-white drop-shadow-sm">{applications.length}</div>
+            <div className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mt-1">Total Applicants</div>
+          </div>
+          
+          <button 
+            onClick={exportToPDF}
+            className="flex items-center justify-center gap-2 bg-white text-indigo-700 hover:bg-indigo-50 px-6 py-4 rounded-2xl font-black text-sm shadow-xl transition-all border border-indigo-100"
+          >
+            <Download className="h-5 w-5" /> Export PDF
+          </button>
         </div>
       </div>
 
-      {/* Candidate List */}
+      {/* Candidate List - Card View */}
       {applications.length > 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-black uppercase tracking-widest">
-                  <th className="px-8 py-5">Candidate</th>
-                  <th className="px-8 py-5">Skills Match</th>
-                  <th className="px-8 py-5">Applied Date</th>
-                  <th className="px-8 py-5">Status</th>
-                  <th className="px-8 py-5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {applications.map((app) => {
-                  const c = app.candidateId;
-                  const profile = c?.candidateProfile || {};
+        <div className="space-y-4">
+          {applications.map((app) => {
+            const c = app.candidateId;
+            const profile = c?.candidateProfile || {};
+            
+            if (!c) return null;
+
+            return (
+              <div 
+                key={app._id} 
+                className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/20 hover:shadow-xl hover:border-indigo-200 hover:ring-4 hover:ring-indigo-50/50 transition-all group cursor-pointer overflow-hidden flex flex-col md:flex-row"
+                onClick={() => setSelectedApp(app)}
+              >
+                {/* Left Side: Avatar & Basic Info */}
+                <div className="p-6 flex items-center gap-6 flex-1 bg-slate-50/50">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-700 flex items-center justify-center font-black text-xl shadow-inner border border-indigo-200/50 shrink-0">
+                    {c.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-black text-slate-900 text-xl group-hover:text-indigo-600 transition-colors truncate">{c.name}</h4>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm font-semibold text-slate-500">
+                      <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" /> {c.email}</span>
+                      {c.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" /> {c.phone}</span>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle Side: Status */}
+                <div className="p-6 md:border-l border-slate-100 flex flex-col justify-center bg-white min-w-[200px]">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest">Status</span>
+                      <span className={getStatusBadge(app.status)}>{app.status}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest">Applied</span>
+                      <span className="font-bold text-slate-700">{new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Actions */}
+                <div className="p-6 flex flex-wrap items-center justify-end bg-slate-50/30 border-t md:border-t-0 md:border-l border-slate-100 gap-3" onClick={(e) => e.stopPropagation()}>
                   
-                  if (!c) return null;
+                  {c.phone && (
+                    <a
+                      href={`tel:${c.phone}`}
+                      className="p-3 bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 rounded-2xl transition-all shadow-sm flex items-center justify-center font-bold text-sm gap-2"
+                      title="Call Candidate"
+                    >
+                      <Phone className="h-5 w-5" /> <span className="md:hidden lg:inline">Call</span>
+                    </a>
+                  )}
 
-                  return (
-                    <tr key={app._id} className="hover:bg-indigo-50/30 transition-all group cursor-pointer" onClick={() => setSelectedApp(app)}>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center space-x-4">
-                          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-700 flex items-center justify-center font-black text-lg shadow-inner border border-indigo-200/50">
-                            {c.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{c.name}</h4>
-                            <p className="text-xs font-semibold text-slate-500 mt-0.5 flex items-center gap-1.5">
-                              <Mail className="h-3 w-3 text-slate-400" /> {c.email}
-                            </p>
-                            <div className="flex items-center space-x-3 text-[11px] font-bold text-slate-400 uppercase mt-2">
-                              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {profile.preferredLocation || "Any"}</span>
-                              <span className="flex items-center gap-1 text-emerald-600"><DollarSign className="h-3 w-3" /> {profile.expectedSalary ? `${(profile.expectedSalary/1000).toFixed(0)}k/yr` : "N/A"}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="px-8 py-5">
-                        <div className="flex flex-wrap gap-1.5 max-w-[200px]">
-                          {profile.skills?.slice(0, 3).map((skill) => (
-                            <span key={skill} className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200">
-                              {skill}
-                            </span>
-                          ))}
-                          {profile.skills?.length > 3 && (
-                            <span className="px-2 py-1 bg-slate-50 text-slate-400 text-[10px] font-bold rounded-lg border border-slate-200 border-dashed">
-                              +{profile.skills.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="px-8 py-5 text-sm font-semibold text-slate-600">
-                        {new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </td>
-
-                      <td className="px-8 py-5">
-                        <span className={getStatusBadge(app.status)}></span>
-                      </td>
-
-                      <td className="px-8 py-5 text-right">
-                        <div className="flex items-center justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => setSelectedApp(app)}
-                            className="p-2.5 bg-white border border-slate-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 rounded-xl transition-all shadow-sm flex items-center justify-center font-bold text-xs gap-1.5"
-                          >
-                            <Eye className="h-4 w-4" /> View
-                          </button>
-                          
-                          {updatingId === app._id ? (
-                            <div className="p-2.5"><Loader2 className="h-4 w-4 animate-spin text-indigo-500" /></div>
-                          ) : (
-                            app.status === "applied" && (
-                              <>
-                                <button
-                                  onClick={() => handleStatusChange(app._id, "shortlisted")}
-                                  className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-xl transition-colors shadow-sm"
-                                  title="Shortlist Candidate"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleStatusChange(app._id, "rejected")}
-                                  className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-colors shadow-sm"
-                                  title="Reject Candidate"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </>
-                            )
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  <button
+                    onClick={() => setSelectedApp(app)}
+                    className="p-3 bg-white border border-slate-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 rounded-2xl transition-all shadow-sm flex items-center justify-center font-bold text-sm gap-2"
+                    title="View Full Profile"
+                  >
+                    <Eye className="h-5 w-5" /> <span className="md:hidden lg:inline">View</span>
+                  </button>
+                  
+                  {updatingId === app._id ? (
+                    <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm"><Loader2 className="h-5 w-5 animate-spin text-indigo-500" /></div>
+                  ) : (
+                    app.status === "applied" && (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange(app._id, "shortlisted")}
+                          className="p-3 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-2xl transition-all border border-emerald-200 shadow-sm flex items-center gap-2 font-bold text-sm"
+                          title="Shortlist Candidate"
+                        >
+                          <Check className="h-5 w-5" /> <span className="md:hidden lg:inline">Shortlist</span>
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(app._id, "rejected")}
+                          className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 rounded-2xl transition-all border border-rose-200 shadow-sm flex items-center gap-2 font-bold text-sm"
+                          title="Reject Candidate"
+                        >
+                          <X className="h-5 w-5" /> <span className="md:hidden lg:inline">Reject</span>
+                        </button>
+                      </>
+                    )
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-200/20 py-24 px-6 text-center">

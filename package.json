@@ -17,6 +17,8 @@
     "firebase-admin": "^11.11.1",
     "framer-motion": "^12.43.0",
     "google-auth-library": "^11.0.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.23.0",
     "mongoose": "^9.7.3",
     "next": "16.2.10",
