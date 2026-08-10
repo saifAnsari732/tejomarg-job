@@ -204,6 +204,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   userRole={user?.role}
                   alreadyApplied={alreadyApplied}
                   profileResumeUrl={resumeUrl}
+                  whatsappNumber={company?.contactNumber}
                 />
               </div>
 
