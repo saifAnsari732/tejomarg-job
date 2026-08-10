@@ -27,7 +27,7 @@ async function getAdminDashboardData() {
       db.collection("companies").where("isVerified", "==", false).count().get().then(s => s.data().count),
     ]);
 
-    const expiringJobs = activeJobsList.map(job => {
+    const expiringJobs = activeJobsList.map((job: any) => {
       let daysActive = 15;
       if (job.pricingPlan === "Standard") daysActive = 30;
       else if (job.pricingPlan === "Premium") daysActive = 45;
