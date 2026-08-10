@@ -29,6 +29,7 @@ interface EducationItem {
 
 interface CertificationItem {
   name: string;
+  imageUrl?: string;
 }
 
 export default function CandidateProfilePage() {
@@ -827,25 +828,62 @@ export default function CandidateProfilePage() {
             {certifications.length > 0 ? (
               <div className="space-y-3">
                 {certifications.map((cert, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-2.5 bg-slate-50 border rounded-lg">
+                  <div key={idx} className="flex flex-col gap-2 p-3 bg-slate-50 border rounded-lg">
                     {editCert ? (
-                      <div className="flex-1 flex gap-2 items-center">
-                        <input type="text" value={cert.name} onChange={e => {
-                          const updated = [...certifications];
-                          updated[idx].name = e.target.value;
-                          setCertifications(updated);
-                        }} className="flex-1 border rounded p-1 text-xs bg-white" placeholder="Certification Name" />
-                        <button onClick={() => {
-                          setCertifications(certifications.filter((_, i) => i !== idx));
-                        }} className="text-red-500 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
                       <>
-                        <span className="font-bold text-slate-800 text-xs">{cert.name}</span>
-                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                        <div className="flex gap-2 items-center">
+                          <input type="text" value={cert.name} onChange={e => {
+                            const updated = [...certifications];
+                            updated[idx].name = e.target.value;
+                            setCertifications(updated);
+                          }} className="flex-1 border rounded p-1.5 text-xs bg-white font-medium" placeholder="Certification Name" />
+                          <button onClick={() => {
+                            setCertifications(certifications.filter((_, i) => i !== idx));
+                          }} className="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded border border-red-100">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <label className="cursor-pointer bg-white hover:bg-slate-50 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded border shadow-sm flex items-center gap-1.5 transition-colors">
+                            <Upload className="h-3.5 w-3.5 text-indigo-600" />
+                            {cert.imageUrl ? "Change Certificate Image" : "Upload Certificate Image"}
+                            <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                const formData = new FormData();
+                                formData.append("file", e.target.files[0]);
+                                toast.loading("Uploading...", { id: "upload-cert" });
+                                try {
+                                  const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                  const data = await res.json();
+                                  if (!res.ok) throw new Error(data.error);
+                                  const updated = [...certifications];
+                                  updated[idx].imageUrl = data.url;
+                                  setCertifications(updated);
+                                  toast.success("Uploaded!", { id: "upload-cert" });
+                                } catch (err: any) {
+                                  toast.error(err.message, { id: "upload-cert" });
+                                }
+                              }
+                            }} />
+                          </label>
+                          {cert.imageUrl && (
+                            <a href={cert.imageUrl} target="_blank" rel="noreferrer" className="text-[11px] text-indigo-600 font-bold hover:underline flex items-center gap-1">
+                              <ExternalLink className="h-3 w-3" /> View Image
+                            </a>
+                          )}
+                        </div>
                       </>
+                    ) : (
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-slate-800 text-sm">{cert.name}</span>
+                        {cert.imageUrl ? (
+                          <a href={cert.imageUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-700 bg-indigo-50 p-1.5 rounded-md border border-indigo-100 flex items-center gap-1 text-[10px] font-bold">
+                            <ExternalLink className="h-3.5 w-3.5" /> VIEW CERTIFICATE
+                          </a>
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-slate-400" />
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}
