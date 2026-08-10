@@ -10,6 +10,7 @@ import {
   Building2, Briefcase, Mail, Phone, Calendar, User as UserIcon, 
   Home, ChevronRight, Edit2, Check, X, GraduationCap, Languages, MessageSquare, Camera
 } from "lucide-react";
+import { TagInput } from "@/components/ui/TagInput";
 
 interface ExperienceItem {
   company: string;
@@ -513,12 +514,17 @@ export default function CandidateProfilePage() {
                             }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Skills Used</label>
-                            <input type="text" placeholder="React, Node.js" value={exp.skills} onChange={e => {
-                              const updated = [...experience];
-                              updated[idx].skills = e.target.value;
-                              setExperience(updated);
-                            }} className="w-full mt-0.5 border border-slate-200 rounded px-2 py-1 text-xs" />
+                            <label className="text-[10px] font-bold text-slate-400 uppercase mb-0.5 block">Skills Used</label>
+                            <TagInput 
+                              tags={exp.skills ? exp.skills.split(",").map(s => s.trim()).filter(Boolean) : []} 
+                              onChange={(newTags) => {
+                                const updated = [...experience];
+                                updated[idx].skills = newTags.join(", ");
+                                setExperience(updated);
+                              }} 
+                              placeholder="Add skill..."
+                              suggestions={["React", "Node.js", "JavaScript", "TypeScript", "Python", "Java", "C++", "C#", "SQL", "MongoDB", "AWS", "Docker"]}
+                            />
                           </div>
                         </div>
                         <div>
@@ -766,15 +772,13 @@ export default function CandidateProfilePage() {
             <h3 className="font-extrabold text-slate-900 text-[15px] mb-4">Skills</h3>
             
             {editSkills ? (
-              <div className="space-y-2">
-                <textarea 
-                  value={tempSkillsText} 
-                  onChange={e => setTempSkillsText(e.target.value)} 
-                  className="w-full border border-slate-200 rounded p-2 text-xs" 
-                  rows={3} 
-                  placeholder="React, Node.js, CSS, Excel"
+              <div className="space-y-2 mt-2">
+                <TagInput 
+                  tags={tempSkillsText ? tempSkillsText.split(",").map(s => s.trim()).filter(Boolean) : []}
+                  onChange={(newTags) => setTempSkillsText(newTags.join(", "))}
+                  placeholder="e.g. React, Node.js, Excel"
+                  suggestions={["React", "Node.js", "JavaScript", "TypeScript", "Python", "Java", "C++", "SQL", "MongoDB", "AWS", "Docker", "Figma", "Excel", "Marketing", "Sales"]}
                 />
-                <p className="text-[10px] text-slate-400">Comma-separated list of skills.</p>
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
