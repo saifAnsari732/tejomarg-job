@@ -1,10 +1,17 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 import { Cpu, Target, MousePointerClick, Zap } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function FeaturesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+
   const features = [
     {
       icon: Cpu,
@@ -36,43 +43,72 @@ export default function FeaturesSection() {
     }
   ];
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Heading reveal
+      gsap.fromTo(
+        headingRef.current,
+        { opacity: 0, y: 40, filter: "blur(8px)" },
+        {
+          opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out",
+          scrollTrigger: { trigger: headingRef.current, start: "top 85%", toggleActions: "play none none none" }
+        }
+      );
+
+      // Cards stagger
+      if (cardsRef.current) {
+        const cards = cardsRef.current.querySelectorAll(".feature-card");
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 50, filter: "blur(6px)" },
+          {
+            opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out",
+            stagger: 0.12,
+            scrollTrigger: { trigger: cardsRef.current, start: "top 85%", toggleActions: "play none none none" }
+          }
+        );
+
+        // Hover lift effect
+        cards.forEach((card) => {
+          card.addEventListener("mouseenter", () => {
+            gsap.to(card, { y: -10, scale: 1.02, duration: 0.3, ease: "power2.out" });
+          });
+          card.addEventListener("mouseleave", () => {
+            gsap.to(card, { y: 0, scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" });
+          });
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section ref={sectionRef} className="py-24 bg-white relative overflow-hidden">
       {/* Background Ornaments */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-50/50 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-bold mb-6 border border-blue-100">
-              <Zap className="w-4 h-4" />
-              <span>POWERED BY AI</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
-              Your career, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">supercharged</span>
-            </h2>
-            <p className="text-lg text-slate-500 font-medium">
-              We have completely reimagined the job search process to be faster, smarter, and stress-free. Let technology do the heavy lifting for you.
-            </p>
-          </motion.div>
+        <div ref={headingRef} className="text-center max-w-3xl mx-auto mb-20" style={{ opacity: 0 }}>
+          <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-bold mb-6 border border-blue-100">
+            <Zap className="w-4 h-4" />
+            <span>POWERED BY AI</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6">
+            Your career, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">supercharged</span>
+          </h2>
+          <p className="text-lg text-slate-500 font-medium">
+            We have completely reimagined the job search process to be faster, smarter, and stress-free. Let technology do the heavy lifting for you.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, idx) => (
-            <motion.div
+            <div
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              whileHover={{ y: -8, scale: 1.02 }}
-              className="relative group rounded-[2rem] p-8 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)] transition-all overflow-hidden cursor-pointer"
+              className="feature-card relative group rounded-[2rem] p-8 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)] transition-shadow overflow-hidden cursor-pointer"
+              style={{ opacity: 0 }}
             >
               {/* Hover Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -90,7 +126,7 @@ export default function FeaturesSection() {
 
               {/* Bottom decorative line */}
               <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${feature.color} scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500`}></div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
