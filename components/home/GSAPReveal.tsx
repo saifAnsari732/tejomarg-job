@@ -14,11 +14,6 @@ interface Props {
   from?: "bottom" | "left" | "right" | "fade";
 }
 
-/**
- * Wraps any element with GSAP entrance animation.
- * On mount: fade+slide in from bottom (or custom direction).
- * If scrollTrigger=true: animates when element enters viewport.
- */
 export default function GSAPReveal({ children, className = "", delay = 0, scrollTrigger = false, from = "bottom" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,20 +22,19 @@ export default function GSAPReveal({ children, className = "", delay = 0, scroll
 
     const fromVars: gsap.TweenVars = {
       opacity: 0,
-      ...(from === "bottom" ? { y: 48 } : {}),
-      ...(from === "left" ? { x: -60 } : {}),
-      ...(from === "right" ? { x: 60 } : {}),
-      filter: "blur(6px)",
+      ...(from === "bottom" ? { y: 36 } : {}),
+      ...(from === "left" ? { x: -50 } : {}),
+      ...(from === "right" ? { x: 50 } : {}),
     };
 
     const toVars: gsap.TweenVars = {
       opacity: 1,
       y: 0,
       x: 0,
-      filter: "blur(0px)",
-      duration: 0.65,
+      duration: 0.5,
       ease: "power3.out",
       delay,
+      clearProps: "transform",
     };
 
     if (scrollTrigger) {
@@ -59,7 +53,7 @@ export default function GSAPReveal({ children, className = "", delay = 0, scroll
   }, [delay, from, scrollTrigger]);
 
   return (
-    <div ref={ref} className={className} style={{ opacity: 0, willChange: "transform, opacity" }}>
+    <div ref={ref} className={className} style={{ opacity: 0 }}>
       {children}
     </div>
   );
