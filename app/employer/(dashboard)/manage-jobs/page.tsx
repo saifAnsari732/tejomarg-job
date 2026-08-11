@@ -324,27 +324,36 @@ export default function ManageJobsPage() {
                   <span>Applicants</span>
                 </Link>
 
-                {/* Status Toggle toggle */}
+                {/* Status Toggle */}
                 <button
                   onClick={() => handleStatusToggle(job)}
                   disabled={togglingId === job._id}
                   className={`p-2 border rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
                     job.status === "active"
-                      ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+                      ? "border-emerald-500 bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:border-emerald-600"
                       : job.status === "closed"
-                      ? "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-500"
-                      : "border-slate-100 dark:border-slate-800 opacity-50 cursor-not-allowed text-slate-350"
+                      ? "border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-500"
+                      : "border-slate-200 opacity-50 cursor-not-allowed text-slate-350"
                   }`}
                   title={job.status === "active" ? "Mark as Closed" : job.status === "closed" ? "Mark as Active" : "Pending Moderation"}
                 >
                   {togglingId === job._id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : job.status === "active" ? (
-                    <ToggleRight className="h-5 w-5 text-emerald-600" />
+                    <ToggleRight className="h-5 w-5 text-white" />
                   ) : (
-                    <ToggleLeft className="h-5 w-5 text-slate-400" />
+                    <ToggleLeft className="h-5 w-5 text-slate-500" />
                   )}
                 </button>
+
+                {/* Edit button */}
+                <Link
+                  href={`/employer/post-job?editId=${job._id}`}
+                  className="p-2 border border-slate-200 dark:border-slate-700 hover:border-blue-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 hover:text-blue-600 dark:hover:text-blue-400 text-slate-500 rounded-xl transition-colors cursor-pointer"
+                  title="Edit Job Posting"
+                >
+                  <Edit2 className="h-4.5 w-4.5" />
+                </Link>
 
                 {/* Delete button */}
                 <button

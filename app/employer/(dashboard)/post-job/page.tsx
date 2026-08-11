@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, Plus, ArrowLeft, Check, CheckCircle2, Circle, Eye, Edit2, Sparkles } from "lucide-react";
 import Script from "next/script";
 
 export default function PostJobPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("editId");
+
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,6 +75,29 @@ export default function PostJobPage() {
     }
     loadCategories();
   }, []);
+
+  // Load existing job for editing
+  useEffect(() => {
+    if (editId) {
+      const loadJob = async () => {
+        try {
+          const res = await fetch(`/api/employer/jobs/${editId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setFormData(prev => ({
+              ...prev,
+              ...data,
+              skillsRequired: Array.isArray(data.skillsRequired) ? data.skillsRequired.join(", ") : (data.skillsRequired || prev.skillsRequired),
+              deadline: data.deadline ? new Date(data.deadline).toISOString().split('T')[0] : prev.deadline
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to load job for editing", err);
+        }
+      };
+      loadJob();
+    }
+  }, [editId]);
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
@@ -169,13 +195,30 @@ export default function PostJobPage() {
 
   const handleSubmit = async () => {
     setSaving(true);
-    try {
-      const payload = {
-        ...formData,
-        experienceLevel: formData.experienceRequired === "Fresher Only" ? "Entry-level" : "Mid-level",
-        couponCode: appliedDiscount > 0 ? couponCode : undefined,
-      };
+    const payload = {
+      ...formData,
+      experienceLevel: formData.experienceRequired === "Fresher Only" ? "Entry-level" : "Mid-level",
+      couponCode: appliedDiscount > 0 ? couponCode : undefined,
+    };
 
+    try {
+      if (editId) {
+        // Edit mode
+        const res = await fetch(`/api/employer/jobs/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to update job");
+
+        toast.success("Job updated successfully!");
+        router.push("/employer/dashboard");
+        return;
+      }
+
+      // Create new job
       const res = await fetch("/api/employer/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -184,6 +227,12 @@ export default function PostJobPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post job");
+
+      if (payload.isDraft) {
+        toast.success("Job saved as draft");
+        router.push("/employer/dashboard");
+        return;
+      }
 
       const { orderId, jobId, amount } = data;
 
@@ -838,8 +887,9 @@ export default function PostJobPage() {
                     <span>₹{getFinalPrice(formData.pricingPlan)}</span>
                   </div>
                 </div>
-                <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#1a7650] flex items-center justify-center gap-2 w-full md:w-auto">
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay & Publish"}
+                <button onClick={handleSubmit} disabled={saving} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650] flex items-center gap-2">
+                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+                  {editId ? "Save Changes" : "Pay & Publish"}
                 </button>
               </div>
             </div>

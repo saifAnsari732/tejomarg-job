@@ -2,6 +2,34 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { db } from "@/lib/firebaseAdmin";
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = session.user as any;
+    const jobDoc = await db.collection("jobs").doc(id).get();
+    
+    if (!jobDoc.exists) {
+      return NextResponse.json({ error: "Job posting not found" }, { status: 404 });
+    }
+    const job = { _id: jobDoc.id, ...jobDoc.data() } as any;
+
+    if (user.role === "employer" && job.employerId !== user.id) {
+      return NextResponse.json({ error: "Unauthorized to view this job posting" }, { status: 403 });
+    }
+
+    return NextResponse.json(job);
+  } catch (error: any) {
+    console.error("Job GET error:", error);
+    return NextResponse.json({ error: error.message || "Failed to fetch job" }, { status: 550 });
+  }
+}
+
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
