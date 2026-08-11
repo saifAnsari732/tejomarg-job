@@ -185,7 +185,7 @@ export default function PostJobPage() {
 
       // Handle Razorpay Payment
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
+        key: (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").replace(/['"]/g, '').trim(), // Clean the Key ID
         amount: amount.toString(), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
         currency: "INR",
         name: "Tejomarg Job Portal",
@@ -238,6 +238,34 @@ export default function PostJobPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleNextStep1 = () => {
+    if (!formData.title || !formData.category || !formData.location) {
+      toast.error("Please fill in all required fields (Job Title, Category, Location)");
+      return;
+    }
+    setCurrentStep(2);
+  };
+
+  const handleNextStep2 = () => {
+    if (!formData.description || !formData.skillsRequired) {
+      toast.error("Please provide Job Description and Skills");
+      return;
+    }
+    if (formData.experienceRequired === "Experienced Only" && (!formData.experienceYears || parseInt(formData.experienceYears) <= 0)) {
+      toast.error("Please specify the minimum years of experience");
+      return;
+    }
+    setCurrentStep(3);
+  };
+
+  const handleNextStep3 = () => {
+    if (!formData.deadline || !formData.openings) {
+      toast.error("Please specify Application Deadline and Openings");
+      return;
+    }
+    setCurrentStep(4);
   };
 
   const handleSaveDraft = async () => {
@@ -456,7 +484,7 @@ export default function PostJobPage() {
             </div>
             
             <div className="p-6 border-t border-slate-100 flex justify-end">
-              <button onClick={() => setCurrentStep(2)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">
+              <button onClick={handleNextStep1} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">
                 Continue
               </button>
             </div>
@@ -539,7 +567,7 @@ export default function PostJobPage() {
 
             <div className="p-6 border-t border-slate-100 flex justify-between">
               <button onClick={() => setCurrentStep(1)} className="border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
-              <button onClick={() => setCurrentStep(3)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
+              <button onClick={handleNextStep2} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
             </div>
           </div>
         )}
@@ -596,7 +624,7 @@ export default function PostJobPage() {
 
             <div className="p-6 border-t border-slate-100 flex justify-between">
               <button onClick={() => setCurrentStep(2)} className="border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50">Back</button>
-              <button onClick={() => setCurrentStep(4)} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
+              <button onClick={handleNextStep3} className="bg-[#208f60] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#1a7650]">Continue</button>
             </div>
           </div>
         )}
