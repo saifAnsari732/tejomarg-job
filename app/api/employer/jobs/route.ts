@@ -163,11 +163,10 @@ export async function POST(req: Request) {
     }
 
     // Calculate Price Based on Plan
-    let amountInRupees = 10; // Default
-    if (body.pricingPlan === "Classic") amountInRupees = 10;
-    if (body.pricingPlan === "Premium") amountInRupees = 20;
-    if (body.pricingPlan === "Premium AI") amountInRupees = 3;
-    if (body.pricingPlan === "Super Premium") amountInRupees = 4;
+    let amountInRupees = 199; // Default for Basic
+    if (body.pricingPlan === "Standard") amountInRupees = 399;
+    if (body.pricingPlan === "Premium") amountInRupees = 499;
+    if (body.pricingPlan === "Enterprise") amountInRupees = 599;
 
     // Apply Coupon Discount if valid
     if (body.couponCode) {
@@ -214,6 +213,7 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("Employer jobs POST error:", error);
-    return NextResponse.json({ error: error.message || "Failed to post job" }, { status: 550 });
+    const errorMessage = error?.error?.description || error?.message || "Failed to post job";
+    return NextResponse.json({ error: errorMessage }, { status: 550 });
   }
 }
