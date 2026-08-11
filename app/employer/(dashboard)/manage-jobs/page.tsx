@@ -318,7 +318,7 @@ export default function ManageJobsPage() {
                 {/* View Applicants button */}
                 <Link
                   href={`/employer/jobs/${job._id}/applicants`}
-                  className="w-full xl:w-auto px-6 py-3 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center space-x-2 shadow-sm"
+                  className="w-full xl:w-auto px-6 py-3 bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center space-x-2 shadow-sm"
                 >
                   <Users className="h-5 w-5 text-slate-500" />
                   <span>Applicants</span>
@@ -329,7 +329,7 @@ export default function ManageJobsPage() {
                   <button
                     onClick={() => handleStatusToggle(job)}
                     disabled={togglingId === job._id}
-                    className={`p-3 border rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
+                    className={`p-3 border rounded-xl bg-slate-100 cursor-pointer flex items-center justify-center shrink-0 ${
                       job.status === "active"
                         ? "border-emerald-500 bg-emerald-500 text-white shadow-md hover:bg-emerald-600 hover:border-emerald-600"
                         : job.status === "closed"
@@ -339,11 +339,11 @@ export default function ManageJobsPage() {
                     title={job.status === "active" ? "Mark as Closed" : job.status === "closed" ? "Mark as Active" : "Pending Moderation"}
                   >
                     {togglingId === job._id ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-5 w-7 animate-spin" />
                     ) : job.status === "active" ? (
-                      <ToggleRight className="h-5 w-5 text-white" />
+                      <ToggleRight className="h-6 w-7 text-black" />
                     ) : (
-                      <ToggleLeft className="h-5 w-5 text-slate-500" />
+                      <ToggleLeft className="h-6 w-7 text-black" />
                     )}
                   </button>
 

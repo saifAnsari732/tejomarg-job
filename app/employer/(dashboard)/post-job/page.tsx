@@ -88,7 +88,17 @@ export default function PostJobPage() {
               ...prev,
               ...data,
               skillsRequired: Array.isArray(data.skillsRequired) ? data.skillsRequired.join(", ") : (data.skillsRequired || prev.skillsRequired),
-              deadline: data.deadline ? new Date(data.deadline).toISOString().split('T')[0] : prev.deadline
+              deadline: (() => {
+                if (!data.deadline) return prev.deadline;
+                try {
+                  const ts = data.deadline._seconds ? data.deadline._seconds * 1000 : data.deadline;
+                  const date = new Date(ts);
+                  if (isNaN(date.getTime())) return prev.deadline;
+                  return date.toISOString().split('T')[0];
+                } catch {
+                  return prev.deadline;
+                }
+              })()
             }));
           }
         } catch (err) {
