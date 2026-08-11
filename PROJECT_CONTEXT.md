@@ -61,4 +61,48 @@ This document tracks daily updates, file modifications, and significant UI/UX or
 - **Changes:** Fixed a vulnerability where unpaid jobs could be activated. Clicking the activate toggle on an unpaid job now auto-redirects the user to the Razorpay payment flow. Added strict backend validation (HTTP 402) to reject activations for jobs lacking a `paymentId`.
 
 ---
+
+## Project Overview & Architecture
+
+**Tejomarg Job Portal** is a modern, full-stack Next.js application designed to connect employers with candidates. 
+
+### Key Features & How it Works:
+1. **Frontend:** Built with Next.js 16 (App Router), React, Tailwind CSS, and Framer Motion for premium UI animations. Features a Glassmorphic design system.
+2. **Backend & API:** Uses Next.js API Routes (`app/api/...`) for backend logic.
+3. **Database:** MongoDB (via Mongoose) stores Users, Jobs, and Applications. Firestore is used for caching external job feeds and managing some real-time components.
+4. **Authentication:** Powered by NextAuth.js. Supports Google OAuth and Email/Password login. Role-based access control divides users into `candidate`, `employer`, and `admin`.
+5. **Payment Gateway:** Razorpay is integrated for employers to pay before activating job posts. Server-side validation ensures jobs cannot be activated without a valid `paymentId`.
+6. **AI Integration:** Google Gemini AI is integrated to automatically generate professional job descriptions and extract skills based on job titles.
+7. **External Job APIs:** Fetches live remote jobs from Arbeitnow and Remotive APIs, caching them in Firestore for 60 days to reduce API limits.
+8. **Admin Dashboard:** A dedicated, premium portal for admins to manage users, approve jobs, create coupons, and monitor system health.
+
+### Environment Variables (`.env.local`)
+
+To run this project locally or deploy it to production (like Vercel, Hostinger, or cPanel), the following environment variables MUST be configured correctly:
+
+#### Database & Auth
+- `MONGODB_URI`: Connection string for the MongoDB database.
+- `NEXTAUTH_SECRET`: A secure random string used to encrypt NextAuth session cookies.
+- `NEXTAUTH_URL`: The base URL of the application (e.g., `http://localhost:3000` or `https://yourdomain.com`).
+
+#### Google OAuth (For Login)
+- `GOOGLE_CLIENT_ID`: Client ID from Google Cloud Console.
+- `GOOGLE_CLIENT_SECRET`: Client Secret from Google Cloud Console.
+
+#### AI & External APIs
+- `GEMINI_API_KEY`: API key for Google Gemini AI (used for Job Description generation).
+- `JSEARCH_API_KEY`: API key for JSearch (RapidAPI) if used.
+
+#### Payment Gateway (Razorpay)
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID`: Public Key ID (starts with `rzp_live_` or `rzp_test_`) exposed to the frontend.
+- `RAZORPAY_KEY_ID`: Same as above, used in backend routes.
+- `RAZORPAY_KEY_SECRET`: Secret Key (Keep this private!) used to verify payments and create orders.
+
+#### Firebase / Firestore (For caching & storage)
+- `FIREBASE_PROJECT_ID`: Firebase project ID.
+- `FIREBASE_CLIENT_EMAIL`: Service account email for Firebase Admin SDK.
+- `FIREBASE_PRIVATE_KEY`: Private key for Firebase Admin SDK (must be formatted correctly with `\n` without extra quotes).
+- `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, etc.: Public Firebase config for client-side usage (like image uploads).
+
+---
 *Note: This file will be updated daily based on prompts and file changes for tracking project context.*
