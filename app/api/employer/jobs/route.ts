@@ -190,9 +190,12 @@ export async function POST(req: Request) {
     const amountInPaise = amountInRupees * 100;
 
     // Initialize Razorpay
+    const key_id = (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "").replace(/['"]/g, '').trim();
+    const key_secret = (process.env.RAZORPAY_KEY_SECRET || "").replace(/['"]/g, '').trim();
+
     const instance = new Razorpay({
-      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
-      key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+      key_id,
+      key_secret,
     });
 
     const options = {
