@@ -1,6 +1,5 @@
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
@@ -14,6 +13,7 @@ import {
   ChevronRight, 
   Headset 
 } from "lucide-react";
+import SidebarLogoutButton from "@/components/employer/SidebarLogoutButton";
 
 export default async function EmployerLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -27,17 +27,17 @@ export default async function EmployerLayout({ children }: { children: React.Rea
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 flex flex-col md:flex-row gap-8">
+      <div className="flex-1 flex overflow-hidden">
         {/* Employer Sidebar */}
-        <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 h-fit space-y-2 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-          <div className="pb-4 mb-4 border-b border-slate-100 dark:border-slate-700">
+        <aside className="w-64 shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-4 h-[calc(100vh-74px)] overflow-y-auto hidden md:flex flex-col sticky top-0 shadow-sm z-10">
+          <div className="pb-4 mb-4 border-b border-slate-100 dark:border-slate-700 px-2 mt-2">
             <span className="text-[10px] uppercase text-blue-500 font-extrabold tracking-wider block mb-1">Employer Panel</span>
             <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Recruiter Hub</h2>
           </div>
 
-          <nav className="space-y-1.5">
+          <nav className="flex-1 space-y-1.5">
             <Link
               href="/employer"
               className="group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-400 transition-all"
@@ -120,14 +120,19 @@ export default async function EmployerLayout({ children }: { children: React.Rea
               </a>
             </div>
           </nav>
+          
+          <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700">
+            <SidebarLogoutButton />
+          </div>
         </aside>
 
         {/* Employer Dashboard Workspace */}
-        <section className="flex-1 min-w-0">
-          {children}
-        </section>
+        <main className="flex-1 overflow-y-auto h-[calc(100vh-74px)] w-full">
+          <div className="max-w-7xl mx-auto p-4 md:p-8">
+            {children}
+          </div>
+        </main>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }

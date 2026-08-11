@@ -191,114 +191,110 @@ export default function ManageJobsPage() {
     <div className="space-y-6">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Title */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Manage Posted Jobs</h1>
-          <p className="text-sm text-slate-550 mt-1">
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Manage Posted Jobs</h1>
+          <p className="text-base text-slate-500 mt-2">
             Monitor, edit, close, or review applicants for roles you've published.
           </p>
         </div>
         <Link
           href="/employer/post-job"
-          className="bg-blue-605 bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 transition-all flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-5 w-5" />
           <span>Post a Job</span>
         </Link>
       </div>
 
       {jobs.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {jobs.map((job) => (
             <div
               key={job._id}
-              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 p-8 flex flex-col xl:flex-row xl:items-center justify-between gap-8 hover:shadow-xl hover:shadow-blue-500/5 transition-all overflow-hidden relative"
             >
               {/* Left Column: Job Info */}
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center space-x-3">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white hover:text-blue-650 transition-colors">
+              <div className="space-y-4 flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white hover:text-blue-600 transition-colors">
                     {job.title}
                   </h3>
                   
                   {/* Status Badge */}
                   {job.status === "active" && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-100 dark:border-emerald-900/20">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-100 dark:border-emerald-900/20 shadow-sm">
                       Active
                     </span>
                   )}
                   {job.status === "pending" && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-955/10 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-100/50 dark:border-amber-900/20">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/10 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-100/50 shadow-sm">
                       Pending Approval
                     </span>
                   )}
                   {job.status === "pending_payment" && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-100">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-100 shadow-sm">
                       Pending Payment
                     </span>
                   )}
                   {job.status === "draft" && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 shadow-sm">
                       Draft
                     </span>
                   )}
                   {job.status === "closed" && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-655 dark:text-slate-400 text-xs font-semibold border border-slate-200/50 dark:border-slate-700">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold border border-slate-200/50 shadow-sm">
                       Closed
                     </span>
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-x-5 gap-y-3 mt-4 text-sm text-slate-600 font-semibold">
-                  <span className="flex items-center">
-                    <Briefcase className="h-4 w-4 mr-1.5 text-blue-500" />
+                <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-600 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="flex items-center gap-2">
+                    <div className="p-1.5 bg-blue-100/50 dark:bg-blue-900/20 rounded-md"><Briefcase className="h-4 w-4 text-blue-600" /></div>
                     {job.jobType}
                   </span>
-                  <span className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1.5 text-rose-500" /> 
+                  <span className="flex items-center gap-2">
+                    <div className="p-1.5 bg-rose-100/50 dark:bg-rose-900/20 rounded-md"><MapPin className="h-4 w-4 text-rose-600" /></div>
                     {job.location}
                   </span>
-                  <span className="flex items-center">
-                    <FolderOpen className="h-4 w-4 mr-1.5 text-amber-500" /> 
+                  <span className="flex items-center gap-2">
+                    <div className="p-1.5 bg-amber-100/50 dark:bg-amber-900/20 rounded-md"><FolderOpen className="h-4 w-4 text-amber-600" /></div>
                     {job.category || "General"}
                   </span>
-                  <span className="flex items-center">
-                    <GraduationCap className="h-4 w-4 mr-1.5 text-indigo-500" /> 
+                  <span className="flex items-center gap-2">
+                    <div className="p-1.5 bg-indigo-100/50 dark:bg-indigo-900/20 rounded-md"><GraduationCap className="h-4 w-4 text-indigo-600" /></div>
                     {job.experienceRequired}
                   </span>
-                  <span className="flex items-center">
-                    <IndianRupee className="h-4 w-4 mr-1 text-emerald-500" /> 
+                  <span className="flex items-center gap-2">
+                    <div className="p-1.5 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-md"><IndianRupee className="h-4 w-4 text-emerald-600" /></div>
                     {job.salaryMin?.toLocaleString()} - {job.salaryMax?.toLocaleString()}
                   </span>
-                  <span className="flex items-center">
-                    <Users className="h-4 w-4 mr-1.5 text-sky-500" /> 
-                    Openings: {job.openings}
-                  </span>
-                  <span className="flex items-center text-slate-400">
-                    <Clock className="h-4 w-4 mr-1.5" />
+                  <span className="flex items-center gap-2 text-slate-400">
+                    <div className="p-1.5 bg-slate-200/50 dark:bg-slate-800 rounded-md"><Clock className="h-4 w-4 text-slate-400" /></div>
                     Posted: {new Date(job.createdAt).toLocaleDateString()}
                   </span>
                 </div>
 
                 {/* Payment History Details */}
                 {(job.paymentId || job.pricingPlan || job.paymentOrderId) && (
-                  <div className="flex flex-wrap items-center gap-3 mt-4 p-3 bg-slate-50 dark:bg-slate-750/30 rounded-xl border border-slate-100 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
+                  <div className="flex flex-wrap items-center gap-4 mt-2 px-1 text-sm text-slate-600 dark:text-slate-300">
                     {job.pricingPlan && (
-                      <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-100">
+                      <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-100">
                         <span className="text-slate-400">Plan:</span>
-                        <span className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg text-blue-700 dark:text-blue-400 shadow-sm">{job.pricingPlan}</span>
+                        <span className="bg-blue-50 border border-blue-100 px-3 py-1 rounded-full text-blue-700 shadow-sm">{job.pricingPlan}</span>
                       </div>
                     )}
                     {job.paymentId && (
-                      <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-600 pl-3">
+                      <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-600 pl-4">
                         <span className="text-slate-400">Pay ID:</span>
-                        <span className="font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded-md shadow-sm">{job.paymentId}</span>
+                        <span className="font-mono text-xs bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">{job.paymentId}</span>
                       </div>
                     )}
                     {job.paymentOrderId && !job.paymentId && (
-                      <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-600 pl-3">
+                      <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-600 pl-4">
                         <span className="text-slate-400">Order ID:</span>
-                        <span className="font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded-md shadow-sm">{job.paymentOrderId}</span>
+                        <span className="font-mono text-xs bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">{job.paymentOrderId}</span>
                       </div>
                     )}
                   </div>
@@ -306,72 +302,78 @@ export default function ManageJobsPage() {
               </div>
 
               {/* Middle Column: Stats */}
-              <div className="flex items-center space-x-8 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 dark:border-slate-750">
-                <div className="text-center">
-                  <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{job.applicantCount}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Applicants</p>
+              <div className="flex items-center xl:border-l xl:border-slate-100 xl:dark:border-slate-700 xl:pl-8 py-4 xl:py-0">
+                <div className="text-center bg-blue-50/50 dark:bg-slate-900/50 rounded-2xl p-4 min-w-[120px] border border-blue-100/50 dark:border-slate-700">
+                  <p className="text-4xl font-extrabold text-blue-600 dark:text-blue-400">{job.applicantCount}</p>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Applicants</p>
+                </div>
+                <div className="text-center bg-emerald-50/50 dark:bg-slate-900/50 rounded-2xl p-4 min-w-[120px] border border-emerald-100/50 dark:border-slate-700 ml-4">
+                  <p className="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">{job.openings}</p>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Openings</p>
                 </div>
               </div>
 
               {/* Right Column: Actions */}
-              <div className="flex flex-wrap items-center gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-slate-150 dark:border-slate-700">
+              <div className="flex flex-wrap xl:flex-col items-center justify-center gap-4 xl:ml-6 border-t xl:border-t-0 pt-6 xl:pt-0 border-slate-100 dark:border-slate-700 w-full xl:w-auto">
                 {/* View Applicants button */}
                 <Link
                   href={`/employer/jobs/${job._id}/applicants`}
-                  className="px-4 py-2 bg-slate-50 dark:bg-slate-750 text-slate-705 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center space-x-1.5"
+                  className="w-full xl:w-auto px-6 py-3 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center space-x-2 shadow-sm"
                 >
-                  <Users className="h-4 w-4" />
+                  <Users className="h-5 w-5 text-slate-500" />
                   <span>Applicants</span>
                 </Link>
 
-                {/* Status Toggle */}
-                <button
-                  onClick={() => handleStatusToggle(job)}
-                  disabled={togglingId === job._id}
-                  className={`p-2 border rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
-                    job.status === "active"
-                      ? "border-emerald-500 bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 hover:border-emerald-600"
-                      : job.status === "closed"
-                      ? "border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-500"
-                      : "border-slate-200 opacity-50 cursor-not-allowed text-slate-350"
-                  }`}
-                  title={job.status === "active" ? "Mark as Closed" : job.status === "closed" ? "Mark as Active" : "Pending Moderation"}
-                >
-                  {togglingId === job._id ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : job.status === "active" ? (
-                    <ToggleRight className="h-5 w-5 text-white" />
-                  ) : (
-                    <ToggleLeft className="h-5 w-5 text-slate-500" />
-                  )}
-                </button>
+                <div className="flex items-center gap-3 w-full justify-center">
+                  {/* Status Toggle */}
+                  <button
+                    onClick={() => handleStatusToggle(job)}
+                    disabled={togglingId === job._id}
+                    className={`p-3 border rounded-xl transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
+                      job.status === "active"
+                        ? "border-emerald-500 bg-emerald-500 text-white shadow-md hover:bg-emerald-600 hover:border-emerald-600"
+                        : job.status === "closed"
+                        ? "border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-500"
+                        : "border-slate-200 opacity-50 cursor-not-allowed text-slate-400"
+                    }`}
+                    title={job.status === "active" ? "Mark as Closed" : job.status === "closed" ? "Mark as Active" : "Pending Moderation"}
+                  >
+                    {togglingId === job._id ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : job.status === "active" ? (
+                      <ToggleRight className="h-5 w-5 text-white" />
+                    ) : (
+                      <ToggleLeft className="h-5 w-5 text-slate-500" />
+                    )}
+                  </button>
 
-                {/* Edit button */}
-                <Link
-                  href={`/employer/post-job?editId=${job._id}`}
-                  className="p-2 border border-slate-200 dark:border-slate-700 hover:border-blue-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 hover:text-blue-600 dark:hover:text-blue-400 text-slate-500 rounded-xl transition-colors cursor-pointer"
-                  title="Edit Job Posting"
-                >
-                  <Edit2 className="h-4.5 w-4.5" />
-                </Link>
+                  {/* Edit button */}
+                  <Link
+                    href={`/employer/post-job?editId=${job._id}`}
+                    className="p-3 border border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 text-slate-500 rounded-xl transition-colors cursor-pointer shadow-sm"
+                    title="Edit Job Posting"
+                  >
+                    <Edit2 className="h-5 w-5" />
+                  </Link>
 
-                {/* Delete button */}
-                <button
-                  onClick={() => handleDelete(job._id)}
-                  className="p-2 border border-slate-200 dark:border-slate-700 hover:border-rose-200 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 hover:text-rose-600 dark:hover:text-rose-455 text-slate-500 rounded-xl transition-colors cursor-pointer"
-                  title="Delete Job Posting"
-                >
-                  <Trash2 className="h-4.5 w-4.5" />
-                </button>
+                  {/* Delete button */}
+                  <button
+                    onClick={() => handleDelete(job._id)}
+                    className="p-3 border border-slate-200 dark:border-slate-700 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-600 dark:hover:text-rose-400 text-slate-500 rounded-xl transition-colors cursor-pointer shadow-sm"
+                    title="Delete Job Posting"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
 
                 {/* Pay Now Button for Drafts / Pending Payment */}
                 {(job.status === "draft" || job.status === "pending_payment") && (
                   <button
                     onClick={() => handlePayAndPublish(job._id)}
                     disabled={togglingId === job._id}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors flex items-center space-x-1.5 ml-2"
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20 mt-2 xl:mt-0"
                   >
-                    {togglingId === job._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                    {togglingId === job._id ? <Loader2 className="h-5 w-5 animate-spin" /> : <CreditCard className="h-5 w-5" />}
                     <span>Pay & Publish</span>
                   </button>
                 )}
