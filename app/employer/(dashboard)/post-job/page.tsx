@@ -49,6 +49,7 @@ export default function PostJobPage() {
     communicationPreference: "Yes, to myself",
     pricingPlan: "Basic",
     openings: "1",
+    isDraft: false,
     deadline: "",
     skillsRequired: "General",
   });
