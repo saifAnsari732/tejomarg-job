@@ -22,7 +22,7 @@ export default function PostJobPage() {
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
-  const [currentStep, setCurrentStep] = useState(0); // 0 is initial choice, 1-5 are wizard steps
+  const [currentStep, setCurrentStep] = useState(editId ? 1 : 0); // 0 is initial choice, 1-5 are wizard steps
 
   // Form State matching all screenshot fields
   const [formData, setFormData] = useState({
