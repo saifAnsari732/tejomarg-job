@@ -12,6 +12,7 @@ export default function PostJobPage() {
   const [loadingCats, setLoadingCats] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
 
   // Coupon states
   const [couponCode, setCouponCode] = useState("");
@@ -138,6 +139,9 @@ export default function PostJobPage() {
         skillsRequired: data.skills || prev.skillsRequired,
       }));
       
+      // Clear manual input if any
+      setSkillInput("");
+
       toast.success("AI Generation complete!", { id: loadingToast });
     } catch (err: any) {
       console.error(err);
@@ -323,6 +327,34 @@ export default function PostJobPage() {
       {label} {selected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3 text-slate-400" />}
     </button>
   );
+
+  const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const newSkill = skillInput.trim();
+      if (newSkill) {
+        const currentSkills = formData.skillsRequired.split(",").map(s => s.trim()).filter(s => s);
+        if (!currentSkills.includes(newSkill)) {
+          setFormData({ ...formData, skillsRequired: [...currentSkills, newSkill].join(", ") });
+        }
+        setSkillInput("");
+      }
+    } else if (e.key === "Backspace" && !skillInput) {
+      // Remove last skill on backspace if input is empty
+      e.preventDefault();
+      const currentSkills = formData.skillsRequired.split(",").map(s => s.trim()).filter(s => s);
+      if (currentSkills.length > 0) {
+        currentSkills.pop();
+        setFormData({ ...formData, skillsRequired: currentSkills.join(", ") });
+      }
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    const currentSkills = formData.skillsRequired.split(",").map(s => s.trim()).filter(s => s);
+    const updatedSkills = currentSkills.filter(s => s !== skillToRemove);
+    setFormData({ ...formData, skillsRequired: updatedSkills.join(", ") });
+  };
 
   const steps = [
     "Job details",
@@ -553,15 +585,25 @@ export default function PostJobPage() {
               </div>
 
               <div className="pt-6 border-t border-slate-100">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Skills Required <span className="text-slate-400 font-normal ml-1">(comma-separated)</span> <span className="text-red-500">*</span></label>
-                <input 
-                  type="text"
-                  name="skillsRequired" 
-                  value={formData.skillsRequired} 
-                  onChange={handleChange} 
-                  placeholder="e.g. React, Node.js, Communication, SEO"
-                  className="w-full p-4 border border-slate-300 rounded-lg focus:outline-none focus:border-[#208f60]" 
-                />
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Skills Required <span className="text-slate-400 font-normal ml-1">(Type a skill and press Enter or Comma)</span> <span className="text-red-500">*</span></label>
+                <div className="w-full p-2 border border-slate-300 rounded-lg focus-within:border-[#208f60] bg-white flex flex-wrap gap-2 items-center min-h-[56px]">
+                  {formData.skillsRequired.split(",").map(s => s.trim()).filter(s => s).map((skill, index) => (
+                    <span key={index} className="flex items-center gap-1 bg-emerald-50 text-[#208f60] border border-emerald-200 px-3 py-1.5 rounded-md text-sm font-medium">
+                      {skill}
+                      <button type="button" onClick={() => removeSkill(skill)} className="hover:text-red-500 text-emerald-600 focus:outline-none">
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                  <input 
+                    type="text"
+                    value={skillInput} 
+                    onChange={(e) => setSkillInput(e.target.value)} 
+                    onKeyDown={handleSkillKeyDown}
+                    placeholder={formData.skillsRequired ? "Add more..." : "e.g. React, Communication, Sales"}
+                    className="flex-1 min-w-[150px] p-2 outline-none bg-transparent" 
+                  />
+                </div>
               </div>
             </div>
 
