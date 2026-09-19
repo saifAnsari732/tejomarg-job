@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Briefcase, Globe, ChevronDown } from "lucide-react";
 
 export default function Footer() {
@@ -13,8 +14,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
-              <img src="/job1.png" alt="Tejomarg Icon" className="h-12 w-auto object-contain shrink-0" />
-              <img src="/job2.png" alt="Tejomarg Text" className="h-40 -my-16 -ml-8 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
+              <Image src="/job1.png" alt="Tejomarg Icon" width={48} height={48} className="h-12 w-auto object-contain shrink-0" />
+              <Image src="/job2.png" alt="Tejomarg Text" width={160} height={60} className="h-40 -my-16 -ml-8 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
             </div>
             <p className="text-base text-slate-500 pr-4 leading-relaxed font-medium">
               India's #1 Job Platform. Connecting talent with the best opportunities across the nation with AI-powered precision.

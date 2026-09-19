@@ -2,187 +2,161 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Cpu } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, Cpu, Sparkles, Bot, Mic, CheckCircle2, Award, Play } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function JobPrepBanner() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const slides = [
-    {
-      title: "Software Engineer",
-      company: "Tesla",
-      companyInitial: "T",
-      companyColor: "bg-red-600",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
-      bgGradient: "from-blue-900 via-blue-900 to-slate-900",
-      time: "5 min AI Interview"
-    },
-    {
-      title: "Product Manager",
-      company: "Google",
-      companyInitial: "G",
-      companyColor: "bg-blue-600",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop",
-      bgGradient: "from-slate-900 via-sky-900 to-slate-900",
-      time: "10 min AI Interview"
-    },
-    {
-      title: "UX Designer",
-      company: "Apple",
-      companyInitial: "A",
-      companyColor: "bg-slate-800",
-      image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop",
-      bgGradient: "from-blue-900 via-fuchsia-900 to-sky-900",
-      time: "7 min AI Interview"
-    }
+  const roles = [
+    { title: "Software Engineer", company: "Tesla / Google", score: "96%", time: "5 Min Session" },
+    { title: "Product Manager", company: "Amazon / Flipkart", score: "94%", time: "8 Min Session" },
+    { title: "Data Analyst", company: "TCS / Infosys", score: "98%", time: "6 Min Session" },
   ];
 
-  const nextSlide = () => {
-    setDirection(1);
-    setCurrentSlide((p) => (p + 1) % slides.length);
-  };
-  const prevSlide = () => {
-    setDirection(-1);
-    setCurrentSlide((p) => (p === 0 ? slides.length - 1 : p - 1));
-  };
-
-  const current = slides[currentSlide];
-
-  const slideVariants: any = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 100 : -100,
-      opacity: 0,
-      scale: 0.95
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.4, ease: "easeOut" }
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -100 : 100,
-      opacity: 0,
-      scale: 0.95,
-      transition: { duration: 0.3, ease: "easeIn" }
-    })
-  };
+  const currentRole = roles[activeTab];
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#020617] rounded-[2rem] p-8 lg:p-14 flex flex-col lg:flex-row items-center justify-between border border-white/5 relative overflow-hidden shadow-2xl group animate-fade-in-up">
+        
+        {/* Main AI Job Prep Container */}
+        <div className="relative rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-emerald-500/20 p-8 sm:p-12 lg:p-16 shadow-[0_25px_60px_-15px_rgba(16,185,129,0.15)] overflow-hidden">
           
-          {/* Animated Background Gradients inside Banner */}
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-500/30 transition-colors duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-sky-500/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-sky-500/30 transition-colors duration-700"></div>
+          {/* Glowing Ambient Background Elements */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-          {/* Left Side Content (Desktop) / Top Content (Mobile) */}
-          <div className="lg:w-1/2 z-10 flex flex-col items-center lg:items-start text-center lg:text-left mb-14 lg:mb-0 space-y-5 lg:space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             
-            <div className="flex flex-col items-center lg:flex-row lg:gap-5">
-              <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center p-0.5 shadow-lg shadow-blue-500/20 mb-3 lg:mb-0 animate-pulse-slow">
-                <div className="w-full h-full bg-[#020617] rounded-[10px] lg:rounded-xl flex items-center justify-center">
-                  <Cpu className="w-6 h-6 lg:w-8 lg:h-8 text-blue-400" />
+            {/* Left Column: Headline & Action */}
+            <div className="lg:col-span-7 flex flex-col items-start text-left">
+              
+              {/* AI Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <Bot className="w-4 h-4 text-emerald-400" />
+                AI-POWERED INTERVIEW COACH
+              </div>
+
+              {/* Headline */}
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15] mb-6">
+                Ace Your Next Interview with{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+                  Tejomarg AI
+                </span>
+              </h2>
+
+              {/* Subtitle */}
+              <p className="text-emerald-100/80 text-base sm:text-lg mb-8 max-w-xl leading-relaxed font-medium">
+                Practice real-world technical and HR interview questions. Get real-time AI feedback on your answers, confidence score, and voice delivery.
+              </p>
+
+              {/* Feature Chips */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mb-10">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-200 backdrop-blur-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Instant Feedback
+                </div>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-200 backdrop-blur-sm">
+                  <Award className="w-4 h-4 text-teal-400 shrink-0" />
+                  Top 500+ Question Bank
+                </div>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-200 backdrop-blur-sm">
+                  <Mic className="w-4 h-4 text-cyan-400 shrink-0" />
+                  100% Free Practice
                 </div>
               </div>
-              <h2 className="text-3xl lg:text-5xl font-extrabold text-white tracking-tight">AI Job Prep</h2>
-            </div>
-            
-            <div className="flex items-center justify-center w-full">
-              <div className="h-px bg-white/10 w-8 lg:hidden mr-3"></div>
-              <p className="text-xs sm:text-sm lg:text-xl font-bold text-slate-300 lg:text-slate-300 leading-relaxed tracking-wider uppercase lg:normal-case max-w-[200px] lg:max-w-md">
-                Ace your next interview with our cutting-edge AI Coach.
-              </p>
-              <div className="h-px bg-white/10 w-8 lg:hidden ml-3"></div>
-            </div>
-            
-            <Link 
-              href="/resume-tools/job-prep"
-              className="hidden lg:inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-bold rounded-full transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] mt-6"
-            >
-              Start Practice Session <ChevronRight className="h-5 w-5 ml-2" />
-            </Link>
-          </div>
 
-          {/* Right Side Carousel Graphic */}
-          <div className="lg:w-1/2 relative z-10 flex justify-center lg:justify-end items-center h-[380px] lg:h-[400px]">
-            
-            {/* Background Cards (Stacked effect) */}
-            <div className="absolute right-[50%] translate-x-[50%] lg:translate-x-0 lg:right-20 w-[240px] h-[320px] bg-white/5 rounded-3xl border border-white/5 shadow-2xl scale-90 opacity-40 backdrop-blur-md"></div>
-            <div className="absolute right-[50%] translate-x-[50%] lg:translate-x-0 lg:right-10 w-[260px] h-[340px] bg-white/10 rounded-3xl border border-white/10 shadow-2xl scale-95 opacity-60 backdrop-blur-md"></div>
-            
-            {/* Slider Container */}
-            <div className="relative w-[280px] sm:w-[300px] h-[380px] flex items-center justify-center z-20">
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div 
-                   key={currentSlide}
-                   custom={direction}
-                   variants={slideVariants}
-                   initial="enter"
-                   animate="center"
-                   exit="exit"
-                   className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${current.bgGradient} overflow-hidden shadow-2xl border border-white/10 flex flex-col items-center p-8 text-center`}
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <Link
+                  href="/resume-tools/job-prep"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-extrabold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 group"
                 >
-                  {/* Graphic background */}
-                  <div className="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent pointer-events-none"></div>
-                  
-                  <div className="relative z-10 flex flex-col h-full w-full justify-between items-center">
-                    <div>
-                      <h3 className="text-white font-bold text-2xl leading-tight">{current.title}</h3>
-                      <div className="flex items-center justify-center mt-3 text-white gap-2 font-bold bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm mx-auto w-max text-sm">
-                        <span className={`w-4 h-4 ${current.companyColor} text-white flex items-center justify-center rounded-full text-[9px]`}>{current.companyInitial}</span>
-                        {current.company}
-                      </div>
-                    </div>
+                  Start Practice Session
+                  <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
 
-                    <div className="mt-6 w-32 h-32 rounded-full overflow-hidden border-4 border-white/20 mx-auto shadow-2xl shadow-black/50">
-                       <img 
-                          src={current.image} 
-                          alt="Candidate"
-                          className="w-full h-full object-cover"
-                       />
-                    </div>
-
-                    <div className="w-full mt-6">
-                      <button className="w-full py-3.5 bg-white/10 hover:bg-white/20 transition-colors text-white font-bold rounded-xl text-sm shadow-lg mb-3 border border-white/10 backdrop-blur-md">
-                        Start Mock Interview
-                      </button>
-                      <p className="text-xs text-blue-300 font-semibold">{current.time}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Carousel arrows */}
-              <button 
-                onClick={prevSlide}
-                className="absolute -left-5 sm:-left-6 lg:-left-12 top-1/2 -translate-y-1/2 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-[#020617]/80 hover:bg-white/20 border border-white/10 transition-colors backdrop-blur-md text-white flex items-center justify-center z-30 cursor-pointer shadow-xl"
-              >
-                <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6 rotate-180" />
-              </button>
-              <button 
-                onClick={nextSlide}
-                className="absolute -right-5 sm:-right-6 lg:-right-12 top-1/2 -translate-y-1/2 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-[#020617]/80 hover:bg-white/20 border border-white/10 transition-colors backdrop-blur-md text-white flex items-center justify-center z-30 cursor-pointer shadow-xl"
-              >
-                <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6" />
-              </button>
             </div>
+
+            {/* Right Column: Interactive Mock Interview Preview Card */}
+            <div className="lg:col-span-5 w-full">
+              
+              <div className="bg-slate-900/90 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+                
+                {/* Top Live Bar */}
+                <div className="flex items-center justify-between pb-5 border-b border-white/10 mb-6">
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">AI Recruiter Live</span>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-400/20">
+                    {currentRole.score} Match Rate
+                  </span>
+                </div>
+
+                {/* Role Switcher Tabs */}
+                <div className="flex items-center gap-2 mb-6 bg-black/40 p-1.5 rounded-2xl border border-white/5">
+                  {roles.map((r, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveTab(idx)}
+                      className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                        activeTab === idx
+                          ? "bg-emerald-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {r.title.split(" ")[0]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Live Question Card Mockup */}
+                <div className="bg-slate-950/80 rounded-2xl p-5 border border-white/10 mb-6 space-y-3">
+                  <div className="flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
+                    <span>Target Role: {currentRole.title}</span>
+                    <span>{currentRole.company}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-200 leading-relaxed">
+                    "Explain a challenging technical obstacle you faced recently and how you resolved it."
+                  </p>
+                  
+                  {/* Voice waveform simulation */}
+                  <div className="flex items-center gap-1.5 pt-2">
+                    <Mic className="w-4 h-4 text-emerald-400 mr-2" />
+                    {[40, 75, 30, 90, 60, 100, 45, 80, 50, 35].map((height, i) => (
+                      <span
+                        key={i}
+                        style={{ height: `${height * 0.25}px` }}
+                        className="w-1 bg-emerald-400 rounded-full animate-pulse"
+                      ></span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Action Button */}
+                <Link
+                  href="/resume-tools/job-prep"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/15 backdrop-blur-md transition-all group-hover:border-emerald-400/40"
+                >
+                  <Play className="w-4 h-4 fill-emerald-400 text-emerald-400" />
+                  Launch Live Mock Interview
+                </Link>
+
+              </div>
+
+            </div>
+
           </div>
 
-          {/* Mobile Button at Bottom */}
-          <div className="lg:hidden w-full flex justify-center mt-12 relative z-20">
-            <Link 
-              href="/resume-tools/job-prep"
-              className="inline-flex items-center justify-center px-8 py-3.5 w-full max-w-[280px] bg-gradient-to-r from-blue-600 to-sky-600 text-white font-bold rounded-full transition-colors text-sm shadow-[0_0_20px_rgba(79,70,229,0.3)]"
-            >
-              Start Practice Session <ChevronRight className="h-4 w-4 ml-2" />
-            </Link>
-          </div>
-          
         </div>
+
       </div>
     </section>
   );

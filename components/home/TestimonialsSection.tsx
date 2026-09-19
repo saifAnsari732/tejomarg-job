@@ -1,98 +1,260 @@
-import React from "react";
-import { Star, Quote } from "lucide-react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Star, ChevronLeft, ChevronRight, CheckCircle2, Quote } from "lucide-react";
+
+interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  company: string;
+  location: string;
+  rating: number;
+  image: string;
+  text: string;
+}
 
 export default function TestimonialsSection() {
-  const testimonials = [
+  const [activeIndex, setActiveIndex] = useState(2);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  const testimonials: Testimonial[] = [
     {
+      id: 1,
       name: "Shiwangi Singla",
-      tag: "PLACED",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop", // placeholder
-      text: `"Thanks Tejomarg for helping me find a job without much hassle. If you are a fresher or a skilled person with expert knowledge in a specific field, you can easily find a job through the app."`
+      role: "Software Engineer",
+      company: "Wipro",
+      location: "Punjab",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
+      text: "Thanks Tejomarg for helping me find my dream tech job without hassle. Freshers and experienced devs both get direct HR responses within 24 hours!",
     },
     {
-      name: "Jenil Chovariya",
-      tag: "PLACED",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop", // placeholder
-      text: `"This app is very helpful if you are looking for a job and the team is also very supportive and friendly. They guided me through every stage. It is very easy to find a job on Tejomarg."`
+      id: 2,
+      name: "Deepak Yadav",
+      role: "Operations Lead",
+      company: "Kisan Choice",
+      location: "Uttar Pradesh",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop",
+      text: "Taste reminds me of traditional homemade support! The placement assistance was super responsive and guided me through every interview round.",
     },
     {
-      name: "Kaynat Mansuri",
-      tag: "PLACED",
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop", // placeholder
-      text: `"It is definitely a great app with correct and true information on the job details. I am happy to use it and I would also recommend my friends to use it for their career development."`
+      id: 3,
+      name: "Vikash Singh",
+      role: "Business Support Specialist",
+      company: "Eco Kisan",
+      location: "Bihar",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+      text: "Business support is very good. Team is extremely responsive. I applied on Tejomarg and got shortlisted by 3 top companies in the first week!",
+    },
+    {
+      id: 4,
+      name: "Ram Shakal Singh",
+      role: "Senior Consultant",
+      company: "TM24 Groups",
+      location: "Uttar Pradesh",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop",
+      text: "Tejomarg's mustard-clean process feels truly authentic. Every job match is 100% verified with direct contact details of genuine recruiters.",
+    },
+    {
+      id: 5,
+      name: "Prabhash Yadav",
+      role: "Data Analyst",
+      company: "Kisan Agro",
+      location: "Bihar",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop",
+      text: "It is definitely a great platform with correct job details. Applied with 1-click and got scheduled for direct technical round instantly!",
     },
   ];
 
-  return (
-    <section className="bg-slate-50 py-24 relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-blue-100/50 rounded-bl-full blur-3xl -z-0"></div>
-      <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-sky-100/50 rounded-tr-full blur-3xl -z-0"></div>
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, testimonials.length]);
 
+  const handlePrev = () => {
+    setIsAutoPlaying(false);
+    setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const handleNext = () => {
+    setIsAutoPlaying(false);
+    setActiveIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  return (
+    <section className="py-24 bg-gradient-to-b from-teal-950 via-emerald-950 to-slate-950 text-white relative overflow-hidden select-none">
+      {/* Background Orbs & Ambient Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-teal-400/10 rounded-full blur-[120px] pointer-events-none"></div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
-            Join the community of <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-600">5 crore</span> satisfied job seekers
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md">
+            <Quote className="w-3.5 h-3.5 text-emerald-400" /> Real stories and testimonials
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight uppercase mb-4 text-slate-100">
+            WHAT OUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">CLIENTS SAY</span>
           </h2>
-          
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-sm font-bold mb-2 text-slate-500 uppercase tracking-widest">Play Store Ratings</p>
-            <div className="flex items-center gap-1.5 text-amber-400 mb-2">
-              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
-              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
-              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
-              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
-              <Star className="h-6 w-6 fill-current drop-shadow-sm" />
+          <p className="text-emerald-100/80 text-base sm:text-lg font-medium">
+            Real feedback from our trusted network, job seekers, and partner families across India.
+          </p>
+
+          {/* Rating Summary Pill */}
+          <div className="mt-6 inline-flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 px-6 py-2.5 rounded-2xl shadow-xl">
+            <div className="flex items-center gap-1 text-amber-400">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-current drop-shadow" />
+              ))}
             </div>
-            <p className="text-sm text-slate-500 font-medium">Based on 1.2M+ reviews</p>
+            <span className="text-xs font-semibold text-slate-200 border-l border-white/20 pl-4">
+              Over <strong className="text-emerald-300">5 Crore+</strong> candidates & recruiters placed
+            </span>
           </div>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, idx) => (
-            <div 
-              key={idx} 
-              className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(79,70,229,0.1)] hover:-translate-y-2 transition-all duration-300 border border-slate-100 p-8 flex flex-col relative group animate-fade-in-up"
-              style={{ animationDelay: `${idx * 0.15}s` }}
-            >
-              {/* Gradient Top Border on Hover */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-3xl"></div>
+        {/* 3D Perspective Card Carousel */}
+        <div className="relative h-[480px] sm:h-[440px] w-full flex items-center justify-center perspective-[1200px]">
+          
+          <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
+            {testimonials.map((t, idx) => {
+              const offset = idx - activeIndex;
+              const isCenter = offset === 0;
+              const isLeft = offset === -1 || (activeIndex === 0 && idx === testimonials.length - 1);
+              const isRight = offset === 1 || (activeIndex === testimonials.length - 1 && idx === 0);
+              const isVisible = isCenter || isLeft || isRight;
 
-              <div className="flex items-center gap-4 mb-6 relative z-10">
-                <img src={t.image} alt={t.name} className="w-14 h-14 rounded-full object-cover border-2 border-blue-50 shadow-sm" />
-                <div>
-                  <h4 className="font-bold text-slate-800 text-base flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    {t.name} 
-                    <span className="text-[10px] w-max bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                      {t.tag}
-                    </span>
-                  </h4>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-xs font-bold text-slate-700">{t.rating}</span>
-                    <div className="flex items-center text-amber-400">
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      <Star className="h-3.5 w-3.5 fill-current text-amber-400/30" />
+              if (!isVisible) return null;
+
+              let styleTransform = "";
+              let zIndex = 10;
+              let opacity = 0.4;
+              let scale = 0.85;
+
+              if (isCenter) {
+                styleTransform = "translateX(0%) rotateY(0deg) translateZ(0px)";
+                zIndex = 30;
+                opacity = 1;
+                scale = 1.05;
+              } else if (isLeft) {
+                styleTransform = "translateX(-65%) rotateY(18deg) translateZ(-100px)";
+                zIndex = 20;
+                opacity = 0.65;
+                scale = 0.88;
+              } else if (isRight) {
+                styleTransform = "translateX(65%) rotateY(-18deg) translateZ(-100px)";
+                zIndex = 20;
+                opacity = 0.65;
+                scale = 0.88;
+              }
+
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => {
+                    setIsAutoPlaying(false);
+                    setActiveIndex(idx);
+                  }}
+                  className={`absolute w-[290px] sm:w-[350px] transition-all duration-700 ease-out cursor-pointer transform-gpu ${
+                    isCenter ? "shadow-[0_25px_60px_-15px_rgba(16,185,129,0.3)]" : "hover:opacity-90"
+                  }`}
+                  style={{
+                    transform: styleTransform + ` scale(${scale})`,
+                    zIndex: zIndex,
+                    opacity: opacity,
+                  }}
+                >
+                  <div className={`rounded-3xl p-6 sm:p-8 border transition-all duration-300 ${
+                    isCenter 
+                      ? "bg-gradient-to-b from-teal-800 to-emerald-900 border-emerald-400/40 text-white" 
+                      : "bg-slate-900/90 border-slate-700/60 text-slate-300 backdrop-blur-md"
+                  }`}>
+
+                    {/* Top Quote Icon & Rating */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-1 text-amber-400">
+                        {[...Array(t.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-current" />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 tracking-wider">
+                        PLACED
+                      </span>
                     </div>
+
+                    {/* Testimonial Text */}
+                    <p className="text-sm sm:text-base leading-relaxed mb-8 font-medium italic min-h-[90px]">
+                      "{t.text}"
+                    </p>
+
+                    {/* User Profile Footer */}
+                    <div className="flex items-center gap-4 pt-4 border-t border-white/10">
+                      <div className="relative shrink-0">
+                        <img
+                          src={t.image}
+                          alt={t.name}
+                          className="w-14 h-14 rounded-full object-cover border-2 border-emerald-400 shadow-md"
+                        />
+                        <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 text-white">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                      </div>
+                      <div className="overflow-hidden">
+                        <h4 className="font-bold text-white text-base truncate">{t.name}</h4>
+                        <p className="text-xs text-emerald-300/90 truncate font-semibold">{t.role} • {t.company}</p>
+                        <p className="text-[11px] text-slate-400 font-medium truncate">{t.location}</p>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
-              </div>
-              
-              <p className="text-slate-600 text-sm sm:text-base italic leading-relaxed relative z-10 flex-1">
-                {t.text}
-              </p>
-              
-              <Quote className="absolute bottom-6 right-6 w-16 h-16 text-blue-50 -z-0 rotate-180 transition-colors group-hover:text-blue-100/50" />
-            </div>
+              );
+            })}
+          </div>
+
+          {/* Navigation Controls */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 sm:left-6 z-40 p-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-110 active:scale-95"
+            aria-label="Previous Testimonial"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          
+          <button
+            onClick={handleNext}
+            className="absolute right-2 sm:right-6 z-40 p-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-lg transition-all hover:scale-110 active:scale-95"
+            aria-label="Next Testimonial"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Carousel Pagination Indicator Dots */}
+        <div className="flex items-center justify-center gap-2.5 mt-8">
+          {testimonials.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setIsAutoPlaying(false);
+                setActiveIndex(idx);
+              }}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                activeIndex === idx
+                  ? "w-8 bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+                  : "w-2.5 bg-white/20 hover:bg-white/40"
+              }`}
+            />
           ))}
         </div>
 

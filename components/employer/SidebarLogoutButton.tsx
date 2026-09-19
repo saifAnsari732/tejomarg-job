@@ -7,7 +7,10 @@ import { signOut } from "next-auth/react";
 export default function SidebarLogoutButton() {
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/" })}
+      onClick={async () => {
+        await signOut({ redirect: false });
+        window.location.replace("/");
+      }}
       className="w-full group flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all border border-transparent hover:border-red-100 dark:hover:border-red-900/50"
     >
       <div className="flex items-center space-x-3">

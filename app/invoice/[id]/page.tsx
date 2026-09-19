@@ -14,8 +14,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   const job = doc.data() as any;
 
-  // Only show invoice for paid jobs
-  if (!job.paymentId && !job.paymentOrderId) {
+  // Only show invoice for paid or active jobs
+  if (!job.paymentId && !job.paymentOrderId && job.status !== "active") {
     notFound();
   }
 

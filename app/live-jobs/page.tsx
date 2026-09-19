@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Search, MapPin, Briefcase, Building2, Clock, ExternalLink,
-  Wifi, WifiOff, Loader2, AlertCircle, ChevronLeft, ChevronRight,
-  Filter, X, Globe, Zap, RefreshCw, ArrowLeft, Star, BadgeCheck
+  Wifi, Loader2, AlertCircle, ChevronLeft, ChevronRight,
+  Globe, Zap, RefreshCw, ArrowLeft, BadgeCheck, Sparkles, CheckCircle2
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -53,11 +53,11 @@ function timeAgo(dateStr: string | null): string {
 
 function typeColor(type: string) {
   switch (type) {
-    case "FULLTIME":  return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400";
-    case "PARTTIME":  return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400";
-    case "CONTRACT":  return "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400";
-    case "INTERN":    return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400";
-    default:          return "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300";
+    case "FULLTIME":  return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800";
+    case "PARTTIME":  return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800";
+    case "CONTRACT":  return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
+    case "INTERN":    return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800";
+    default:          return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
   }
 }
 
@@ -84,7 +84,6 @@ export default function LiveJobsPage() {
   const [status,     setStatus]     = useState<"idle"|"live"|"mock"|"error">("idle");
   const [inputQ,     setInputQ]     = useState("React Developer");
   const [inputL,     setInputL]     = useState("India");
-  const [showFilters, setShowFilters] = useState(false);
 
   const fetchJobs = useCallback(async (q: string, loc: string, pg: number) => {
     setLoading(true);
@@ -125,7 +124,6 @@ export default function LiveJobsPage() {
     if (key === "empType")    setEmpType(value);
     if (key === "datePosted") setDatePosted(value);
     setPage(1);
-    // Re-fetch with updated filter immediately
     const nextEmpType    = key === "empType"    ? value : empType;
     const nextDatePosted = key === "datePosted" ? value : datePosted;
     setTimeout(() => fetchJobsWithFilters(query, location, 1, nextEmpType, nextDatePosted), 0);
@@ -155,65 +153,87 @@ export default function LiveJobsPage() {
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen pb-16">
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen pb-16 font-sans">
 
-      {/* ── Hero Header ──────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-10 px-4">
-        <div className="max-w-5xl mx-auto space-y-5">
+      {/* Hero Header Banner */}
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-4">
+        <div className="relative rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-emerald-500/20 p-8 sm:p-12 text-white shadow-2xl overflow-hidden space-y-6">
+          
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-          {/* Back + Title */}
-          <div className="flex items-center gap-3">
-            <Link href="/"
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors border border-white/10 text-white">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors border border-white/15 text-white">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-black text-2xl sm:text-3xl tracking-tight">Live Real-Time Job Feed</h1>
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-100/80 font-semibold">
+                  Aggregated live job listings from top Indian companies & remote global portals
+                </p>
+              </div>
+            </div>
+
+            <span className="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 font-extrabold text-[10px] px-3.5 py-1.5 rounded-full uppercase tracking-wider self-start sm:self-auto backdrop-blur-md">
+              LIVE API SYNC 🟢
+            </span>
           </div>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch}
-            className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          {/* Search Form */}
+          <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-12 gap-3 relative z-10 pt-2">
+            <div className="sm:col-span-6 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 value={inputQ}
                 onChange={e => setInputQ(e.target.value)}
-                placeholder="Job title, skill, or company…"
-                className="w-full pl-9 pr-4 py-3 rounded-xl text-sm font-semibold bg-white/10 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 backdrop-blur"
+                placeholder="Job title, skill, or company name..."
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-xs font-semibold bg-white/10 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 backdrop-blur shadow-inner"
               />
             </div>
-            <div className="relative sm:w-52">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+
+            <div className="sm:col-span-4 relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 value={inputL}
                 onChange={e => setInputL(e.target.value)}
-                placeholder="Location (e.g. Bangalore)"
-                className="w-full pl-9 pr-4 py-3 rounded-xl text-sm font-semibold bg-white/10 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 backdrop-blur"
+                placeholder="Location (e.g. Bangalore / Remote)"
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-xs font-semibold bg-white/10 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 backdrop-blur shadow-inner"
               />
             </div>
-            <button type="submit"
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-sm transition-all shadow-lg shadow-blue-500/20 cursor-pointer whitespace-nowrap">
-              <Search className="h-4 w-4" /> Search Jobs
+
+            <button
+              type="submit"
+              className="sm:col-span-2 flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+            >
+              <Search className="h-4 w-4" /> Search
             </button>
           </form>
+
         </div>
       </div>
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-4 pt-6 space-y-5">
+      {/* Main Container */}
+      <div className="max-w-6xl mx-auto px-4 pt-4 space-y-6">
 
-        {/* Filter Row */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Employment Type chips */}
+        {/* Filter Chips Bar */}
+        <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 p-4 rounded-2xl shadow-sm flex flex-wrap items-center gap-3">
+          
+          {/* Employment Type Pills */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {JOB_TYPES.map(t => (
               <button
                 key={t.value}
                 onClick={() => handleFilterChange("empType", t.value)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer ${
                   empType === t.value
-                    ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400"
+                    ? "bg-emerald-500 border-emerald-500 text-slate-950 shadow-md"
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-400"
                 }`}
               >
                 {t.label}
@@ -221,18 +241,18 @@ export default function LiveJobsPage() {
             ))}
           </div>
 
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
-          {/* Date Posted chips */}
+          {/* Date Posted Pills */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {DATE_FILTERS.map(d => (
               <button
                 key={d.value}
                 onClick={() => handleFilterChange("datePosted", d.value)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all cursor-pointer ${
                   datePosted === d.value
-                    ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white text-white dark:text-slate-900 shadow-sm"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-500"
+                    ? "bg-slate-900 dark:bg-white border-slate-900 dark:border-white text-white dark:text-slate-950 shadow-md"
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400"
                 }`}
               >
                 {d.label}
@@ -243,142 +263,135 @@ export default function LiveJobsPage() {
           <div className="ml-auto">
             <button
               onClick={() => fetchJobs(query, location, page)}
-              title="Refresh"
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
+              title="Refresh Feed"
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-emerald-500 transition-colors cursor-pointer"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        {/* Results count */}
+        {/* Results Counter */}
         {!loading && jobs.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <Globe className="h-3.5 w-3.5" />
-            <span>
-              Showing <strong className="text-slate-700 dark:text-slate-300">{jobs.length}</strong> jobs for
-              <strong className="text-slate-700 dark:text-slate-300"> "{query}"</strong> in
-              <strong className="text-slate-700 dark:text-slate-300"> {location}</strong>
+          <div className="flex items-center justify-between px-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <Globe className="h-4 w-4 text-emerald-500" />
+              Showing <strong className="text-slate-900 dark:text-white">{jobs.length}</strong> live jobs for
+              <strong className="text-slate-900 dark:text-white"> "{query}"</strong> in
+              <strong className="text-slate-900 dark:text-white"> {location}</strong>
             </span>
-            {status === "mock" && (
-              <span className="ml-2 text-amber-500 font-semibold">
-                · Demo data (add API key for real results)
-              </span>
-            )}
           </div>
         )}
 
-      
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-3xl p-16 text-center shadow-sm flex flex-col items-center justify-center space-y-3">
+            <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+            <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Fetching live job feed...</h4>
+            <p className="text-xs text-slate-400 max-w-xs">Connecting to real-time employer APIs and live job indexes.</p>
+          </div>
+        )}
 
         {/* Error State */}
         {!loading && status === "error" && (
-          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-            <AlertCircle className="h-10 w-10 text-red-400" />
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Could not load jobs</p>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-3xl p-12 text-center shadow-sm flex flex-col items-center justify-center space-y-3">
+            <AlertCircle className="h-10 w-10 text-red-500" />
+            <h4 className="font-extrabold text-slate-900 dark:text-white text-base">Could not load live job feed</h4>
             <button onClick={() => fetchJobs(query, location, page)}
-              className="text-xs font-bold text-blue-600 hover:underline cursor-pointer">
-              Try again
+              className="px-4 py-2 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-md cursor-pointer">
+              Try Again
             </button>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && status !== "error" && jobs.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-            <Briefcase className="h-10 w-10 text-slate-300 dark:text-slate-600" />
-            <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
-              No jobs found for this search.
-            </p>
-            <p className="text-xs text-slate-400">Try a different keyword or location.</p>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-3xl p-12 text-center shadow-sm flex flex-col items-center justify-center space-y-3">
+            <Briefcase className="h-10 w-10 text-slate-400" />
+            <h4 className="font-extrabold text-slate-900 dark:text-white text-base">No live jobs found for this search</h4>
+            <p className="text-xs text-slate-400">Try adjusting your job title keyword or location filter.</p>
           </div>
         )}
 
-        {/* Job Cards Grid */}
+        {/* Job Cards */}
         {!loading && jobs.length > 0 && (
           <div className="grid grid-cols-1 gap-4">
             {jobs.map(job => (
               <div key={job.id}
-                className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                className="group bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-emerald-400 transition-all duration-300">
 
                 <div className="flex items-start gap-4">
                   <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center border border-slate-100 dark:border-slate-700">
-                    {job.companyLogo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain p-1" />
-                    ) : (
-                      <span className="text-base font-black text-blue-600 dark:text-blue-400">{job.company.charAt(0).toUpperCase()}</span>
-                    )}
-                  </div>
-                </a>
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 flex items-center justify-center border border-slate-100 dark:border-slate-700 shadow-sm p-1.5">
+                      {job.companyLogo ? (
+                        <img src={job.companyLogo} alt={job.company} className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">{job.company.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                  </a>
 
-                  {/* Job Info */}
+                  {/* Job Details */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
                       <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-w-0">
-                        <h3 className="font-extrabold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-base leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                           {job.title}
                         </h3>
-                        <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                          <Building2 className="h-3 w-3 text-slate-400 shrink-0" />
-                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{job.company}</span>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{job.company}</span>
                           {job.source !== "Mock Data" && (
                             <span title="Verified listing" className="flex items-center">
-                              <BadgeCheck className="h-3 w-3 text-blue-400" />
+                              <BadgeCheck className="h-3.5 w-3.5 text-emerald-500" />
                             </span>
                           )}
                         </div>
                       </a>
 
-                      {/* Apply button */}
+                      {/* Apply Now CTA */}
                       <a href={job.applyUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-all shadow-sm shadow-blue-500/20 cursor-pointer">
-                        Apply Now <ExternalLink className="h-3 w-3" />
+                        className="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all shadow-md cursor-pointer">
+                        Apply Now <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     </div>
 
-                    {/* Meta row */}
-                    <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 shrink-0" />
+                    {/* Metadata Badges */}
+                    <div className="flex flex-wrap items-center gap-2.5 mt-4 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                         {job.location}
                       </span>
 
                       {job.isRemote && (
-                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800">
                           <Wifi className="h-3 w-3" /> Remote
                         </span>
                       )}
 
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${typeColor(job.type)}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${typeColor(job.type)}`}>
                         {typeLabel(job.type)}
                       </span>
 
-                      {job.salary !== "Not Disclosed" && (
-                        <span className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                      {job.salary && job.salary !== "Not Disclosed" && (
+                        <span className="flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-750 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700">
                           💰 {job.salary}
                         </span>
                       )}
 
-                      <span className="flex items-center gap-1 ml-auto">
-                        <Clock className="h-3 w-3" />
+                      <span className="flex items-center gap-1 ml-auto text-[11px] text-slate-400 font-medium">
+                        <Clock className="h-3.5 w-3.5" />
                         {timeAgo(job.postedAt)}
                       </span>
                     </div>
 
-                    {/* Description snippet */}
-                    <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
+                    {/* Description */}
+                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
                       {job.description}
                     </p>
 
-                    {/* Source badge */}
-                    <div className="mt-2">
-                      <span className="text-[9px] uppercase tracking-widest font-bold text-slate-300 dark:text-slate-600">
-                        via {job.source}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -388,11 +401,11 @@ export default function LiveJobsPage() {
 
         {/* Pagination */}
         {!loading && jobs.length > 0 && (
-          <div className="flex items-center justify-center gap-3 pt-4">
+          <div className="flex items-center justify-center gap-3 pt-6">
             <button
               disabled={page === 1}
               onClick={() => handlePageChange(page - 1)}
-              className="flex items-center gap-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold bg-white dark:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:border-blue-400 transition-all cursor-pointer">
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold bg-white dark:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-400 transition-all cursor-pointer">
               <ChevronLeft className="h-4 w-4" /> Previous
             </button>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 px-2">
@@ -400,7 +413,7 @@ export default function LiveJobsPage() {
             </span>
             <button
               onClick={() => handlePageChange(page + 1)}
-              className="flex items-center gap-1 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold bg-white dark:bg-slate-800 hover:border-blue-400 transition-all cursor-pointer">
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold bg-white dark:bg-slate-800 hover:border-emerald-400 transition-all cursor-pointer">
               Next <ChevronRight className="h-4 w-4" />
             </button>
           </div>

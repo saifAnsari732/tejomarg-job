@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import confetti from "canvas-confetti";
+import { showProfessionalError, getCleanApiUrl } from "@/lib/toastHelper";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -22,6 +23,8 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [resendTimer, setResendTimer] = useState(30);
+  const [isCaptchaSolved, setIsCaptchaSolved] = useState(false);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -34,31 +37,30 @@ export default function AdminLoginPage() {
   }, [step, resendTimer]);
 
   useEffect(() => {
-    // Clear any existing verifier if it got detached from DOM (e.g., during navigation or hot reload)
-    if (typeof window !== "undefined") {
-      if ((window as any).recaptchaVerifier) {
-        try {
-          (window as any).recaptchaVerifier.clear();
-        } catch (e) {}
-        (window as any).recaptchaVerifier = undefined;
+    if (typeof window !== "undefined" && !recaptchaVerifierRef.current) {
+      try {
+        const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "normal",
+          callback: () => {
+            console.log("[reCAPTCHA] Solved successfully");
+            setIsCaptchaSolved(true);
+          },
+          "expired-callback": () => {
+            console.log("[reCAPTCHA] Solved token expired");
+            setIsCaptchaSolved(false);
+          },
+        });
+        verifier.render().catch((e) => console.error("[reCAPTCHA] Render error:", e));
+        recaptchaVerifierRef.current = verifier;
+      } catch (err) {
+        console.error("[reCAPTCHA] Initialization error:", err);
       }
-
-      // Initialize fresh RecaptchaVerifier
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: () => {
-          // reCAPTCHA solved automatically
-        },
-      });
     }
 
     return () => {
-      // Cleanup on unmount
-      if (typeof window !== "undefined" && (window as any).recaptchaVerifier) {
-        try {
-          (window as any).recaptchaVerifier.clear();
-        } catch (e) {}
-        (window as any).recaptchaVerifier = undefined;
+      if (recaptchaVerifierRef.current) {
+        try { recaptchaVerifierRef.current.clear(); } catch (e) {}
+        recaptchaVerifierRef.current = null;
       }
     };
   }, []);
@@ -69,24 +71,52 @@ export default function AdminLoginPage() {
       toast.error("Please enter a valid phone number");
       return;
     }
+
+    if (!isCaptchaSolved) {
+      toast.error("Please click the 'I am not a robot' checkbox first!");
+      return;
+    }
     
     setLoading(true);
     try {
-      const formattedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+91${phoneNumber}`;
-      const appVerifier = (window as any).recaptchaVerifier;
+      const sanitizedPhone = phoneNumber.replace(/\D/g, "").slice(-10);
+      const formattedPhone = `+91${sanitizedPhone}`;
       
+      let appVerifier = recaptchaVerifierRef.current;
+      if (!appVerifier) {
+        appVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "normal",
+          callback: () => {
+            setIsCaptchaSolved(true);
+          },
+          "expired-callback": () => {
+            setIsCaptchaSolved(false);
+          },
+        });
+        await appVerifier.render();
+        recaptchaVerifierRef.current = appVerifier;
+      }
+
       const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(result);
       setStep("otp");
       setResendTimer(30);
-      toast.success("OTP sent securely via SMS!");
+      toast.success("OTP sent successfully! Please check your phone 📱");
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Failed to send OTP. Please try again.");
-      if ((window as any).recaptchaVerifier) {
-         (window as any).recaptchaVerifier.render().then((widgetId: any) => {
-           (window as any).grecaptcha.reset(widgetId);
-         });
+      console.error("[Firebase SMS Error]:", err?.message || err);
+      setIsCaptchaSolved(false);
+      if (typeof (window as any).grecaptcha !== "undefined") {
+        try { (window as any).grecaptcha.reset(); } catch (e) {}
+      }
+
+      if (err?.code === "auth/too-many-requests") {
+        toast.error("Too many attempts. Please try again in 30 minutes.");
+      } else if (err?.code === "auth/invalid-phone-number") {
+        toast.error("Please enter a valid 10-digit phone number.");
+      } else if (err?.code === "auth/quota-exceeded") {
+        toast.error("SMS service busy. Please try again later.");
+      } else {
+        showProfessionalError(err, "Failed to send OTP. Please check the 'I am not a robot' checkbox and try again.");
       }
     } finally {
       setLoading(false);
@@ -95,18 +125,29 @@ export default function AdminLoginPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp || otp.length !== 6 || !confirmationResult) {
+    if (!otp || otp.length !== 6) {
       toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
     setLoading(true);
     try {
+      const originUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+
+      if (!confirmationResult) {
+        toast.error("OTP session expired. Please request a new OTP.");
+        setStep("phone");
+        setLoading(false);
+        return;
+      }
+
+      // Verify OTP via Firebase Phone Auth
       const result = await confirmationResult.confirm(otp);
       const idToken = await result.user.getIdToken(true);
 
       const res = await signIn("phone-otp", {
         redirect: false,
+        callbackUrl: originUrl,
         idToken,
         intendedRole: "admin",
       });
@@ -130,27 +171,18 @@ export default function AdminLoginPage() {
 
       if (userRole === "employer") {
         toast.error("This number is registered as an Employer. Redirecting...");
-        router.push("/employer/post-job");
+        window.location.href = "/employer/post-job";
       } else if (userRole === "admin") {
-        router.push("/admin");
+        window.location.href = "/admin";
       } else {
         if (callbackUrl && !callbackUrl.includes("/login")) {
-          router.push(callbackUrl);
+          window.location.href = callbackUrl;
         } else {
-          router.push("/");
+          window.location.href = "/";
         }
       }
-      router.refresh();
     } catch (err: any) {
-      console.error(err);
-      const msg = err.message || "";
-      if (msg.includes("auth/user-disabled") || msg.includes("suspended")) {
-        toast.error("Your account has been disabled. Please contact support.");
-      } else if (msg.includes("auth/invalid-verification-code")) {
-        toast.error("Invalid OTP code. Please try again.");
-      } else {
-        toast.error(msg || "Invalid OTP code");
-      }
+      showProfessionalError(err, "Invalid OTP code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -164,7 +196,6 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 font-sans selection:bg-blue-500/30 overflow-hidden relative">
-      <div id="recaptcha-container"></div>
       
       {/* Background Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 dark:bg-blue-600/10 blur-3xl pointer-events-none" />
@@ -241,13 +272,25 @@ export default function AdminLoginPage() {
                     </div>
                   </div>
 
+                  <div id="recaptcha-wrapper" className="flex justify-center my-3 min-h-[1px]">
+                    <div id="recaptcha-container"></div>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading || phoneNumber.length !== 10}
-                    className="w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-500/20 font-bold transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 group"
+                    className={`w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-white font-bold transition-all duration-200 shadow-lg group ${
+                      loading || phoneNumber.length !== 10
+                        ? "bg-slate-400 cursor-not-allowed opacity-70"
+                        : !isCaptchaSolved
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/25 cursor-pointer"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25 cursor-pointer"
+                    }`}
                   >
                     {loading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : !isCaptchaSolved && phoneNumber.length === 10 ? (
+                      <span>Please check "I'm not a robot" above</span>
                     ) : (
                       <>
                         <span>Send OTP</span>

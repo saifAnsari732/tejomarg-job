@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer";
 import FilterSidebar from "@/components/jobs/FilterSidebar";
 import JobCard from "@/components/jobs/JobCard";
 import LiveJobsSection from "@/components/jobs/LiveJobsSection";
-import { ChevronLeft, ChevronRight, Inbox, Zap, Database } from "lucide-react";
+import { ChevronLeft, ChevronRight, Inbox, Zap, Database, Search, Briefcase, MapPin, Sparkles, Filter } from "lucide-react";
 
 interface SearchParams {
   search?: string;
@@ -113,7 +113,7 @@ async function getJobsData(filters: SearchParams) {
 
     // Sort
     if (filters.sort === "Salary - High to low") {
-      jobs.sort((a, b) => (b.salaryMax || 0) - (a.salaryMax || 0));
+      jobs.sort((a, b) => (parseFloat(b.salaryMax) || 0) - (parseFloat(a.salaryMax) || 0));
     } else {
       jobs.sort((a, b) => {
          const dA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
@@ -191,25 +191,44 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
   const liveLocation = currentFilters.location || "India";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans selection:bg-emerald-500/30">
       <Navbar />
       
-      {/* Hero Header Banner */}
-      <div className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 pt-16 pb-20 mb-8 overflow-hidden shadow-inner">
-        {/* Abstract background shapes */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-indigo-500/10 rounded-full blur-3xl transform rotate-12"></div>
-          <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-blue-500/10 rounded-full blur-3xl transform -rotate-12"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-purple-500/5 rounded-full blur-[100px]"></div>
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-md">
-            Find your next <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">dream job</span>
-          </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-2xl drop-shadow-sm font-medium">
-            Explore thousands of premium opportunities to make the best career move.
-          </p>
+      {/* Premium Hero Header Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 w-full">
+        <div className="relative rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 border border-emerald-500/20 p-8 sm:p-12 text-white shadow-2xl overflow-hidden">
+          
+          {/* Ambient Glows */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+          <div className="relative z-10 space-y-4 max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              VERIFIED OPPORTUNITIES PORTAL
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              Find Your Next{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+                Dream Career
+              </span>
+            </h1>
+
+            <p className="text-emerald-100/80 text-sm sm:text-base font-medium max-w-xl leading-relaxed">
+              Explore thousands of verified openings across top tech companies, MNCs, and fast-growing Indian startups.
+            </p>
+
+            {/* Quick Stats Badges */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <span className="bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-200 backdrop-blur-md">
+                💼 {pagination.totalJobs > 0 ? `${pagination.totalJobs}+ Active Jobs` : "50,000+ Opportunities"}
+              </span>
+              <span className="bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-200 backdrop-blur-md">
+                ⚡ Direct HR Responses
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -225,33 +244,33 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
           <div className="flex-1 w-full space-y-6">
             
             {/* Section Header */}
-            <div className="bg-white p-4 sm:px-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+            <div className="bg-white dark:bg-slate-800 p-4 sm:px-6 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <h2 className="font-extrabold text-slate-900 text-xl tracking-tight">
+                <h2 className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">
                   {jobs.length > 0 ? "Recommended Jobs" : "All Jobs"}
                 </h2>
-                <span className="text-[10px] uppercase font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-100">
-                  Portal & Live
+                <span className="text-[10px] uppercase font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">
+                  Portal & Live Feed
                 </span>
               </div>
 
               {/* Sort controls */}
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Sort by:</span>
-                <div className="flex rounded-lg bg-slate-100 p-1 border border-slate-200/60">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Sort by:</span>
+                <div className="flex rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-700">
                   <Link href={getSortLink("latest")}
-                    className={`text-xs font-bold px-4 py-1.5 rounded-md transition-all duration-200 ${
+                    className={`text-xs font-bold px-4 py-1.5 rounded-lg transition-all duration-200 ${
                       currentFilters.sort === "latest"
-                        ? "bg-white text-indigo-700 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                        ? "bg-emerald-500 text-slate-950 shadow-sm font-extrabold"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                     }`}>
                     Latest
                   </Link>
-                  <Link href={getSortLink("salary-desc")}
-                    className={`text-xs font-bold px-4 py-1.5 rounded-md transition-all duration-200 ${
-                      currentFilters.sort === "salary-desc"
-                        ? "bg-white text-indigo-700 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  <Link href={getSortLink("Salary - High to low")}
+                    className={`text-xs font-bold px-4 py-1.5 rounded-lg transition-all duration-200 ${
+                      currentFilters.sort === "Salary - High to low"
+                        ? "bg-emerald-500 text-slate-950 shadow-sm font-extrabold"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                     }`}>
                     Salary
                   </Link>
@@ -259,35 +278,35 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
               </div>
             </div>
 
-            {/* Job Cards */}
+            {/* Job Cards List */}
             <div className="space-y-4">
-              {/* 1. Portal Jobs (Native) */}
+              {/* 1. Portal Jobs */}
               {jobs.map((job: any) => <JobCard key={job._id} job={job} />)}
 
-              {/* Pagination (for Portal Jobs) */}
+              {/* Pagination */}
               {jobs.length > 0 && pagination.totalPages > 1 && (
-                <div className="flex justify-between items-center py-4">
-                  <span className="text-sm text-slate-500">
-                    Page <span className="font-medium text-slate-900">{pagination.currentPage}</span> of <span className="font-medium text-slate-900">{pagination.totalPages}</span>
+                <div className="flex justify-between items-center py-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Page <span className="font-bold text-slate-900 dark:text-white">{pagination.currentPage}</span> of <span className="font-bold text-slate-900 dark:text-white">{pagination.totalPages}</span>
                   </span>
                   <div className="flex gap-2">
                     {pagination.currentPage > 1 ? (
                       <Link href={getPageLink(pagination.currentPage - 1)}
-                        className="px-3 py-1.5 border border-slate-200 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-xs font-bold text-slate-700 dark:text-slate-200">
                         Previous
                       </Link>
                     ) : (
-                      <button disabled className="px-3 py-1.5 border border-slate-100 rounded text-slate-300 text-sm font-medium">
+                      <button disabled className="px-4 py-2 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-300 dark:text-slate-600 text-xs font-bold">
                         Previous
                       </button>
                     )}
                     {pagination.currentPage < pagination.totalPages ? (
                       <Link href={getPageLink(pagination.currentPage + 1)}
-                        className="px-3 py-1.5 border border-slate-200 rounded hover:bg-slate-50 transition-colors text-sm font-medium">
+                        className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-xs font-bold text-slate-700 dark:text-slate-200">
                         Next
                       </Link>
                     ) : (
-                      <button disabled className="px-3 py-1.5 border border-slate-100 rounded text-slate-300 text-sm font-medium">
+                      <button disabled className="px-4 py-2 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-300 dark:text-slate-600 text-xs font-bold">
                         Next
                       </button>
                     )}
@@ -295,7 +314,7 @@ export default async function BrowseJobsPage({ searchParams }: { searchParams: P
                 </div>
               )}
 
-              {/* 2. Live Jobs */}
+              {/* 2. Live Jobs Section */}
               <LiveJobsSection
                 initialQuery={liveQuery}
                 initialLocation={liveLocation}

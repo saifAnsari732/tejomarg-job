@@ -42,64 +42,43 @@ function typeLabel(type: string) {
 }
 
 function getMockJobs(query: string, location: string) {
-  return [
-    {
-      id: "mock-1",
-      title: `${query} – Senior Role`,
-      company: "Infosys Ltd",
+  const jobs = [];
+  const companies = ["Infosys Ltd", "Wipro Technologies", "Razorpay", "Swiggy", "TCS", "Cognizant", "Google India", "Amazon", "Microsoft", "Flipkart", "Paytm", "Zomato", "Cred", "PhonePe", "MakeMyTrip"];
+  const locations = ["Bangalore, India", "Hyderabad, India", "Pune, India", "Remote, India", "Mumbai, India", "Delhi NCR, India", "Chennai, India"];
+  const types = ["FULLTIME", "PARTTIME", "CONTRACT", "INTERN"];
+  
+  const search = query || "Developer";
+  const locBase = location || "India";
+
+  for (let i = 1; i <= 52; i++) {
+    const comp = companies[i % companies.length];
+    const loc = locations[i % locations.length];
+    const type = types[i % types.length];
+    const isRemote = loc.includes("Remote");
+    
+    // Vary the job titles slightly based on query
+    let title = `${search} - Role ${i}`;
+    if (i % 3 === 0) title = `Senior ${search}`;
+    if (i % 4 === 0) title = `Junior ${search}`;
+    if (i % 5 === 0) title = `${search} Intern`;
+
+    jobs.push({
+      id: `mock-${i}-${Date.now()}`,
+      title: title,
+      company: comp,
       companyLogo: null,
-      location: `Bangalore, ${location}`,
-      type: "FULLTIME",
-      isRemote: false,
-      salary: "INR 12,00,000 – 18,00,000 / year",
-      description: "Work with cutting-edge technologies to build scalable enterprise solutions. You will collaborate with cross-functional teams and deliver high-quality software products.",
-      applyUrl: "https://www.infosys.com/careers",
-      postedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      location: loc.includes("Remote") ? "Remote, India" : loc,
+      type: type,
+      isRemote: isRemote,
+      salary: `INR ${Math.floor(Math.random() * 20 + 5)},00,000 / year`,
+      description: `Exciting opportunity at ${comp} for a ${search}. Join our diverse team to build scalable solutions using modern technologies. We offer a great work environment and excellent growth prospects.`,
+      applyUrl: "#",
+      postedAt: new Date(Date.now() - (i % 30) * 24 * 60 * 60 * 1000).toISOString(),
       source: "Mock Data",
-    },
-    {
-      id: "mock-2",
-      title: `Junior ${query}`,
-      company: "Wipro Technologies",
-      companyLogo: null,
-      location: `Hyderabad, ${location}`,
-      type: "FULLTIME",
-      isRemote: false,
-      salary: "INR 5,00,000 – 8,00,000 / year",
-      description: "Exciting opportunity for freshers and junior professionals. Hands-on experience with modern frameworks and agile development processes.",
-      applyUrl: "https://careers.wipro.com",
-      postedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      source: "Mock Data",
-    },
-    {
-      id: "mock-3",
-      title: `Remote ${query}`,
-      company: "Razorpay",
-      companyLogo: null,
-      location: "Remote, India",
-      type: "FULLTIME",
-      isRemote: true,
-      salary: "INR 20,00,000 – 30,00,000 / year",
-      description: "Join India's leading fintech startup. Work fully remote and build financial infrastructure used by millions of businesses across India.",
-      applyUrl: "https://razorpay.com/jobs",
-      postedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      source: "Mock Data",
-    },
-    {
-      id: "mock-4",
-      title: `${query} Intern`,
-      company: "Swiggy",
-      companyLogo: null,
-      location: "Bangalore, India",
-      type: "INTERN",
-      isRemote: false,
-      salary: "INR 25,000 – 40,000 / month",
-      description: "6-month internship program at one of India's top startups. Gain real-world experience in a high-growth engineering team.",
-      applyUrl: "https://careers.swiggy.com",
-      postedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      source: "Mock Data",
-    },
-  ];
+    });
+  }
+  
+  return jobs;
 }
 
 export default async function LiveJobsSection({ initialQuery = "Developer", initialLocation = "India" }: Props) {

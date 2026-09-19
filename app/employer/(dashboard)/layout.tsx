@@ -19,7 +19,7 @@ export default async function EmployerLayout({ children }: { children: React.Rea
   const session = await getServerSession(authOptions);
   
   if (!session) {
-    return <>{children}</>;
+    redirect("/employer/login");
   }
 
   if ((session.user as any)?.role === "candidate") {

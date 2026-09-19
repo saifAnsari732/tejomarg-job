@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Briefcase, Menu, X, User, LogOut, LayoutDashboard, ChevronDown, ChevronRight, FileText, Search, BookOpen } from "lucide-react";
@@ -23,6 +24,10 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
 
   const navLinks = [
     { name: "Browse Jobs", href: "/jobs" },
+    { name: "Live Jobs 🟢", href: "/live-jobs" },
+    { name: "AI Job Prep ⚡", href: "/resume-tools/job-prep" },
+    { name: "AI Resume Builder", href: "/resume-tools/resume-builder" },
+    { name: "For Employers", href: "/employer/login" },
   ];
 
   if (isLoggedIn) {
@@ -44,9 +49,9 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Mobile Menu Button & Logo */}
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="md:hidden flex items-center">
@@ -60,10 +65,10 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
             
             <Link href="/" className="flex items-center gap-3">
               {/* Icon Logo */}
-              <img src="/job1.png" alt="Tejomarg Icon" className="h-15 w-auto object-contain shrink-0" />
+              <Image src="/job1.png" alt="Tejomarg Icon" width={60} height={60} priority className="h-15 w-auto object-contain shrink-0" />
               
               {/* Text Logo */}
-              <img src="/job2.png" alt="Tejomarg Text" className="hidden sm:block h-48 -my-14 -ml-6 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
+              <Image src="/job2.png" alt="Tejomarg Text" width={240} height={80} priority className="hidden sm:block h-48 -my-14 -ml-6 w-auto object-contain shrink-0 mix-blend-multiply pointer-events-none" />
             </Link>
           </div>
 
@@ -116,6 +121,10 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
               </div>
             </div>
 
+            <Link href="/live-jobs" className="text-slate-700 hover:text-emerald-600 text-sm font-bold flex items-center">
+              Live Jobs <span className="relative flex h-2 w-2 ml-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+            </Link>
+
             <Link href="/resume-tools/job-prep" className="text-slate-700 hover:text-indigo-600 text-sm font-bold flex items-center">
               Job Prep <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded ml-1.5 tracking-wider leading-none">NEW</span>
             </Link>
@@ -151,7 +160,7 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
                   { 
                     label: "Blog", 
                     desc: "Guidance for securing your dream job", 
-                    href: "/jobs",
+                    href: "/blog",
                     icon: <BookOpen className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
                   }
                 ].map(item => (
@@ -229,9 +238,10 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
                       )}
 
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           setShowDropdown(false);
-                          signOut({ callbackUrl: "/" });
+                          await signOut({ redirect: false });
+                          window.location.replace("/");
                         }}
                         className="w-full flex items-center px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors border-t border-slate-100 cursor-pointer"
                       >
@@ -312,9 +322,10 @@ export default function Navbar({ userOverride }: { userOverride?: any } = {}) {
               )}
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   setIsOpen(false);
-                  signOut({ callbackUrl: "/" });
+                  await signOut({ redirect: false });
+                  window.location.href = "/";
                 }}
                 className="w-full text-left block px-3 py-2 rounded-xl text-base font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/10 cursor-pointer"
               >

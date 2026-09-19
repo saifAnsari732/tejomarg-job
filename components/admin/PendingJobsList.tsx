@@ -165,7 +165,7 @@ export default function PendingJobsList({ initialJobs }: PendingJobsListProps) {
                     <div>
                       <h4 className="font-bold text-xs uppercase text-slate-405 tracking-wider mb-1.5">Required Skills:</h4>
                       <div className="flex flex-wrap gap-1.5">
-                        {job.skillsRequired.map((s) => (
+                        {(job.skillsRequired || []).map((s) => (
                           <span
                             key={s}
                             className="px-2.5 py-1 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-700 rounded text-xs font-medium"

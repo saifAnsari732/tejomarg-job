@@ -225,7 +225,7 @@ export default function PostJobPage() {
         if (!res.ok) throw new Error(data.error || "Failed to update job");
 
         toast.success("Job updated successfully!");
-        router.push("/employer/dashboard");
+        router.push("/employer/manage-jobs");
         return;
       }
 
@@ -241,7 +241,7 @@ export default function PostJobPage() {
 
       if (payload.isDraft) {
         toast.success("Job saved as draft");
-        router.push("/employer/dashboard");
+        router.push("/employer/manage-jobs");
         return;
       }
 
@@ -273,7 +273,7 @@ export default function PostJobPage() {
             
             if (verifyRes.ok) {
               toast.success("Payment successful! Your job is now active.");
-              router.push("/employer/dashboard"); // Redirect to dashboard
+              window.location.href = "/employer/manage-jobs";
             } else {
               throw new Error(verifyData.error || "Payment verification failed");
             }

@@ -223,21 +223,23 @@ export default async function JobDetailPage({ params }: PageProps) {
               </div>
 
               {/* Skills Required */}
-              <div>
-                <h3 className="text-xl font-extrabold text-slate-900 mb-4">
-                  Skills Required
-                </h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {job.skillsRequired.map((skill: string) => (
-                    <span
-                      key={skill}
-                      className="px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/50 rounded-xl text-sm font-bold shadow-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+              {(job.skillsRequired || []).length > 0 && (
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-4">
+                    Skills Required
+                  </h3>
+                  <div className="flex flex-wrap gap-2.5">
+                    {(job.skillsRequired || []).map((skill: string) => (
+                      <span
+                        key={skill}
+                        className="px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100/50 rounded-xl text-sm font-bold shadow-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

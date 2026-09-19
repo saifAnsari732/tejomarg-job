@@ -2,71 +2,85 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function proxy(req: NextRequest) {
-  // Try getting token with secure cookie assumption first (Vercel production)
-  let token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET || "super-secret-key-job-portal-platform",
-    secureCookie: process.env.NODE_ENV === "production",
-  });
-
-  // Fallback if not found (e.g. local dev or preview environment without HTTPS)
-  if (!token) {
-    token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET || "super-secret-key-job-portal-platform",
-      secureCookie: false,
-    });
+const safeUrl = (targetPath: string, req: NextRequest) => {
+  try {
+    const origin = req.nextUrl?.origin || (req.url ? new URL(req.url).origin : "https://tejomargjobs.com");
+    return new URL(targetPath, origin);
+  } catch (e) {
+    try {
+      const base = process.env.NEXTAUTH_URL || "https://tejomargjobs.com";
+      const cleanBase = base.startsWith("http") ? base : `https://${base}`;
+      return new URL(targetPath, cleanBase);
+    } catch (err) {
+      return new URL(targetPath, "https://tejomargjobs.com");
+    }
   }
+};
 
+export async function proxy(req: NextRequest) {
+  const secret = process.env.NEXTAUTH_SECRET || "super-secret-key-job-portal-platform";
   const path = req.nextUrl.pathname;
 
-  // If user is already logged in and tries to access any login/signup page
-  if (token) {
-    if (path === "/login" || path === "/signup" || path === "/employer/login" || path === "/employer/signup" || path === "/admin/login") {
-      if (token.role === "employer") {
-        return NextResponse.redirect(new URL("/employer/post-job", req.url));
-      } else if (token.role === "admin") {
-        return NextResponse.redirect(new URL("/admin", req.url));
-      } else {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
-    }
+  // Get token with fallback for secure/unsecure cookies
+  let token = await getToken({ req, secret, secureCookie: process.env.NODE_ENV === "production" });
+  if (!token) {
+    token = await getToken({ req, secret, secureCookie: false });
   }
 
-  if (!token) {
-    if (path === "/employer/login" || path === "/employer/signup" || path === "/login" || path === "/signup" || path === "/admin/login") {
-      return NextResponse.next();
+  const isAuthPage =
+    path === "/login" ||
+    path === "/signup" ||
+    path === "/employer/login" ||
+    path === "/employer/signup" ||
+    path === "/admin/login";
+
+  // If user has a valid active session and visits an auth page
+  if (token && isAuthPage) {
+    if (token.role === "employer") {
+      return NextResponse.redirect(safeUrl("/employer/manage-jobs", req));
+    } else if (token.role === "admin") {
+      return NextResponse.redirect(safeUrl("/admin", req));
+    } else if (token.role === "candidate") {
+      return NextResponse.redirect(safeUrl("/candidate/profile", req));
     }
+    return NextResponse.next();
+  }
+
+  // If user is NOT logged in
+  if (!token) {
+    if (isAuthPage) return NextResponse.next();
 
     if (path.startsWith("/employer")) {
-      const url = new URL("/employer/login", req.url);
+      const url = safeUrl("/employer/login", req);
       url.searchParams.set("callbackUrl", req.nextUrl.href);
       return NextResponse.redirect(url);
     }
     if (path.startsWith("/admin")) {
-      const url = new URL("/admin/login", req.url);
+      const url = safeUrl("/admin/login", req);
       url.searchParams.set("callbackUrl", req.nextUrl.href);
       return NextResponse.redirect(url);
     }
-    const url = new URL("/login", req.url);
-    url.searchParams.set("callbackUrl", req.nextUrl.href);
-    return NextResponse.redirect(url);
+    if (path.startsWith("/candidate")) {
+      const url = safeUrl("/login", req);
+      url.searchParams.set("callbackUrl", req.nextUrl.href);
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
   }
 
   const role = token.role;
 
-  // Route guards based on user role
+  // Role guards
   if (path.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(safeUrl("/admin/login", req));
   }
 
   if (path.startsWith("/employer") && role !== "employer") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(safeUrl("/employer/login", req));
   }
 
   if (path.startsWith("/candidate") && role !== "candidate") {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(safeUrl("/login", req));
   }
 
   return NextResponse.next();

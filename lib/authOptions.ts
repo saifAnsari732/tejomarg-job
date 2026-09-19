@@ -26,38 +26,40 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.idToken) {
-          throw new Error("ID Token is required");
+          throw new Error("Firebase ID Token is required for authentication.");
         }
 
-        // Verify the Firebase ID token using Google Identity Toolkit REST API
-        const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: credentials.idToken }),
-        });
-
-        const data = await response.json();
-
-        if (data.error || !data.users || data.users.length === 0) {
-          throw new Error("Invalid or expired OTP session");
+        let phoneNumber = "";
+        try {
+          const { authAdmin } = await import("@/lib/firebaseAdmin");
+          const decodedToken = await authAdmin.verifyIdToken(credentials.idToken);
+          phoneNumber = decodedToken.phone_number || "";
+        } catch (verifyErr: any) {
+          console.error("[NextAuth Firebase ID Token Verification Error]:", verifyErr?.message || verifyErr);
+          throw new Error("Invalid or expired OTP session. Please try again.");
         }
-
-        const phoneNumber = data.users[0].phoneNumber;
         if (!phoneNumber) {
           throw new Error("No phone number associated with this OTP");
         }
 
+        const formattedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+91${phoneNumber}`;
+        const rawDigits = phoneNumber.replace(/\D/g, "").slice(-10);
+
         const usersRef = db.collection("users");
-        const querySnapshot = await usersRef.where("phone", "==", phoneNumber).limit(1).get();
+        let querySnapshot = await usersRef.where("phone", "==", formattedPhone).limit(1).get();
+        if (querySnapshot.empty && rawDigits) {
+          querySnapshot = await usersRef.where("phone", "==", rawDigits).limit(1).get();
+        }
+
         let user: any = null;
         let userId = "";
 
         if (querySnapshot.empty) {
+          // New user — create account
           const intendedRole = credentials.intendedRole || "candidate";
           const newUser = {
-            name: "User " + phoneNumber.slice(-4), // Default name using last 4 digits
-            phone: phoneNumber,
+            name: "User " + rawDigits.slice(-4),
+            phone: formattedPhone,
             role: intendedRole,
             isBlocked: false,
             createdAt: new Date().toISOString(),
@@ -68,9 +70,8 @@ export const authOptions: NextAuthOptions = {
         } else {
           user = querySnapshot.docs[0].data();
           userId = querySnapshot.docs[0].id;
-          
+
           const intendedRole = credentials.intendedRole || "candidate";
-          // If they login via a different portal, update their role to match the portal they are using
           if (user.role !== intendedRole) {
             await usersRef.doc(userId).update({ role: intendedRole });
             user.role = intendedRole;
@@ -183,6 +184,22 @@ export const authOptions: NextAuthOptions = {
         if (token.name) session.user.name = token.name as string;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      const base = baseUrl || process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const cleanBase = base.replace(/\/+$/, "");
+      if (!url || typeof url !== "string") return cleanBase;
+      if (url.startsWith("/")) return `${cleanBase}${url}`;
+      try {
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          const parsed = new URL(url);
+          if (parsed.origin === cleanBase) return url;
+          return `${cleanBase}${parsed.pathname}${parsed.search}${parsed.hash}`;
+        }
+      } catch (e) {
+        console.warn("[NextAuth Redirect Notice] Could not parse URL:", url);
+      }
+      return cleanBase;
     },
   },
   session: {
