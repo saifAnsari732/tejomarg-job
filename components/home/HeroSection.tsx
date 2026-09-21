@@ -17,37 +17,38 @@ export default function HeroSection() {
   useEffect(() => {
     if (!heroRef.current) return;
 
-    const ctx = gsap.context(() => {
-      // Single fast stagger for all hero elements — no delay on first element
-      gsap.fromTo(
-        ".hero-animate",
-        { opacity: 0, y: 32, filter: "blur(8px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.5,
-          ease: "power3.out",
-          stagger: 0.08, // 80ms between each element = very fast
-          clearProps: "filter", // clean up after animation for perf
-        }
-      );
-    }, heroRef);
+    try {
+      const ctx = gsap.context(() => {
+        gsap.fromTo(
+          ".hero-animate",
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+            ease: "power3.out",
+            stagger: 0.06,
+          }
+        );
+      }, heroRef);
 
-    return () => ctx.revert();
+      return () => ctx.revert();
+    } catch (err) {
+      console.warn("GSAP animation skipped:", err);
+    }
   }, []);
 
   return (
     <section
       ref={heroRef}
-      className="relative w-full pt-12 md:pt-24 pb-20 md:pb-32 overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-teal-50 min-h-[90vh] flex flex-col justify-center"
+      className="relative w-full pt-10 sm:pt-16 md:pt-24 pb-20 md:pb-32 overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-teal-50 min-h-[90vh] flex flex-col justify-center"
     >
      
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-30 flex flex-col items-center text-center w-full">
 
         {/* Top Label */}
-        <div className="hero-animate mb-8" style={{ opacity: 0 }}>
+        <div className="hero-animate mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-slate-100/90 backdrop-blur-md border border-slate-200 shadow-sm max-w-full overflow-hidden">
             <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
             <span className="text-slate-900 text-[10px] sm:text-xs md:text-sm font-extrabold tracking-wide uppercase truncate">Over 50 Lakh+ Opportunities Live</span>
@@ -55,8 +56,8 @@ export default function HeroSection() {
         </div>
 
         {/* Main Heading */}
-        <div className="hero-animate w-full" style={{ opacity: 0 }}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-950 leading-tight mb-6 tracking-tight w-full flex flex-col items-center overflow-visible">
+        <div className="hero-animate w-full">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-950 leading-tight mb-5 sm:mb-6 tracking-tight w-full flex flex-col items-center overflow-visible">
             <div className="flex flex-col md:flex-row justify-center items-center md:gap-x-4 w-full overflow-visible">
               <span className="shrink-0 whitespace-nowrap text-slate-950">Find Your</span>
               <AnimatedHeroTextGSAP />
@@ -67,8 +68,7 @@ export default function HeroSection() {
 
         {/* Subtitle */}
         <p
-          className="hero-animate text-slate-700 text-sm sm:text-lg max-w-2xl mb-8 leading-relaxed font-semibold px-2 w-full mx-auto"
-          style={{ opacity: 0 }}
+          className="hero-animate text-slate-700 text-sm sm:text-lg max-w-2xl mb-6 sm:mb-8 leading-relaxed font-semibold px-2 w-full mx-auto"
         >
           Join thousands of professionals who have accelerated their careers.
           Discover opportunities that match your skills, values, and ambitions in just a few clicks.
@@ -76,8 +76,7 @@ export default function HeroSection() {
 
         {/* Feature Highlights */}
         <div
-          className="hero-animate flex flex-wrap items-center justify-center gap-4 sm:gap-8 mb-12 text-sm sm:text-base text-slate-800 font-bold"
-          style={{ opacity: 0 }}
+          className="hero-animate flex flex-wrap items-center justify-center gap-4 sm:gap-8 mb-8 sm:mb-10 text-sm sm:text-base text-slate-800 font-bold"
         >
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
@@ -94,14 +93,13 @@ export default function HeroSection() {
         </div>
 
         {/* Search Bar */}
-        <div className="hero-animate w-full max-w-4xl relative z-40" style={{ opacity: 0 }}>
+        <div className="hero-animate w-full max-w-4xl relative z-40">
           <HeroSearchClient />
         </div>
 
         {/* Popular Tags */}
         <div
           className="hero-animate flex flex-wrap items-center justify-center gap-3 mt-8 text-sm"
-          style={{ opacity: 0 }}
         >
           <span className="text-slate-900 font-extrabold mr-1 uppercase tracking-wider text-[11px]">Popular Searches:</span>
           {["Software Engineer", "Product Manager", "Data Scientist", "UI/UX Designer"].map((tag) => (

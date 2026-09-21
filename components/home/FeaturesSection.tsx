@@ -5,7 +5,9 @@ import { Cpu, Target, MousePointerClick, Zap, Sparkles, ArrowUpRight } from "luc
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -52,41 +54,49 @@ export default function FeaturesSection() {
   ];
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Heading reveal
-      gsap.fromTo(
-        headingRef.current,
-        { opacity: 0, y: 40, filter: "blur(8px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: headingRef.current, start: "top 85%", toggleActions: "play none none none" },
+    if (!sectionRef.current) return;
+
+    try {
+      const ctx = gsap.context(() => {
+        // Heading reveal
+        if (headingRef.current) {
+          gsap.fromTo(
+            headingRef.current,
+            { opacity: 0, y: 30 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power3.out",
+              scrollTrigger: { trigger: headingRef.current, start: "top 90%", toggleActions: "play none none none" },
+            }
+          );
         }
-      );
 
-      // Cards stagger reveal
-      if (cardsRef.current) {
-        const cards = cardsRef.current.querySelectorAll(".feature-card");
-        gsap.fromTo(
-          cards,
-          { opacity: 0, y: 50, filter: "blur(6px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.6,
-            ease: "power3.out",
-            stagger: 0.12,
-            scrollTrigger: { trigger: cardsRef.current, start: "top 85%", toggleActions: "play none none none" },
+        // Cards stagger reveal
+        if (cardsRef.current) {
+          const cards = cardsRef.current.querySelectorAll(".feature-card");
+          if (cards.length > 0) {
+            gsap.fromTo(
+              cards,
+              { opacity: 0, y: 30 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: "power3.out",
+                stagger: 0.1,
+                scrollTrigger: { trigger: cardsRef.current, start: "top 90%", toggleActions: "play none none none" },
+              }
+            );
           }
-        );
-      }
-    }, sectionRef);
+        }
+      }, sectionRef);
 
-    return () => ctx.revert();
+      return () => ctx.revert();
+    } catch (err) {
+      console.warn("FeaturesSection animation skipped:", err);
+    }
   }, []);
 
   return (

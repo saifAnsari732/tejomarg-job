@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function HeroSearchClient() {
@@ -51,27 +51,39 @@ export default function HeroSearchClient() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center bg-white md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 p-2 md:p-3 space-y-3 md:space-y-0 rounded-2xl transition-all duration-300 hover:shadow-[0_8px_40px_rgb(79,70,229,0.15)] hover:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/20 focus-within:border-blue-400 w-full relative z-40">
-      
-      {/* Search Job */}
-      <div className="flex items-center flex-1 px-4 py-3 w-full relative group">
-        <Search className="h-6 w-6 text-blue-400 group-focus-within:text-blue-600 transition-colors" />
-        <input 
-          type="text" 
+    <form
+      onSubmit={handleSearch}
+      className="flex flex-col md:flex-row md:items-center bg-white dark:bg-slate-900 rounded-2xl md:rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200 dark:border-slate-800 p-2 sm:p-2.5 space-y-2 md:space-y-0 transition-all duration-300 hover:shadow-[0_12px_40px_rgb(59,130,246,0.12)] hover:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 w-full relative z-40"
+    >
+      {/* Search Job Field */}
+      <div className="flex items-center flex-1 px-3 py-2 sm:py-2.5 relative group">
+        <Search className="h-5 w-5 text-blue-500 shrink-0 mr-3 transition-colors group-focus-within:text-blue-600" />
+        <input
+          type="text"
           value={searchVal}
-          onChange={(e) => { setSearchVal(e.target.value); setShowSearchSuggestions(true); }}
+          onChange={(e) => {
+            setSearchVal(e.target.value);
+            setShowSearchSuggestions(true);
+          }}
           onFocus={() => setShowSearchSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
-          placeholder="Job title, skills, or company" 
-          className="w-full pl-3 pr-2 py-1 bg-transparent border-none text-slate-900 placeholder-slate-400 text-[16px] outline-none focus:ring-0 font-medium"
+          placeholder="Job title, skills, or company"
+          className="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 text-sm sm:text-base outline-none focus:ring-0 font-medium truncate"
         />
+
         {showSearch && (
-          <div className="absolute left-0 right-0 top-full mt-4 bg-white border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden">
+          <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] z-50 overflow-hidden">
             {filteredJobSuggestions.map((item) => (
               <button
-                key={item} type="button" onMouseDown={() => { setSearchVal(item); setShowSearchSuggestions(false); }}
-                className="w-full text-left px-5 py-3.5 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors border-b border-slate-100 last:border-none"
+                key={item}
+                type="button"
+                onMouseDown={() => {
+                  setSearchVal(item);
+                  setShowSearchSuggestions(false);
+                }}
+                className="w-full text-left px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-sm transition-colors border-b border-slate-100 dark:border-slate-800/60 last:border-none flex items-center gap-2.5"
               >
+                <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
                 {item}
               </button>
             ))}
@@ -79,27 +91,41 @@ export default function HeroSearchClient() {
         )}
       </div>
 
-      <div className="hidden md:block w-px h-10 bg-slate-200"></div>
+      {/* Hairline Divider for Mobile */}
+      <div className="block md:hidden border-b border-slate-100 dark:border-slate-800 mx-2"></div>
 
-      {/* Location */}
-      <div className="flex items-center flex-1 px-4 py-3 w-full relative group">
-        <MapPin className="h-6 w-6 text-sky-400 group-focus-within:text-sky-600 transition-colors" />
-        <input 
-          type="text" 
+      {/* Vertical Divider for Desktop */}
+      <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-800 shrink-0 mx-1"></div>
+
+      {/* Location Field */}
+      <div className="flex items-center flex-1 px-3 py-2 sm:py-2.5 relative group">
+        <MapPin className="h-5 w-5 text-sky-500 shrink-0 mr-3 transition-colors group-focus-within:text-sky-600" />
+        <input
+          type="text"
           value={locationVal}
-          onChange={(e) => { setLocationVal(e.target.value); setShowLocationSuggestions(true); }}
+          onChange={(e) => {
+            setLocationVal(e.target.value);
+            setShowLocationSuggestions(true);
+          }}
           onFocus={() => setShowLocationSuggestions(true)}
           onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
-          placeholder="City or 'Remote'" 
-          className="w-full pl-3 pr-2 py-1 bg-transparent border-none text-slate-900 placeholder-slate-400 text-[16px] outline-none focus:ring-0 font-medium"
+          placeholder="City or 'Remote'"
+          className="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 text-sm sm:text-base outline-none focus:ring-0 font-medium truncate"
         />
+
         {showLocation && (
-          <div className="absolute left-0 right-0 top-full mt-4 bg-white border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden">
+          <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] z-50 overflow-hidden">
             {filteredLocationSuggestions.map((item) => (
               <button
-                key={item} type="button" onMouseDown={() => { setLocationVal(item); setShowLocationSuggestions(false); }}
-                className="w-full text-left px-5 py-3.5 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors border-b border-slate-100 last:border-none"
+                key={item}
+                type="button"
+                onMouseDown={() => {
+                  setLocationVal(item);
+                  setShowLocationSuggestions(false);
+                }}
+                className="w-full text-left px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-sm transition-colors border-b border-slate-100 dark:border-slate-800/60 last:border-none flex items-center gap-2.5"
               >
+                <MapPin className="w-4 h-4 text-sky-500 shrink-0" />
                 {item}
               </button>
             ))}
@@ -108,11 +134,16 @@ export default function HeroSearchClient() {
       </div>
 
       {/* Submit Button */}
-      <div className="w-full md:w-auto mt-2 md:mt-0">
-        <button type="submit" className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold py-4 md:py-3.5 px-10 rounded-xl md:rounded-full transition-all duration-300 shadow-[0_4px_14px_rgba(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:-translate-y-0.5 whitespace-nowrap text-[16px]">
-          Search Jobs
+      <div className="w-full md:w-auto pt-1 md:pt-0">
+        <button
+          type="submit"
+          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl md:rounded-full transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.99] text-base flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
+        >
+          <Search className="w-4 h-4 stroke-[2.5]" />
+          <span>Search Jobs</span>
         </button>
       </div>
     </form>
   );
 }
+

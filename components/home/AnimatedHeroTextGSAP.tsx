@@ -36,54 +36,69 @@ export default function AnimatedHeroTextGSAP() {
   const textRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLSpanElement>(null);
 
-  // On mount: entrance animation
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     if (textRef.current) {
-      gsap.fromTo(
-        textRef.current,
-        { opacity: 0, y: 40, filter: "blur(12px)", scale: 0.85 },
-        { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, duration: 0.55, ease: "power3.out" }
-      );
+      try {
+        gsap.fromTo(
+          textRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+        );
+      } catch (err) {
+        console.warn("GSAP error:", err);
+      }
     }
   }, []);
 
   // Word swap every 2.5s with GSAP transition
   useEffect(() => {
+    if (!mounted) return;
     const interval = setInterval(() => {
       if (!textRef.current) return;
 
-      // Exit
-      gsap.to(textRef.current, {
-        opacity: 0,
-        y: -35,
-        scale: 0.85,
-        filter: "blur(10px)",
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => {
-          setWordIndex((prev) => (prev + 1) % animatedWords.length);
-          // Enter
-          gsap.fromTo(
-            textRef.current,
-            { opacity: 0, y: 40, scale: 0.85, filter: "blur(10px)" },
-            { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.45, ease: "power3.out" }
-          );
-        },
-      });
+      try {
+        // Exit
+        gsap.to(textRef.current, {
+          opacity: 0,
+          y: -25,
+          duration: 0.25,
+          ease: "power2.in",
+          onComplete: () => {
+            setWordIndex((prev) => (prev + 1) % animatedWords.length);
+            // Enter
+            try {
+              gsap.fromTo(
+                textRef.current,
+                { opacity: 0, y: 25 },
+                { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
+              );
+            } catch (e) {}
+          },
+        });
+      } catch (err) {
+        setWordIndex((prev) => (prev + 1) % animatedWords.length);
+      }
     }, 2500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [mounted]);
 
   const handleMouseEnter = () => {
     if (containerRef.current) {
-      gsap.to(containerRef.current, { scale: 1.07, rotate: -1.5, duration: 0.25, ease: "power2.out" });
+      try {
+        gsap.to(containerRef.current, { scale: 1.05, duration: 0.2 });
+      } catch (e) {}
     }
   };
 
   const handleMouseLeave = () => {
     if (containerRef.current) {
-      gsap.to(containerRef.current, { scale: 1, rotate: 0, duration: 0.4, ease: "elastic.out(1, 0.5)" });
+      try {
+        gsap.to(containerRef.current, { scale: 1, duration: 0.3 });
+      } catch (e) {}
     }
   };
 
